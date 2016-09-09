@@ -1,0 +1,407 @@
+EESchema Schematic File Version 2
+LIBS:Mouse-01
+LIBS:74xgxx
+LIBS:74xx
+LIBS:ac-dc
+LIBS:actel
+LIBS:adc-dac
+LIBS:Altera
+LIBS:analog_devices
+LIBS:analog_switches
+LIBS:atmel
+LIBS:audio
+LIBS:brooktre
+LIBS:cmos_ieee
+LIBS:cmos4000
+LIBS:conn
+LIBS:connectors
+LIBS:contrib
+LIBS:cypress
+LIBS:dc-dc
+LIBS:device
+LIBS:digital-audio
+LIBS:diode
+LIBS:display
+LIBS:dsp
+LIBS:elec-unifil
+LIBS:ESD_Protection
+LIBS:ftdi
+LIBS:gennum
+LIBS:graphic
+LIBS:hc11
+LIBS:ic-cpu
+LIBS:ic-io
+LIBS:ic-misc
+LIBS:ic-power
+LIBS:intel
+LIBS:interface
+LIBS:ir
+LIBS:Lattice
+LIBS:linear
+LIBS:logo
+LIBS:maxim
+LIBS:memory
+LIBS:microchip
+LIBS:microchip_dspic33dsc
+LIBS:microchip_pic10mcu
+LIBS:microchip_pic12mcu
+LIBS:microchip_pic16mcu
+LIBS:microchip_pic18mcu
+LIBS:microchip_pic32mcu
+LIBS:microcontrollers
+LIBS:motor_drivers
+LIBS:motorola
+LIBS:msp430
+LIBS:nordicsemi
+LIBS:nxp_armmcu
+LIBS:onsemi
+LIBS:opto
+LIBS:Oscillators
+LIBS:passive
+LIBS:philips
+LIBS:power
+LIBS:Power_Management
+LIBS:powerint
+LIBS:pspice
+LIBS:references
+LIBS:regul
+LIBS:relays
+LIBS:rfcom
+LIBS:sensors
+LIBS:silabs
+LIBS:siliconi
+LIBS:stm8
+LIBS:stm32
+LIBS:supertex
+LIBS:switches
+LIBS:texas
+LIBS:transf
+LIBS:transistors
+LIBS:ttl_ieee
+LIBS:valves
+LIBS:video
+LIBS:Xicor
+LIBS:xilinx
+LIBS:Zilog
+LIBS:kerikun11
+LIBS:Mouse-01-cache
+EELAYER 25 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 2 10
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Q_NMOS_GSD Q?
+U 1 1 57C99460
+P 5100 4800
+AR Path="/57C990DA/57C99460" Ref="Q?"  Part="1" 
+AR Path="/57C9DE34/57C99460" Ref="Q?"  Part="1" 
+F 0 "Q?" H 5400 4850 50  0000 R CNN
+F 1 "IRFML8244" H 5750 4750 50  0000 R CNN
+F 2 "" H 5300 4900 50  0000 C CNN
+F 3 "" H 5100 4800 50  0000 C CNN
+	1    5100 4800
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4500 4800 4400 4800
+$Comp
+L GND #PWR?
+U 1 1 57C99473
+P 5200 5100
+AR Path="/57C990DA/57C99473" Ref="#PWR?"  Part="1" 
+AR Path="/57C9DE34/57C99473" Ref="#PWR?"  Part="1" 
+F 0 "#PWR?" H 5200 4850 50  0001 C CNN
+F 1 "GND" H 5200 4950 50  0000 C CNN
+F 2 "" H 5200 5100 50  0000 C CNN
+F 3 "" H 5200 5100 50  0000 C CNN
+	1    5200 5100
+	1    0    0    -1  
+$EndComp
+$Comp
+L LED D?
+U 1 1 57C99482
+P 5200 3500
+AR Path="/57C990DA/57C99482" Ref="D?"  Part="1" 
+AR Path="/57C9DE34/57C99482" Ref="D?"  Part="1" 
+F 0 "D?" H 5200 3600 50  0000 C CNN
+F 1 "VSLY5850" H 5200 3400 50  0000 C CNN
+F 2 "" H 5200 3500 50  0000 C CNN
+F 3 "" H 5200 3500 50  0000 C CNN
+	1    5200 3500
+	0    -1   -1   0   
+$EndComp
+$Comp
+L +BATT #PWR?
+U 1 1 57C99489
+P 5200 2700
+AR Path="/57C990DA/57C99489" Ref="#PWR?"  Part="1" 
+AR Path="/57C9DE34/57C99489" Ref="#PWR?"  Part="1" 
+F 0 "#PWR?" H 5200 2550 50  0001 C CNN
+F 1 "+BATT" H 5200 2840 50  0000 C CNN
+F 2 "" H 5200 2700 50  0000 C CNN
+F 3 "" H 5200 2700 50  0000 C CNN
+	1    5200 2700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5200 2700 5200 2800
+$Comp
+L R R?
+U 1 1 57C99491
+P 4650 4800
+AR Path="/57C990DA/57C99491" Ref="R?"  Part="1" 
+AR Path="/57C9DE34/57C99491" Ref="R?"  Part="1" 
+F 0 "R?" V 4730 4800 50  0000 C CNN
+F 1 "10" V 4650 4800 50  0000 C CNN
+F 2 "" V 4580 4800 50  0000 C CNN
+F 3 "" H 4650 4800 50  0000 C CNN
+	1    4650 4800
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	4900 4800 4800 4800
+$Comp
+L D D?
+U 1 1 57C99499
+P 6300 4050
+AR Path="/57C990DA/57C99499" Ref="D?"  Part="1" 
+AR Path="/57C9DE34/57C99499" Ref="D?"  Part="1" 
+F 0 "D?" H 6300 4150 50  0000 C CNN
+F 1 "SFH213FA" H 6300 3950 50  0000 C CNN
+F 2 "" H 6300 4050 50  0000 C CNN
+F 3 "" H 6300 4050 50  0000 C CNN
+	1    6300 4050
+	0    1    1    0   
+$EndComp
+$Comp
+L LM2902N U?
+U 1 1 57C994A0
+P 7200 4200
+AR Path="/57C990DA/57C994A0" Ref="U?"  Part="1" 
+AR Path="/57C9DE34/57C994A0" Ref="U?"  Part="2" 
+F 0 "U?" H 7250 4400 50  0000 C CNN
+F 1 "AD8604" H 7350 4000 50  0000 C CNN
+F 2 "" H 7150 4300 50  0000 C CNN
+F 3 "" H 7250 4400 50  0000 C CNN
+	1    7200 4200
+	1    0    0    -1  
+$EndComp
+$Comp
+L C C?
+U 1 1 57C994A7
+P 6550 4300
+AR Path="/57C990DA/57C994A7" Ref="C?"  Part="1" 
+AR Path="/57C9DE34/57C994A7" Ref="C?"  Part="1" 
+F 0 "C?" H 6575 4400 50  0000 L CNN
+F 1 "1000p" H 6575 4200 50  0000 L CNN
+F 2 "" H 6588 4150 50  0000 C CNN
+F 3 "" H 6550 4300 50  0000 C CNN
+	1    6550 4300
+	0    1    1    0   
+$EndComp
+$Comp
+L R R?
+U 1 1 57C994AE
+P 6300 4850
+AR Path="/57C990DA/57C994AE" Ref="R?"  Part="1" 
+AR Path="/57C9DE34/57C994AE" Ref="R?"  Part="1" 
+F 0 "R?" V 6380 4850 50  0000 C CNN
+F 1 "100k" V 6300 4850 50  0000 C CNN
+F 2 "" V 6230 4850 50  0000 C CNN
+F 3 "" H 6300 4850 50  0000 C CNN
+	1    6300 4850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6700 4300 6900 4300
+Wire Wire Line
+	6400 4300 6300 4300
+Wire Wire Line
+	6300 4200 6300 4700
+Connection ~ 6300 4300
+$Comp
+L R R?
+U 1 1 57C994B9
+P 7350 3800
+AR Path="/57C990DA/57C994B9" Ref="R?"  Part="1" 
+AR Path="/57C9DE34/57C994B9" Ref="R?"  Part="1" 
+F 0 "R?" V 7430 3800 50  0000 C CNN
+F 1 "220k" V 7350 3800 50  0000 C CNN
+F 2 "" V 7280 3800 50  0000 C CNN
+F 3 "" H 7350 3800 50  0000 C CNN
+	1    7350 3800
+	0    1    1    0   
+$EndComp
+$Comp
+L C C?
+U 1 1 57C994C0
+P 7350 3600
+AR Path="/57C990DA/57C994C0" Ref="C?"  Part="1" 
+AR Path="/57C9DE34/57C994C0" Ref="C?"  Part="1" 
+F 0 "C?" H 7250 3700 50  0000 L CNN
+F 1 "22p" H 7200 3500 50  0000 L CNN
+F 2 "" H 7388 3450 50  0000 C CNN
+F 3 "" H 7350 3600 50  0000 C CNN
+	1    7350 3600
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	7500 4200 7700 4200
+Wire Wire Line
+	7600 3600 7600 4200
+Wire Wire Line
+	7600 3800 7500 3800
+Wire Wire Line
+	7600 3600 7500 3600
+Connection ~ 7600 3800
+Wire Wire Line
+	7200 3800 6800 3800
+Wire Wire Line
+	6800 3600 6800 4300
+Connection ~ 6800 4300
+Wire Wire Line
+	6800 3600 7200 3600
+Connection ~ 6800 3800
+Wire Wire Line
+	7100 3400 7100 3900
+Wire Wire Line
+	6300 3400 6300 3900
+$Comp
+L +3.3VA #PWR?
+U 1 1 57C994D3
+P 6300 3400
+AR Path="/57C990DA/57C994D3" Ref="#PWR?"  Part="1" 
+AR Path="/57C9DE34/57C994D3" Ref="#PWR?"  Part="1" 
+F 0 "#PWR?" H 6450 3350 50  0001 C CNN
+F 1 "+3.3VA" H 6300 3500 50  0000 C CNN
+F 2 "" H 6300 3400 50  0000 C CNN
+F 3 "" H 6300 3400 50  0000 C CNN
+	1    6300 3400
+	1    0    0    -1  
+$EndComp
+$Comp
+L +3.3VA #PWR?
+U 1 1 57C994D9
+P 7100 3400
+AR Path="/57C990DA/57C994D9" Ref="#PWR?"  Part="1" 
+AR Path="/57C9DE34/57C994D9" Ref="#PWR?"  Part="1" 
+F 0 "#PWR?" H 7250 3350 50  0001 C CNN
+F 1 "+3.3VA" H 7100 3500 50  0000 C CNN
+F 2 "" H 7100 3400 50  0000 C CNN
+F 3 "" H 7100 3400 50  0000 C CNN
+	1    7100 3400
+	1    0    0    -1  
+$EndComp
+$Comp
+L +1.65VA #PWR?
+U 1 1 57C994DF
+P 6600 4000
+AR Path="/57C990DA/57C994DF" Ref="#PWR?"  Part="1" 
+AR Path="/57C9DE34/57C994DF" Ref="#PWR?"  Part="1" 
+F 0 "#PWR?" H 6750 3950 50  0001 C CNN
+F 1 "+1.65VA" H 6600 4100 50  0000 C CNN
+F 2 "" H 6600 4000 50  0000 C CNN
+F 3 "" H 6600 4000 50  0000 C CNN
+	1    6600 4000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6600 4000 6600 4100
+Wire Wire Line
+	6600 4100 6900 4100
+$Comp
+L GND #PWR?
+U 1 1 57C994E7
+P 6300 5100
+AR Path="/57C990DA/57C994E7" Ref="#PWR?"  Part="1" 
+AR Path="/57C9DE34/57C994E7" Ref="#PWR?"  Part="1" 
+F 0 "#PWR?" H 6300 4850 50  0001 C CNN
+F 1 "GND" H 6300 4950 50  0000 C CNN
+F 2 "" H 6300 5100 50  0000 C CNN
+F 3 "" H 6300 5100 50  0000 C CNN
+	1    6300 5100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6300 5100 6300 5000
+$Comp
+L GND #PWR?
+U 1 1 57C994EE
+P 7100 5100
+AR Path="/57C990DA/57C994EE" Ref="#PWR?"  Part="1" 
+AR Path="/57C9DE34/57C994EE" Ref="#PWR?"  Part="1" 
+F 0 "#PWR?" H 7100 4850 50  0001 C CNN
+F 1 "GND" H 7100 4950 50  0000 C CNN
+F 2 "" H 7100 5100 50  0000 C CNN
+F 3 "" H 7100 5100 50  0000 C CNN
+	1    7100 5100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7100 4500 7100 5100
+Connection ~ 7600 4200
+Text HLabel 4400 4800 0    60   Input ~ 0
+IR_PWM
+Text HLabel 7700 4200 2    60   Input ~ 0
+IR_RCV
+Wire Wire Line
+	5200 5100 5200 5000
+$Comp
+L LED D?
+U 1 1 57CE6719
+P 5200 3000
+F 0 "D?" H 5200 3100 50  0000 C CNN
+F 1 "VSLY5850" H 5200 2900 50  0000 C CNN
+F 2 "" H 5200 3000 50  0000 C CNN
+F 3 "" H 5200 3000 50  0000 C CNN
+	1    5200 3000
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	5200 3200 5200 3300
+$Comp
+L NSI45090 U?
+U 1 1 57CE74C8
+P 5200 4100
+F 0 "U?" H 5350 4400 60  0000 C CNN
+F 1 "NSI45090" H 5550 3800 60  0000 C CNN
+F 2 "" H 5150 4600 100 0000 C CNN
+F 3 "" H 5150 4600 100 0000 C CNN
+	1    5200 4100
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 57CE7987
+P 4950 4500
+F 0 "R?" V 5030 4500 50  0000 C CNN
+F 1 "100" V 4950 4500 50  0000 C CNN
+F 2 "" V 4880 4500 50  0000 C CNN
+F 3 "" H 4950 4500 50  0000 C CNN
+	1    4950 4500
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	5200 4400 5200 4600
+Connection ~ 5200 4500
+Wire Wire Line
+	5200 3700 5200 3800
+Wire Wire Line
+	5100 4500 5200 4500
+Wire Wire Line
+	4900 4100 4700 4100
+Wire Wire Line
+	4700 4100 4700 4500
+Wire Wire Line
+	4700 4500 4800 4500
+$EndSCHEMATC
