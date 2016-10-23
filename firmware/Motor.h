@@ -44,4 +44,29 @@ private:
 	PwmOut ctrl1, ctrl2;
 };
 
+class Motors {
+public:
+	Motors(PinName ctrl1_pin_l, PinName ctr2_pin_l, PinName ctrl1_pin_r,
+			PinName ctr2_pin_r) :
+			motorL(ctrl1_pin_l, ctr2_pin_l), motorR(ctrl1_pin_r, ctr2_pin_r) {
+
+	}
+	void drive(int16_t val_L, int16_t val_R) {
+		left(val_L);
+		right(val_R);
+	}
+	void left(int16_t val) {
+		motorL.drive(val);
+	}
+	void right(int16_t val) {
+		motorR.drive(-val);
+	}
+	void free() {
+		motorL.free();
+		motorR.free();
+	}
+private:
+	Motor motorL, motorR;
+};
+
 #endif /* MOTOR_H_ */

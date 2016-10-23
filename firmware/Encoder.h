@@ -16,15 +16,30 @@ public:
 	Encoder(TIM_TypeDef *TIMx) {
 		EncoderInit(&encoder, &timer, TIMx, 0xffff, TIM_ENCODERMODE_TI12);
 	}
-	uint16_t value() {
-		return __HAL_TIM_GET_COUNTER(&timer);
+	void init() {
+		ticker.attach_us(this, &Encoder::update, 10000);
+	}
+	int32_t value() {
+		update();
+		return overflow_count * 65536 + getRawCount();
 	}
 private:
 	TIM_Encoder_InitTypeDef encoder;
 	TIM_HandleTypeDef timer;
+	Ticker ticker;
+	int32_t overflow_count;
+	int16_t prev_count;
 
-	uint16_t getRawCount() {
+	int16_t getRawCount() {
 		return __HAL_TIM_GET_COUNTER(&timer);
+	}
+	void update() {
+		int16_t now_count = getRawCount();
+		if (now_count > prev_count + 20000)
+			overflow_count--;
+		if (now_count < prev_count - 20000)
+			overflow_count++;
+		prev_count = now_count;
 	}
 	void EncoderInit(TIM_Encoder_InitTypeDef * encoder,
 			TIM_HandleTypeDef * timer, TIM_TypeDef * TIMx, uint32_t maxcount,
@@ -66,6 +81,22 @@ class Encoders {
 public:
 	Encoders(TIM_TypeDef *TIML, TIM_TypeDef *TIMR) :
 			encoderL(TIML), encoderR(TIMR) {
+	}
+	int32_t left() {
+		return -encoderL.value();
+	}
+	int32_t right() {
+		return encoderR.value();
+	}
+	int32_t value(uint8_t ch) {
+		switch (ch) {
+		case 0:
+			return left();
+		case 1:
+			return right();
+		default:
+			return 0;
+		}
 	}
 private:
 	Encoder encoderL;
