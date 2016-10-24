@@ -9,8 +9,7 @@
 BusOut led(LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN);
 Battery battery(BATTERY_PIN);
 Encoders encoder(ENCODER_L_TIMER, ENCODER_R_TIMER);
-Motors motor(MOTOR_L_CTRL1_PIN, MOTOR_L_CTRL2_PIN, MOTOR_R_CTRL1_PIN,
-MOTOR_R_CTRL2_PIN);
+Motor motor;
 Buzzer buzzer(BUZZER_PIN);
 Button button(BUTTON_PIN);
 MPU6500 mpu(MPU6500_MOSI_PIN, MPU6500_MISO_PIN, MPU6500_SCLK_PIN,
@@ -22,7 +21,7 @@ void print_gyro() {
 }
 
 void ctrl_arts() {
-	float turn = (0 - mpu.gz) * 1 + (0 - mpu.angle) * 100
+	float turn = (0 - mpu.gz) * 1 + (0 - mpu.angle) * 10
 			+ (0 - mpu.int_angle) * 1;
 //				turn = 0;
 	float straight = (300000 - encoder.left() - encoder.right()) * 0.01;
@@ -31,18 +30,6 @@ void ctrl_arts() {
 	straight = 0;
 	int32_t valueL = straight - turn / 2;
 	int32_t valueR = straight + turn / 2;
-	if (valueL > 100) {
-		valueL = 100;
-	} else if (valueL > -100) {
-	} else {
-		valueL = -100;
-	}
-	if (valueR > 100) {
-		valueR = 100;
-	} else if (valueR > -100) {
-	} else {
-		valueR = -100;
-	}
 	motor.drive(valueL, valueR);
 }
 
@@ -60,21 +47,23 @@ int main() {
 
 	button.init();
 	mpu.init();
+	motor.init();
 
+//	motor.drive(-100, -100);
 	Ticker t;
-	t.attach(print_gyro, 0.2);
+//	t.attach(print_gyro, 0.2);
 
 	Ticker ctrl;
 
 	while (true) {
-//		static int32_t prev_enc_L, prev_enc_R;
-//		int32_t enc_L = encoder.left();
-//		int32_t enc_R = encoder.right();
-//		if (enc_L != prev_enc_L || enc_R != prev_enc_R) {
-//			prev_enc_L = enc_L;
-//			prev_enc_R = enc_R;
-//			printf("L: %ld\tR: %ld\n", enc_L, enc_R);
-//		}
+		static int32_t prev_enc_L, prev_enc_R;
+		int32_t enc_L = encoder.left();
+		int32_t enc_R = encoder.right();
+		if (enc_L != prev_enc_L || enc_R != prev_enc_R) {
+			prev_enc_L = enc_L;
+			prev_enc_R = enc_R;
+			printf("L: %ld\tR: %ld\n", enc_L, enc_R);
+		}
 
 		if (button.pressed) {
 			button.flags = 0;

@@ -25,6 +25,49 @@ public:
 		ticker.attach_us(this, &MPU6500::update, 1000);
 	}
 
+	inline int16_t readAccX() {
+		return readInt16(0x3b);
+	}
+	inline int16_t readAccY() {
+		return readInt16(0x3d);
+	}
+	inline int16_t readAccZ() {
+		return readInt16(0x3f);
+	}
+	inline int16_t readTemp() {
+		return readInt16(0x41);
+	}
+	inline int16_t readGyrX() {
+		return readInt16(0x43);
+	}
+	inline int16_t readGyrY() {
+		return readInt16(0x45);
+	}
+	inline int16_t readGyrZ() {
+		return readInt16(0x47);
+	}
+	void readGyrXYZT(int16_t &x, int16_t &y, int16_t &z, int16_t &t) {
+		union {
+			uint16_t u;
+			int16_t i;
+		} _u2i;
+		uint8_t addr = 0x41 | 0x80;
+		unsigned char rx[8];
+		cs = 0;
+		this->write(addr);
+		for (int i = 0; i < 8; i++) {
+			rx[i] = this->write(0x00);
+		}
+		cs = 1;
+		_u2i.u = ((uint16_t)(rx[0]) << 8) | rx[1];
+		t = _u2i.i;
+		_u2i.u = ((uint16_t)(rx[2]) << 8) | rx[3];
+		x = _u2i.i;
+		_u2i.u = ((uint16_t)(rx[4]) << 8) | rx[5];
+		y = _u2i.i;
+		_u2i.u = ((uint16_t)(rx[6]) << 8) | rx[7];
+		z = _u2i.i;
+	}
 private:
 	DigitalOut cs;
 	Ticker ticker;
@@ -71,49 +114,6 @@ private:
 		cs = 1;
 		_u2i.u = ((uint16_t)(rx[0]) << 8) | rx[1];
 		return _u2i.i;
-	}
-	inline int16_t readAccX() {
-		return readInt16(0x3b);
-	}
-	inline int16_t readAccY() {
-		return readInt16(0x3d);
-	}
-	inline int16_t readAccZ() {
-		return readInt16(0x3f);
-	}
-	inline int16_t readTemp() {
-		return readInt16(0x41);
-	}
-	inline int16_t readGyrX() {
-		return readInt16(0x43);
-	}
-	inline int16_t readGyrY() {
-		return readInt16(0x45);
-	}
-	inline int16_t readGyrZ() {
-		return readInt16(0x47);
-	}
-	void readGyrXYZT(int16_t &x, int16_t &y, int16_t &z, int16_t &t) {
-		union {
-			uint16_t u;
-			int16_t i;
-		} _u2i;
-		uint8_t addr = 0x41 | 0x80;
-		unsigned char rx[8];
-		cs = 0;
-		this->write(addr);
-		for (int i = 0; i < 8; i++) {
-			rx[i] = this->write(0x00);
-		}
-		cs = 1;
-		_u2i.u = ((uint16_t)(rx[0]) << 8) | rx[1];
-		t = _u2i.i;
-		_u2i.u = ((uint16_t)(rx[2]) << 8) | rx[3];
-		x = _u2i.i;
-		_u2i.u = ((uint16_t)(rx[4]) << 8) | rx[5];
-		y = _u2i.i;
-		_u2i.u = ((uint16_t)(rx[6]) << 8) | rx[7];
-		z = _u2i.i;
 	}
 	void update() {
 		ay = readAccY();
