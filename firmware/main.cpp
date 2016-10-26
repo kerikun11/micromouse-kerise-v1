@@ -1,12 +1,14 @@
 #include "mbed.h"
 #include "config.h"
 #include "Battery.h"
-#include "Interface.h"
+#include "Buzzer.h"
+#include "Button.h"
 #include "Encoder.h"
 #include "Motor.h"
 #include "MPU6500.h"
+#include "Reflector.h"
 
-BusOut led(LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN);
+BusOut leds(LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN);
 Battery battery(BATTERY_PIN);
 Encoders encoder(ENCODER_L_TIMER, ENCODER_R_TIMER);
 Motor motor;
@@ -14,10 +16,12 @@ Buzzer buzzer(BUZZER_PIN);
 Button button(BUTTON_PIN);
 MPU6500 mpu(MPU6500_MOSI_PIN, MPU6500_MISO_PIN, MPU6500_SCLK_PIN,
 MPU6500_SSEL_PIN);
+Reflector reflector(IR_LED_SL_FR_PIN, IR_LED_SR_FL_PIN);
 
-void print_gyro() {
-	printf("Gz: %.2f\tAngle: %.2f\tInt: %.2f\n", mpu.gz, mpu.angle,
-			mpu.int_angle);
+void print_info() {
+//	printf("Gz: %.2f\tAngle: %.2f\tInt: %.2f\n", mpu.gz, mpu.angle,
+//			mpu.int_angle);
+	printf("ADC: %d\n", reflector.read());
 }
 
 void ctrl_arts() {
@@ -35,7 +39,8 @@ void ctrl_arts() {
 
 int main() {
 	printf("\nHello World!\n");
-	printf("Battery Voltage: %.3f [V]\n", battery.voltage());
+	float voltage = battery.voltage();
+	printf("Battery Voltage: %.3f [V]\n", voltage);
 	if (!battery.check()) {
 		buzzer.playLowBattery();
 		printf("Battery Low!\n");
@@ -44,14 +49,18 @@ int main() {
 		}
 	}
 	buzzer.playBoot();
+	leds = 0x6;
+	wait(0.2);
+	leds = 0x9;
 
+	/* initializations */
 	button.init();
 	mpu.init();
 	motor.init();
+//	reflector.init();
 
-//	motor.drive(-100, -100);
 	Ticker t;
-//	t.attach(print_gyro, 0.2);
+	t.attach(print_info, 0.2);
 
 	Ticker ctrl;
 
@@ -77,5 +86,9 @@ int main() {
 			ctrl.attach_us(ctrl_arts, 100);
 		}
 	}
+}
+
+void ADCx_DMA_IRQHandler(void) {
+	HAL_DMA_IRQHandler(reflector.AdcHandle.DMA_Handle);
 }
 

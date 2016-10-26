@@ -1,121 +1,12 @@
 /*
- * Interface.h
+ * Button.h
  *
- *  Created on: 2016/10/23
+ *  Created on: 2016/10/26
  *      Author: kerikun11
  */
 
-#ifndef INTERFACE_H_
-#define INTERFACE_H_
-
-#include "mbed.h"
-
-class Buzzer {
-public:
-	Buzzer(PinName pin) :
-			out(pin) {
-	}
-	void setFrequency(uint32_t freq) {
-		out.period_us(1000000 / freq);
-		out.pulsewidth_us(1000000 / freq / 10);
-	}
-	void mute() {
-		out.pulsewidth_us(0);
-	}
-	void playBoot() {
-		playC6();
-		t1.attach_us(this, &Buzzer::playD6, 100000);
-		t2.attach_us(this, &Buzzer::playC6, 200000);
-		t8.attach_us(this, &Buzzer::mute, 300000);
-	}
-	void playLowBattery() {
-		playC7();
-		t1.attach_us(this, &Buzzer::mute, 500000);
-	}
-	void playConfirm() {
-		playC6();
-		t1.attach_us(this, &Buzzer::playE6, 50000);
-		t2.attach_us(this, &Buzzer::mute, 100000);
-	}
-	void playCancel() {
-		playC6();
-		t1.attach_us(this, &Buzzer::playA5, 50000);
-		t2.attach_us(this, &Buzzer::mute, 100000);
-	}
-	void playSelect() {
-		playC6();
-		t2.attach_us(this, &Buzzer::mute, 100000);
-	}
-private:
-	PwmOut out;
-	Timeout t1, t2, t3, t4, t5, t6, t7, t8;
-	void playC4() {
-		setFrequency(262);
-	}
-	void playD4() {
-		setFrequency(294);
-	}
-	void playE4() {
-		setFrequency(330);
-	}
-	void playF4() {
-		setFrequency(349);
-	}
-	void playG4() {
-		setFrequency(392);
-	}
-	void playA4() {
-		setFrequency(440);
-	}
-	void playB4() {
-		setFrequency(494);
-	}
-	void playC5() {
-		setFrequency(523);
-	}
-	void playD5() {
-		setFrequency(587);
-	}
-	void playE5() {
-		setFrequency(659);
-	}
-	void playF5() {
-		setFrequency(698);
-	}
-	void playG5() {
-		setFrequency(784);
-	}
-	void playA5() {
-		setFrequency(880);
-	}
-	void playB5() {
-		setFrequency(988);
-	}
-	void playC6() {
-		setFrequency(1047);
-	}
-	void playD6() {
-		setFrequency(1175);
-	}
-	void playE6() {
-		setFrequency(1319);
-	}
-	void playF6() {
-		setFrequency(1397);
-	}
-	void playG6() {
-		setFrequency(1568);
-	}
-	void playA6() {
-		setFrequency(1760);
-	}
-	void playB6() {
-		setFrequency(1976);
-	}
-	void playC7() {
-		setFrequency(2093);
-	}
-};
+#ifndef BUTTON_H_
+#define BUTTON_H_
 
 #define PRESS_LEVEL 2
 #define LONG_PRESS_LEVEL1  50
@@ -194,4 +85,4 @@ private:
 	}
 };
 
-#endif /* INTERFACE_H_ */
+#endif /* BUTTON_H_ */
