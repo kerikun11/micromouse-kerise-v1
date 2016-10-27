@@ -57,7 +57,7 @@ private:
 
 	void setFrequency(uint32_t freq) {
 		out.period_us(1000000 / freq);
-		out.pulsewidth_us(1000000 / freq / 100);
+		out.pulsewidth_us(1000000 / freq / 10);
 	}
 	void playC(uint8_t octave) {
 		setFrequency(440 * pow(2, octave) * 3 / 5);

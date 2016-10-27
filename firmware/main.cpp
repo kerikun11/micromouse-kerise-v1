@@ -21,7 +21,7 @@ Reflector reflector(IR_LED_SL_FR_PIN, IR_LED_SR_FL_PIN);
 void print_info() {
 //	printf("Gz: %.2f\tAngle: %.2f\tInt: %.2f\n", mpu.gz, mpu.angle,
 //			mpu.int_angle);
-	printf("ADC: %d\n", reflector.read());
+//	printf("ADC: %d\n", uhADCxConvertedValue);
 }
 
 void ctrl_arts() {
@@ -57,22 +57,30 @@ int main() {
 	button.init();
 	mpu.init();
 	motor.init();
-//	reflector.init();
+	reflector.init();
 
 	Ticker t;
-	t.attach(print_info, 0.2);
+//	t.attach_us(print_info, 100000);
+
+//	sp.attach_us(sampling, 10);
+//	wait(1);
+//	for (int i = 0; i < buffer_size; i++) {
+//		printf("%d,%d\r\n", i, buffer[i]);
+//	}
+//
+//	while(1);
 
 	Ticker ctrl;
 
 	while (true) {
-		static int32_t prev_enc_L, prev_enc_R;
-		int32_t enc_L = encoder.left();
-		int32_t enc_R = encoder.right();
-		if (enc_L != prev_enc_L || enc_R != prev_enc_R) {
-			prev_enc_L = enc_L;
-			prev_enc_R = enc_R;
-			printf("L: %ld\tR: %ld\n", enc_L, enc_R);
-		}
+//		static int32_t prev_enc_L, prev_enc_R;
+//		int32_t enc_L = encoder.left();
+//		int32_t enc_R = encoder.right();
+//		if (enc_L != prev_enc_L || enc_R != prev_enc_R) {
+//			prev_enc_L = enc_L;
+//			prev_enc_R = enc_R;
+//			printf("L: %ld\tR: %ld\n", enc_L, enc_R);
+//		}
 
 		if (button.pressed) {
 			button.flags = 0;
@@ -87,8 +95,3 @@ int main() {
 		}
 	}
 }
-
-void ADCx_DMA_IRQHandler(void) {
-	HAL_DMA_IRQHandler(reflector.AdcHandle.DMA_Handle);
-}
-

@@ -8,24 +8,23 @@
 #ifndef MOTOR_H_
 #define MOTOR_H_
 
-#define TIMx						TIM2
-#define TIMx_CLK_ENABLE()			__HAL_RCC_TIM2_CLK_ENABLE()
+#define MOTOR_TIMx						TIM2
+#define MOTOR_TIMx_CLK_ENABLE()			__HAL_RCC_TIM2_CLK_ENABLE()
+#define MOTOR_TIMx_CHANNEL_GPIO_PORT()	__HAL_RCC_GPIOC_CLK_ENABLE()
+#define MOTOR_TIMx_GPIO_PORT_CHANNEL1	GPIOA
+#define MOTOR_TIMx_GPIO_PORT_CHANNEL2	GPIOA
+#define MOTOR_TIMx_GPIO_PORT_CHANNEL3	GPIOA
+#define MOTOR_TIMx_GPIO_PORT_CHANNEL4	GPIOA
+#define MOTOR_TIMx_GPIO_PIN_CHANNEL1	GPIO_PIN_0
+#define MOTOR_TIMx_GPIO_PIN_CHANNEL2	GPIO_PIN_1
+#define MOTOR_TIMx_GPIO_PIN_CHANNEL3	GPIO_PIN_2
+#define MOTOR_TIMx_GPIO_PIN_CHANNEL4	GPIO_PIN_3
+#define MOTOR_TIMx_GPIO_AF_CHANNEL1		GPIO_AF1_TIM2
+#define MOTOR_TIMx_GPIO_AF_CHANNEL2		GPIO_AF1_TIM2
+#define MOTOR_TIMx_GPIO_AF_CHANNEL3		GPIO_AF1_TIM2
+#define MOTOR_TIMx_GPIO_AF_CHANNEL4		GPIO_AF1_TIM2
 
-#define TIMx_CHANNEL_GPIO_PORT()	__HAL_RCC_GPIOC_CLK_ENABLE()
-#define TIMx_GPIO_PORT_CHANNEL1		GPIOA
-#define TIMx_GPIO_PORT_CHANNEL2		GPIOA
-#define TIMx_GPIO_PORT_CHANNEL3		GPIOA
-#define TIMx_GPIO_PORT_CHANNEL4		GPIOA
-#define TIMx_GPIO_PIN_CHANNEL1		GPIO_PIN_0
-#define TIMx_GPIO_PIN_CHANNEL2		GPIO_PIN_1
-#define TIMx_GPIO_PIN_CHANNEL3		GPIO_PIN_2
-#define TIMx_GPIO_PIN_CHANNEL4		GPIO_PIN_3
-#define TIMx_GPIO_AF_CHANNEL1		GPIO_AF1_TIM2
-#define TIMx_GPIO_AF_CHANNEL2		GPIO_AF1_TIM2
-#define TIMx_GPIO_AF_CHANNEL3		GPIO_AF1_TIM2
-#define TIMx_GPIO_AF_CHANNEL4		GPIO_AF1_TIM2
-
-#define  PERIOD_VALUE				(1000 - 1)
+#define MOTOR_PERIOD_VALUE				(1000 - 1)
 
 class Motor {
 public:
@@ -33,32 +32,32 @@ public:
 	}
 	void init() {
 		GPIO_InitTypeDef GPIO_InitStruct;
-		TIMx_CLK_ENABLE();
-		TIMx_CHANNEL_GPIO_PORT();
+		MOTOR_TIMx_CLK_ENABLE();
+		MOTOR_TIMx_CHANNEL_GPIO_PORT();
 
 		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 		GPIO_InitStruct.Pull = GPIO_PULLUP;
 		GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
 
-		GPIO_InitStruct.Alternate = TIMx_GPIO_AF_CHANNEL1;
-		GPIO_InitStruct.Pin = TIMx_GPIO_PIN_CHANNEL1;
-		HAL_GPIO_Init(TIMx_GPIO_PORT_CHANNEL1, &GPIO_InitStruct);
+		GPIO_InitStruct.Alternate = MOTOR_TIMx_GPIO_AF_CHANNEL1;
+		GPIO_InitStruct.Pin = MOTOR_TIMx_GPIO_PIN_CHANNEL1;
+		HAL_GPIO_Init(MOTOR_TIMx_GPIO_PORT_CHANNEL1, &GPIO_InitStruct);
 
-		GPIO_InitStruct.Alternate = TIMx_GPIO_AF_CHANNEL2;
-		GPIO_InitStruct.Pin = TIMx_GPIO_PIN_CHANNEL2;
-		HAL_GPIO_Init(TIMx_GPIO_PORT_CHANNEL2, &GPIO_InitStruct);
+		GPIO_InitStruct.Alternate = MOTOR_TIMx_GPIO_AF_CHANNEL2;
+		GPIO_InitStruct.Pin = MOTOR_TIMx_GPIO_PIN_CHANNEL2;
+		HAL_GPIO_Init(MOTOR_TIMx_GPIO_PORT_CHANNEL2, &GPIO_InitStruct);
 
-		GPIO_InitStruct.Alternate = TIMx_GPIO_AF_CHANNEL3;
-		GPIO_InitStruct.Pin = TIMx_GPIO_PIN_CHANNEL3;
-		HAL_GPIO_Init(TIMx_GPIO_PORT_CHANNEL3, &GPIO_InitStruct);
+		GPIO_InitStruct.Alternate = MOTOR_TIMx_GPIO_AF_CHANNEL3;
+		GPIO_InitStruct.Pin = MOTOR_TIMx_GPIO_PIN_CHANNEL3;
+		HAL_GPIO_Init(MOTOR_TIMx_GPIO_PORT_CHANNEL3, &GPIO_InitStruct);
 
-		GPIO_InitStruct.Alternate = TIMx_GPIO_AF_CHANNEL4;
-		GPIO_InitStruct.Pin = TIMx_GPIO_PIN_CHANNEL4;
-		HAL_GPIO_Init(TIMx_GPIO_PORT_CHANNEL4, &GPIO_InitStruct);
+		GPIO_InitStruct.Alternate = MOTOR_TIMx_GPIO_AF_CHANNEL4;
+		GPIO_InitStruct.Pin = MOTOR_TIMx_GPIO_PIN_CHANNEL4;
+		HAL_GPIO_Init(MOTOR_TIMx_GPIO_PORT_CHANNEL4, &GPIO_InitStruct);
 
-		TimHandle.Instance = TIMx;
+		TimHandle.Instance = MOTOR_TIMx;
 		TimHandle.Init.Prescaler = 0;
-		TimHandle.Init.Period = PERIOD_VALUE;
+		TimHandle.Init.Period = MOTOR_PERIOD_VALUE;
 		TimHandle.Init.ClockDivision = 0;
 		TimHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
 		TimHandle.Init.RepetitionCounter = 0;
@@ -92,47 +91,47 @@ public:
 //		HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_4);
 	}
 	void left(int16_t width) {
-		if (width > PERIOD_VALUE / 2) {
-			width = PERIOD_VALUE / 2;
+		if (width > MOTOR_PERIOD_VALUE / 2) {
+			width = MOTOR_PERIOD_VALUE / 2;
 		}
-		if (width < -PERIOD_VALUE / 2) {
-			width = -PERIOD_VALUE / 2;
+		if (width < -MOTOR_PERIOD_VALUE / 2) {
+			width = -MOTOR_PERIOD_VALUE / 2;
 		}
 		if (width > 0) {
-			sConfig.Pulse = PERIOD_VALUE - width;
+			sConfig.Pulse = MOTOR_PERIOD_VALUE - width;
 			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_1);
 			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1);
-			sConfig.Pulse = PERIOD_VALUE;
+			sConfig.Pulse = MOTOR_PERIOD_VALUE;
 			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_2);
 			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_2);
 		} else {
-			sConfig.Pulse = PERIOD_VALUE;
+			sConfig.Pulse = MOTOR_PERIOD_VALUE;
 			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_1);
 			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1);
-			sConfig.Pulse = PERIOD_VALUE + width;
+			sConfig.Pulse = MOTOR_PERIOD_VALUE + width;
 			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_2);
 			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_2);
 		}
 	}
 	void right(int16_t width) {
-		if (width > PERIOD_VALUE / 2) {
-			width = PERIOD_VALUE / 2;
+		if (width > MOTOR_PERIOD_VALUE / 2) {
+			width = MOTOR_PERIOD_VALUE / 2;
 		}
-		if (width < -PERIOD_VALUE / 2) {
-			width = -PERIOD_VALUE / 2;
+		if (width < -MOTOR_PERIOD_VALUE / 2) {
+			width = -MOTOR_PERIOD_VALUE / 2;
 		}
 		if (width > 0) {
-			sConfig.Pulse = PERIOD_VALUE;
+			sConfig.Pulse = MOTOR_PERIOD_VALUE;
 			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_3);
 			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_3);
-			sConfig.Pulse = PERIOD_VALUE - width;
+			sConfig.Pulse = MOTOR_PERIOD_VALUE - width;
 			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_4);
 			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_4);
 		} else {
-			sConfig.Pulse = PERIOD_VALUE + width;
+			sConfig.Pulse = MOTOR_PERIOD_VALUE + width;
 			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_3);
 			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_3);
-			sConfig.Pulse = PERIOD_VALUE;
+			sConfig.Pulse = MOTOR_PERIOD_VALUE;
 			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_4);
 			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_4);
 		}
