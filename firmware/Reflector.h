@@ -9,6 +9,7 @@
 #define REFLECTOR_H_
 
 #include "mbed.h"
+#include "FFT.h"
 
 /* Definition for ADCx clock resources */
 #define ADCx_S							ADC1
@@ -28,16 +29,16 @@
 #define ADCx_CHANNEL_GPIO_PORT          GPIOC
 
 /* Definition for ADCx's Channel */
-#define ADCx_CHANNEL_SL					ADC_CHANNEL_13
-#define ADCx_CHANNEL_FL					ADC_CHANNEL_12
-#define ADCx_CHANNEL_FR					ADC_CHANNEL_11
-#define ADCx_CHANNEL_SR					ADC_CHANNEL_10
+#define ADCx_CHANNEL_SL					ADC_CHANNEL_10
+#define ADCx_CHANNEL_FL					ADC_CHANNEL_11
+#define ADCx_CHANNEL_FR					ADC_CHANNEL_12
+#define ADCx_CHANNEL_SR					ADC_CHANNEL_13
 
 #define IR_LED_PERIOD_US				100
-#define IR_LED_DUTY_US					50
+#define IR_LED_DUTY_US					10
 
 #define IR_RECEIVER_SAMPLING_PERIOD_US	10
-#define IR_RECEIVER_UPDATE_PERIOD_US	1000000
+#define IR_RECEIVER_UPDATE_PERIOD_US	100000
 
 class Reflector {
 public:
@@ -120,6 +121,18 @@ public:
 		updateTicker.attach_us(this, &Reflector::update,
 		IR_RECEIVER_UPDATE_PERIOD_US);
 	}
+	float sl() {
+		return distance[0];
+	}
+	float fl() {
+		return distance[1];
+	}
+	float fr() {
+		return distance[2];
+	}
+	float sr() {
+		return distance[3];
+	}
 private:
 	PwmOut led_sl_fr, led_sr_fl;
 	ADC_HandleTypeDef AdcHandle_S;
@@ -127,6 +140,7 @@ private:
 	ADC_ChannelConfTypeDef sConfig;
 	Ticker samplingTicker;
 	Ticker updateTicker;
+	float distance[4];
 	static const int buffer_size = 64;
 	struct sampling_buffer {
 		uint16_t buffer[4][buffer_size];
@@ -185,13 +199,20 @@ private:
 		HAL_ADC_Start_IT(&AdcHandle_F);
 	}
 	void update() {
-		for (int i = 0; i < buffer_size; i++) {
-			printf("%d,%d,%d,%d\r\n", sample.buffer[0][i], sample.buffer[1][i],
-					sample.buffer[2][i], sample.buffer[3][i]);
+		// read data and fft
+		for (int ch = 0; ch < 4; ch++) {
+			FFT fft(buffer_size);
+			for (int i = 0; i < buffer_size; i++) {
+				fft[i] = sample.buffer[ch][i];
+			}
+			fft.execute();
+			int m = buffer_size * IR_RECEIVER_SAMPLING_PERIOD_US
+					/ IR_LED_PERIOD_US;
+			distance[ch] = norm(fft[m]);
 		}
-		printf("\r\n");
-		updateTicker.detach();
-//		samplingTicker.attach_us(this, &Reflector::sampling, IR_RECEIVER_SAMPLING_US);
+		// start next sampling
+		samplingTicker.attach_us(this, &Reflector::sampling,
+		IR_RECEIVER_SAMPLING_PERIOD_US);
 	}
 };
 

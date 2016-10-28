@@ -10,6 +10,8 @@
 
 #include "mbed.h"
 
+#define MPU6500_UPDATE_PERIOD_US	1000
+
 class MPU6500: private SPI {
 public:
 	MPU6500(PinName mosi_pin, PinName miso_pin, PinName sclk_pin,
@@ -22,7 +24,7 @@ public:
 	float angle;
 	float int_angle;
 	void init() {
-		ticker.attach_us(this, &MPU6500::update, 1000);
+		ticker.attach_us(this, &MPU6500::update, MPU6500_UPDATE_PERIOD_US);
 	}
 
 	inline int16_t readAccX() {
@@ -118,8 +120,8 @@ private:
 	void update() {
 		ay = readAccY();
 		gz = (readGyrZ() * 16.4f - 1200.0) / 2000.0;
-		angle += gz / 1000.0f;
-		int_angle += angle / 1000.0f;
+		angle += gz * MPU6500_UPDATE_PERIOD_US / 1000000;
+		int_angle += angle * MPU6500_UPDATE_PERIOD_US / 1000000;
 	}
 };
 

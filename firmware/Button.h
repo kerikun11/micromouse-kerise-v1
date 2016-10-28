@@ -9,7 +9,7 @@
 #define BUTTON_H_
 
 #define PRESS_LEVEL 2
-#define LONG_PRESS_LEVEL1  50
+#define LONG_PRESS_LEVEL1  40
 #define LONG_PRESS_LEVEL2  200
 #define LONG_PRESS_LEVEL3  1000
 
