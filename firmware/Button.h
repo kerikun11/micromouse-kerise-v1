@@ -8,10 +8,10 @@
 #ifndef BUTTON_H_
 #define BUTTON_H_
 
-#define BUTTON_PRESS_LEVEL					2
-#define BUTTON_LONG_PRESS_LEVEL_1			40
-#define BUTTON_LONG_PRESS_LEVEL_2			200
-#define BUTTON_LONG_PRESS_LEVEL_3			1000
+#define BUTTON_PRESS_LEVEL			2
+#define BUTTON_LONG_PRESS_LEVEL_1	40
+#define BUTTON_LONG_PRESS_LEVEL_2	200
+#define BUTTON_LONG_PRESS_LEVEL_3	1000
 
 #define BUTTON_SAMPLING_PERIOD_US	10000
 
@@ -49,7 +49,7 @@ public:
 	};
 private:
 	DigitalIn pin;
-	int pressedState;
+	const int pressedState;
 	Ticker ticker;
 	volatile int counter;
 

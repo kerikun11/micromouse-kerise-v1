@@ -20,10 +20,10 @@ public:
 		setup();
 		ticker.attach_us(this, &MPU6500::update, MPU6500_UPDATE_PERIOD_US);
 	}
-	float ay;
-	float gz;
-	float angle;
-	float int_angle;
+	float ay = 0;
+	float gz = 0;
+	float angle = 0;
+	float int_angle = 0;
 
 	inline int16_t readAccX() {
 		return readInt16(0x3b);

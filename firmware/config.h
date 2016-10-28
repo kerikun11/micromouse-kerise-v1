@@ -65,9 +65,6 @@
 
 #define BATTERY_PIN			PB_1
 
-#define ENCODER_L_TIMER		TIM3
-#define ENCODER_R_TIMER		TIM4
-
 //#define MOTOR_L_CTRL1_PIN	PA_0
 //#define MOTOR_L_CTRL2_PIN	PA_1
 //#define MOTOR_R_CTRL1_PIN	PA_2

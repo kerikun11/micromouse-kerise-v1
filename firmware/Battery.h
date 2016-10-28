@@ -22,7 +22,7 @@ public:
 	}
 private:
 	AnalogIn adc;
-	float _threshold_voltage;
+	const float _threshold_voltage;
 };
 
 

@@ -10,7 +10,7 @@
 
 #define MOTOR_TIMx						TIM2
 #define MOTOR_TIMx_CLK_ENABLE()			__HAL_RCC_TIM2_CLK_ENABLE()
-#define MOTOR_TIMx_CHANNEL_GPIO_PORT()	__HAL_RCC_GPIOC_CLK_ENABLE()
+#define MOTOR_TIMx_CHANNEL_GPIO_PORT()	__HAL_RCC_GPIOA_CLK_ENABLE()
 #define MOTOR_TIMx_GPIO_PORT_CHANNEL1	GPIOA
 #define MOTOR_TIMx_GPIO_PORT_CHANNEL2	GPIOA
 #define MOTOR_TIMx_GPIO_PORT_CHANNEL3	GPIOA
@@ -59,7 +59,11 @@ public:
 		TimHandle.Init.ClockDivision = 0;
 		TimHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
 		TimHandle.Init.RepetitionCounter = 0;
-		HAL_TIM_PWM_Init(&TimHandle);
+		if (HAL_TIM_PWM_Init(&TimHandle) != HAL_OK) {
+			printf("Couldn't Init PWM\r\n");
+			while (1) {
+			}
+		}
 
 		sConfig.OCMode = TIM_OCMODE_PWM1;
 		sConfig.OCPolarity = TIM_OCPOLARITY_HIGH;

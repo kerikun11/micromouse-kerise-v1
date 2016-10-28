@@ -38,15 +38,120 @@
 #define IR_LED_DUTY_US					20
 
 #define IR_RECEIVER_SAMPLING_PERIOD_US	10
-#define IR_RECEIVER_UPDATE_PERIOD_US	100000
+#define IR_RECEIVER_UPDATE_PERIOD_MS	100
+
+#define IR_RECEIVER_SAMPLE_SIZE			64
 
 class Reflector {
 public:
 	Reflector(PinName led_sl_fr_pin, PinName led_sr_fl_pin) :
-			led_sl_fr(led_sl_fr_pin), led_sr_fl(led_sr_fl_pin) {
+			updateTimer(this, &Reflector::sampling, osTimerPeriodic), led_sl_fr(
+					led_sl_fr_pin), led_sr_fl(led_sr_fl_pin) {
 		led_sl_fr.period_us(IR_LED_PERIOD_US);
 		led_sr_fl.period_us(IR_LED_PERIOD_US);
+		adcInitialize();
+		sample.state = 0;
+		samplingTicker.attach_us(this, &Reflector::sampling,
+		IR_RECEIVER_SAMPLING_PERIOD_US);
+		updateTimer.start(IR_RECEIVER_UPDATE_PERIOD_MS);
+	}
+	~Reflector() {
+		updateTimer.stop();
+		samplingTicker.detach();
+	}
+	float sl() {
+		return distance[0];
+	}
+	float fl() {
+		return distance[1];
+	}
+	float fr() {
+		return distance[2];
+	}
+	float sr() {
+		return distance[3];
+	}
+private:
+	RtosTimer updateTimer;
+	PwmOut led_sl_fr, led_sr_fl;
+	ADC_HandleTypeDef AdcHandle_S;
+	ADC_HandleTypeDef AdcHandle_F;
+	ADC_ChannelConfTypeDef sConfig;
+	Ticker samplingTicker;
+	volatile float distance[4];
+	volatile struct sampling_buffer {
+		uint16_t buffer[4][IR_RECEIVER_SAMPLE_SIZE];
+		int state;
+		int pointer;
+	} sample;
 
+	void ir_led(bool sl_fr, bool sr_fl) {
+		if (sl_fr)
+			led_sl_fr.pulsewidth_us(IR_LED_DUTY_US);
+		else
+			led_sl_fr.pulsewidth_us(0);
+		if (sr_fl)
+			led_sr_fl.pulsewidth_us(IR_LED_DUTY_US);
+		else
+			led_sr_fl.pulsewidth_us(0);
+	}
+	void sampling() {
+		switch (sample.state) {
+		case 0:
+			sample.pointer = 0;
+			sample.state = 1;
+			ir_led(true, false);
+			sConfig.Channel = ADCx_CHANNEL_SL;
+			HAL_ADC_ConfigChannel(&AdcHandle_S, &sConfig);
+			sConfig.Channel = ADCx_CHANNEL_FR;
+			HAL_ADC_ConfigChannel(&AdcHandle_F, &sConfig);
+			break;
+		case 1:
+			sample.buffer[0][sample.pointer] = HAL_ADC_GetValue(&AdcHandle_S);
+			sample.buffer[2][sample.pointer] = HAL_ADC_GetValue(&AdcHandle_F);
+			sample.pointer++;
+			if (sample.pointer >= IR_RECEIVER_SAMPLE_SIZE) {
+				sample.pointer = 0;
+				sample.state = 2;
+				ir_led(false, true);
+				sConfig.Channel = ADCx_CHANNEL_SR;
+				HAL_ADC_ConfigChannel(&AdcHandle_S, &sConfig);
+				sConfig.Channel = ADCx_CHANNEL_FL;
+				HAL_ADC_ConfigChannel(&AdcHandle_F, &sConfig);
+			}
+			break;
+		case 2:
+			sample.buffer[3][sample.pointer] = HAL_ADC_GetValue(&AdcHandle_S);
+			sample.buffer[1][sample.pointer] = HAL_ADC_GetValue(&AdcHandle_F);
+			sample.pointer++;
+			if (sample.pointer >= IR_RECEIVER_SAMPLE_SIZE) {
+				sample.pointer = 0;
+				sample.state = 0;
+				ir_led(false, false);
+				samplingTicker.detach();
+			}
+			break;
+		}
+		HAL_ADC_Start_IT(&AdcHandle_S);
+		HAL_ADC_Start_IT(&AdcHandle_F);
+	}
+	void update() {
+		// read data and fft
+		for (int ch = 0; ch < 4; ch++) {
+			FFT fft(IR_RECEIVER_SAMPLE_SIZE);
+			for (int i = 0; i < IR_RECEIVER_SAMPLE_SIZE; i++) {
+				fft[i] = sample.buffer[ch][i];
+			}
+			fft.execute();
+			int m = IR_RECEIVER_SAMPLE_SIZE * IR_RECEIVER_SAMPLING_PERIOD_US
+					/ IR_LED_PERIOD_US;
+			distance[ch] = norm(fft[m]);
+		}
+		// start next sampling
+		samplingTicker.attach_us(this, &Reflector::sampling,
+		IR_RECEIVER_SAMPLING_PERIOD_US);
+	}
+	void adcInitialize() {
 		/*##-1- Enable peripherals and GPIO Clocks #################################*/
 		/* ADCx Periph clock enable */
 		ADCx_S_CLK_ENABLE();
@@ -79,7 +184,7 @@ public:
 
 		/*##-1- Configure the ADC peripheral #######################################*/
 		AdcHandle_S.Instance = ADCx_S;
-		AdcHandle_S.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
+		AdcHandle_S.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV4;
 		AdcHandle_S.Init.Resolution = ADC_RESOLUTION12b;
 		AdcHandle_S.Init.ScanConvMode = DISABLE; /* Sequencer disabled (ADC conversion on only 1 channel: channel set on rank 1) */
 		AdcHandle_S.Init.ContinuousConvMode = ENABLE; /* Continuous mode disabled to have only 1 conversion at each conversion trig */
@@ -91,11 +196,14 @@ public:
 		AdcHandle_S.Init.NbrOfConversion = 1;
 		AdcHandle_S.Init.DMAContinuousRequests = DISABLE;
 		AdcHandle_S.Init.EOCSelection = DISABLE;
-		HAL_ADC_Init(&AdcHandle_S);
-
+		if (HAL_ADC_Init(&AdcHandle_S) != HAL_OK) {
+			printf("Couldn't Init ADC S\r\n");
+			while (1) {
+			}
+		}
 		/*##-1- Configure the ADC peripheral #######################################*/
 		AdcHandle_F.Instance = ADCx_F;
-		AdcHandle_F.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
+		AdcHandle_F.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV4;
 		AdcHandle_F.Init.Resolution = ADC_RESOLUTION12b;
 		AdcHandle_F.Init.ScanConvMode = DISABLE; /* Sequencer disabled (ADC conversion on only 1 channel: channel set on rank 1) */
 		AdcHandle_F.Init.ContinuousConvMode = ENABLE; /* Continuous mode disabled to have only 1 conversion at each conversion trig */
@@ -107,111 +215,16 @@ public:
 		AdcHandle_F.Init.NbrOfConversion = 1;
 		AdcHandle_F.Init.DMAContinuousRequests = DISABLE;
 		AdcHandle_F.Init.EOCSelection = DISABLE;
-		HAL_ADC_Init(&AdcHandle_F);
+		if (HAL_ADC_Init(&AdcHandle_F) != HAL_OK) {
+			printf("Couldn't Init ADC F\r\n");
+			while (1) {
+			}
+		}
 
 		/*##-2- Configure ADC regular channel ######################################*/
 		sConfig.Rank = 1;
 		sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
 		sConfig.Offset = 0;
-
-		sample.state = 0;
-		samplingTicker.attach_us(this, &Reflector::sampling,
-		IR_RECEIVER_SAMPLING_PERIOD_US);
-		updateTicker.attach_us(this, &Reflector::update,
-		IR_RECEIVER_UPDATE_PERIOD_US);
-	}
-	float sl() {
-		return distance[0];
-	}
-	float fl() {
-		return distance[1];
-	}
-	float fr() {
-		return distance[2];
-	}
-	float sr() {
-		return distance[3];
-	}
-private:
-	PwmOut led_sl_fr, led_sr_fl;
-	ADC_HandleTypeDef AdcHandle_S;
-	ADC_HandleTypeDef AdcHandle_F;
-	ADC_ChannelConfTypeDef sConfig;
-	Ticker samplingTicker;
-	Ticker updateTicker;
-	float distance[4];
-	static const int buffer_size = 64;
-	struct sampling_buffer {
-		uint16_t buffer[4][buffer_size];
-		int state;
-		int pointer;
-	} sample;
-
-	void ir_led(bool sl_fr, bool sr_fl) {
-		if (sl_fr)
-			led_sl_fr.pulsewidth_us(IR_LED_DUTY_US);
-		else
-			led_sl_fr.pulsewidth_us(0);
-		if (sr_fl)
-			led_sr_fl.pulsewidth_us(IR_LED_DUTY_US);
-		else
-			led_sr_fl.pulsewidth_us(0);
-	}
-	void sampling() {
-		switch (sample.state) {
-		case 0:
-			sample.pointer = 0;
-			sample.state = 1;
-			ir_led(true, false);
-			sConfig.Channel = ADCx_CHANNEL_SL;
-			HAL_ADC_ConfigChannel(&AdcHandle_S, &sConfig);
-			sConfig.Channel = ADCx_CHANNEL_FR;
-			HAL_ADC_ConfigChannel(&AdcHandle_F, &sConfig);
-			break;
-		case 1:
-			sample.buffer[0][sample.pointer] = HAL_ADC_GetValue(&AdcHandle_S);
-			sample.buffer[2][sample.pointer] = HAL_ADC_GetValue(&AdcHandle_F);
-			sample.pointer++;
-			if (sample.pointer >= buffer_size) {
-				sample.pointer = 0;
-				sample.state = 2;
-				ir_led(false, true);
-				sConfig.Channel = ADCx_CHANNEL_SR;
-				HAL_ADC_ConfigChannel(&AdcHandle_S, &sConfig);
-				sConfig.Channel = ADCx_CHANNEL_FL;
-				HAL_ADC_ConfigChannel(&AdcHandle_F, &sConfig);
-			}
-			break;
-		case 2:
-			sample.buffer[3][sample.pointer] = HAL_ADC_GetValue(&AdcHandle_S);
-			sample.buffer[1][sample.pointer] = HAL_ADC_GetValue(&AdcHandle_F);
-			sample.pointer++;
-			if (sample.pointer >= buffer_size) {
-				sample.pointer = 0;
-				sample.state = 0;
-				ir_led(false, false);
-				samplingTicker.detach();
-			}
-			break;
-		}
-		HAL_ADC_Start_IT(&AdcHandle_S);
-		HAL_ADC_Start_IT(&AdcHandle_F);
-	}
-	void update() {
-		// read data and fft
-		for (int ch = 0; ch < 4; ch++) {
-			FFT fft(buffer_size);
-			for (int i = 0; i < buffer_size; i++) {
-				fft[i] = sample.buffer[ch][i];
-			}
-			fft.execute();
-			int m = buffer_size * IR_RECEIVER_SAMPLING_PERIOD_US
-					/ IR_LED_PERIOD_US;
-			distance[ch] = norm(fft[m]);
-		}
-		// start next sampling
-		samplingTicker.attach_us(this, &Reflector::sampling,
-		IR_RECEIVER_SAMPLING_PERIOD_US);
 	}
 };
 
