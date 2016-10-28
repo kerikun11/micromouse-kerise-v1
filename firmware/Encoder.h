@@ -15,8 +15,6 @@ class Encoder {
 public:
 	Encoder(TIM_TypeDef *TIMx) {
 		EncoderInit(&encoder, &timer, TIMx, 0xffff, TIM_ENCODERMODE_TI12);
-	}
-	void init() {
 		ticker.attach_us(this, &Encoder::update, 10000);
 	}
 	int32_t value() {

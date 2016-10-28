@@ -8,10 +8,12 @@
 #ifndef BUTTON_H_
 #define BUTTON_H_
 
-#define PRESS_LEVEL 2
-#define LONG_PRESS_LEVEL1  40
-#define LONG_PRESS_LEVEL2  200
-#define LONG_PRESS_LEVEL3  1000
+#define BUTTON_PRESS_LEVEL					2
+#define BUTTON_LONG_PRESS_LEVEL_1			40
+#define BUTTON_LONG_PRESS_LEVEL_2			200
+#define BUTTON_LONG_PRESS_LEVEL_3			1000
+
+#define BUTTON_SAMPLING_PERIOD_US	10000
 
 class Button {
 public:
@@ -23,8 +25,8 @@ public:
 	Button(PinName button_pin, int pressed_state = 0, PinMode pin_mode = PullUp) :
 			pin(button_pin, pin_mode), pressedState(pressed_state) {
 		flags = 0x00;
+		ticker.attach_us(this, &Button::timerIsr, BUTTON_SAMPLING_PERIOD_US);
 	}
-
 	~Button() {
 		ticker.detach();
 	}
@@ -45,13 +47,6 @@ public:
 			volatile uint8_t long_pressing_3 :1; /**< ボタンがもっともっと長押しされている */
 		};
 	};
-
-	/** ボタン初期化関数.
-	 タイマー割り込みをアタッチする．始めに必ず実行すること．
-	 */
-	void init() {
-		ticker.attach_us(this, &Button::timerIsr, 10000);
-	}
 private:
 	DigitalIn pin;
 	int pressedState;
@@ -60,24 +55,24 @@ private:
 
 	void timerIsr() {
 		if (pin == pressedState) {
-			if (counter < LONG_PRESS_LEVEL3 + 1)
+			if (counter < BUTTON_LONG_PRESS_LEVEL_3 + 1)
 				counter++;
-			if (counter == LONG_PRESS_LEVEL3)
+			if (counter == BUTTON_LONG_PRESS_LEVEL_3)
 				long_pressing_3 = 1;
-			if (counter == LONG_PRESS_LEVEL2)
+			if (counter == BUTTON_LONG_PRESS_LEVEL_2)
 				long_pressing_2 = 1;
-			if (counter == LONG_PRESS_LEVEL1)
+			if (counter == BUTTON_LONG_PRESS_LEVEL_1)
 				long_pressing_1 = 1;
-			if (counter == PRESS_LEVEL)
+			if (counter == BUTTON_PRESS_LEVEL)
 				pressing = 1;
 		} else {
-			if (counter >= LONG_PRESS_LEVEL3)
+			if (counter >= BUTTON_LONG_PRESS_LEVEL_3)
 				long_pressed_3 = 1;
-			else if (counter >= LONG_PRESS_LEVEL2)
+			else if (counter >= BUTTON_LONG_PRESS_LEVEL_2)
 				long_pressed_2 = 1;
-			else if (counter >= LONG_PRESS_LEVEL1)
+			else if (counter >= BUTTON_LONG_PRESS_LEVEL_1)
 				long_pressed_1 = 1;
-			else if (counter >= PRESS_LEVEL)
+			else if (counter >= BUTTON_PRESS_LEVEL)
 				pressed = 1;
 			counter = 0;
 			flags &= 0x0F;

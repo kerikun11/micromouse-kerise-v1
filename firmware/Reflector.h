@@ -35,7 +35,7 @@
 #define ADCx_CHANNEL_SR					ADC_CHANNEL_13
 
 #define IR_LED_PERIOD_US				100
-#define IR_LED_DUTY_US					10
+#define IR_LED_DUTY_US					20
 
 #define IR_RECEIVER_SAMPLING_PERIOD_US	10
 #define IR_RECEIVER_UPDATE_PERIOD_US	100000
@@ -46,8 +46,7 @@ public:
 			led_sl_fr(led_sl_fr_pin), led_sr_fl(led_sr_fl_pin) {
 		led_sl_fr.period_us(IR_LED_PERIOD_US);
 		led_sr_fl.period_us(IR_LED_PERIOD_US);
-	}
-	void init() {
+
 		/*##-1- Enable peripherals and GPIO Clocks #################################*/
 		/* ADCx Periph clock enable */
 		ADCx_S_CLK_ENABLE();

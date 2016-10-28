@@ -18,14 +18,12 @@ public:
 			PinName cs_pin) :
 			SPI(mosi_pin, miso_pin, sclk_pin), cs(cs_pin, 1) {
 		setup();
+		ticker.attach_us(this, &MPU6500::update, MPU6500_UPDATE_PERIOD_US);
 	}
 	float ay;
 	float gz;
 	float angle;
 	float int_angle;
-	void init() {
-		ticker.attach_us(this, &MPU6500::update, MPU6500_UPDATE_PERIOD_US);
-	}
 
 	inline int16_t readAccX() {
 		return readInt16(0x3b);
@@ -73,6 +71,7 @@ public:
 private:
 	DigitalOut cs;
 	Ticker ticker;
+	Thread thread;
 
 	void setup() {
 		this->writeReg(0x19, 0x07);	// samplerate
