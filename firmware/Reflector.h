@@ -248,7 +248,7 @@ private:
 	}
 };
 
-#define WALL_UPDATE_PERIOD_US		1000
+#define WALL_UPDATE_PERIOD_US		500
 
 class WallDetector {
 public:
@@ -271,7 +271,7 @@ private:
 	void update() {
 		for (int i = 0; i < 2; i++) {
 			int16_t value = _rfl->side(i);
-			if (value > 300)
+			if (value > 250)
 				_wall.side[i] = true;
 			else if (value < 200)
 				_wall.side[i] = false;

@@ -22,6 +22,7 @@ Reflector *rfl;
 WallDetector *wd;
 
 Ticker driveTicker;
+Ticker ctrlTicker;
 Ticker infoTicker;
 
 void print_info() {
@@ -42,14 +43,6 @@ void print_info() {
 void motor_drive() {
 	double angle = 0;
 	double straight = 0;
-	double wall = 0;
-
-	if (wd->wall().side[0] && wd->wall().side[1]) {
-		wall = (rfl->sl() - rfl->sr()) * 0.00001;
-		wall = (wall > 0.01) ? 0.01 : wall;
-		wall = (wall < -0.01) ? -0.01 : wall;
-		gm->set_target_relative(-wall);
-	}
 
 	angle = gm->get_pid(100, 0.1, 1);
 	angle = (angle > 100) ? 100 : angle;
@@ -65,8 +58,18 @@ void motor_drive() {
 }
 
 void ctrl_machine() {
+	double wall = 0;
 	if (wd->wall().side[0]) {
-
+		wall = (750 - rfl->side(0)) * 0.001;
+		wall = (wall > 0.01) ? 0.01 : wall;
+		wall = (wall < -0.01) ? -0.01 : wall;
+		gm->set_target_relative(wall);
+	}
+	if (wd->wall().side[1]) {
+		wall = (420 - rfl->side(1)) * 0.001;
+		wall = (wall > 0.01) ? 0.01 : wall;
+		wall = (wall < -0.01) ? -0.01 : wall;
+		gm->set_target_relative(-wall);
 	}
 }
 
@@ -79,7 +82,7 @@ void serial_ctrl() {
 		switch (c) {
 		case 'g':
 			bz->play(BUZZER_MUSIC_CONFIRM);
-			driveTicker.attach_us(motor_drive, 100);
+			driveTicker.attach_us(motor_drive, 1000);
 			break;
 		case 'f':
 			bz->play(BUZZER_MUSIC_SELECT);
@@ -87,16 +90,16 @@ void serial_ctrl() {
 			mt->free();
 			break;
 		case 'h':
-			gm->set_target_relative(15);
+			gm->set_target_relative(90);
 			break;
 		case 'j':
-			em->set_target_relative(-10);
+			em->set_target_relative(-180);
 			break;
 		case 'k':
-			em->set_target_relative(10);
+			em->set_target_relative(180);
 			break;
 		case 'l':
-			gm->set_target_relative(-15);
+			gm->set_target_relative(-90);
 			break;
 		}
 	}
@@ -133,6 +136,7 @@ int main() {
 	*led = 0x9;
 
 	infoTicker.attach_us(print_info, 100000);
+	ctrlTicker.attach_us(ctrl_machine, 1000);
 
 	Thread serialCtrlThread;
 	serialCtrlThread.start(serial_ctrl);
@@ -156,7 +160,7 @@ int main() {
 		if (btn->long_pressed_1) {
 			btn->flags = 0;
 			bz->play(BUZZER_MUSIC_CONFIRM);
-			driveTicker.attach_us(motor_drive, 100);
+			driveTicker.attach_us(motor_drive, 1000);
 		}
 
 		if (mpu->accelY() < -2000000) {
