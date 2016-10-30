@@ -143,4 +143,48 @@ private:
 	Encoder encoderR;
 };
 
+class EncoderMeasure {
+public:
+	EncoderMeasure(Encoder *enc) :
+			_enc(enc) {
+	}
+	void start() {
+		start_position = _enc->value();
+	}
+	int32_t read() {
+		return _enc->value() - start_position;
+	}
+	void reset() {
+		start_position = _enc->value();
+	}
+private:
+	Encoder *_enc;
+	int32_t start_position;
+};
+
+class EncodersMeasure {
+public:
+	EncodersMeasure(Encoders *encs) :
+			_encs(encs) {
+	}
+	void start() {
+		start_positionL = _encs->left();
+		start_positionR = _encs->right();
+	}
+	int32_t left() {
+		return _encs->left() - start_positionL;
+	}
+	int32_t right() {
+		return _encs->right() - start_positionR;
+	}
+	void reset() {
+		start_positionL = _encs->left();
+		start_positionR = _encs->right();
+	}
+private:
+	Encoders *_encs;
+	int32_t start_positionL;
+	int32_t start_positionR;
+};
+
 #endif /* ENCODER_H_ */

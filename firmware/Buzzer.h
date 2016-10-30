@@ -25,9 +25,7 @@ public:
 		thread.start(this, &Buzzer::task);
 	}
 	void play(enum BUZZER_MUSIC new_music) {
-		enum BUZZER_MUSIC *pt = new enum BUZZER_MUSIC;
-		*pt = new_music;
-		queue.put(pt);
+		queue.put((enum BUZZER_MUSIC *) new_music);
 	}
 private:
 	Thread thread;
@@ -66,8 +64,8 @@ private:
 		while (1) {
 			osEvent evt = queue.get();
 			if (evt.status == osEventMessage) {
-				enum BUZZER_MUSIC *music = (enum BUZZER_MUSIC *) evt.value.p;
-				switch (*music) {
+				enum BUZZER_MUSIC music = (enum BUZZER_MUSIC) evt.value.v;
+				switch (music) {
 				case BUZZER_MUSIC_BOOT:
 					playC(2);
 					Thread::wait(100);
@@ -142,7 +140,6 @@ private:
 					break;
 				}
 				mute();
-				delete music;
 			}
 		}
 	}

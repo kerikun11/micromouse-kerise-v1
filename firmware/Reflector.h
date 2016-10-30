@@ -35,7 +35,7 @@
 #define ADCx_CHANNEL_SR					ADC_CHANNEL_13
 
 #define IR_LED_PERIOD_US				100
-#define IR_LED_DUTY_US					20
+#define IR_LED_DUTY_US					50
 
 #define IR_RECEIVER_SAMPLING_PERIOD_US	10
 #define IR_RECEIVER_UPDATE_PERIOD_MS	100
@@ -45,19 +45,13 @@
 class Reflector {
 public:
 	Reflector(PinName led_sl_fr_pin, PinName led_sr_fl_pin) :
-			updateTimer(this, &Reflector::sampling, osTimerPeriodic), led_sl_fr(
-					led_sl_fr_pin), led_sr_fl(led_sr_fl_pin) {
+			led_sl_fr(led_sl_fr_pin), led_sr_fl(led_sr_fl_pin) {
 		led_sl_fr.period_us(IR_LED_PERIOD_US);
 		led_sr_fl.period_us(IR_LED_PERIOD_US);
 		adcInitialize();
 		sample.state = 0;
-		samplingTicker.attach_us(this, &Reflector::sampling,
-		IR_RECEIVER_SAMPLING_PERIOD_US);
-		updateTimer.start(IR_RECEIVER_UPDATE_PERIOD_MS);
-	}
-	~Reflector() {
-		updateTimer.stop();
-		samplingTicker.detach();
+		samplingStart();
+		thread.start(this, &Reflector::task);
 	}
 	float sl() {
 		return distance[0];
@@ -72,13 +66,14 @@ public:
 		return distance[3];
 	}
 private:
-	RtosTimer updateTimer;
 	PwmOut led_sl_fr, led_sr_fl;
+	Thread thread;
 	ADC_HandleTypeDef AdcHandle_S;
 	ADC_HandleTypeDef AdcHandle_F;
 	ADC_ChannelConfTypeDef sConfig;
 	Ticker samplingTicker;
 	volatile float distance[4];
+	bool is_sampling;
 	volatile struct sampling_buffer {
 		uint16_t buffer[4][IR_RECEIVER_SAMPLE_SIZE];
 		int state;
@@ -95,7 +90,21 @@ private:
 		else
 			led_sr_fl.pulsewidth_us(0);
 	}
-	void sampling() {
+	void task() {
+		while (1) {
+			update();
+			samplingStart();
+			while (is_sampling) {
+				Thread::wait(1);
+			}
+		}
+	}
+	void samplingStart() {
+		is_sampling = true;
+		samplingTicker.attach_us(this, &Reflector::samplingIsr,
+		IR_RECEIVER_SAMPLING_PERIOD_US);
+	}
+	void samplingIsr() {
 		switch (sample.state) {
 		case 0:
 			sample.pointer = 0;
@@ -129,6 +138,7 @@ private:
 				sample.state = 0;
 				ir_led(false, false);
 				samplingTicker.detach();
+				is_sampling = false;
 			}
 			break;
 		}
@@ -147,9 +157,6 @@ private:
 					/ IR_LED_PERIOD_US;
 			distance[ch] = norm(fft[m]);
 		}
-		// start next sampling
-		samplingTicker.attach_us(this, &Reflector::sampling,
-		IR_RECEIVER_SAMPLING_PERIOD_US);
 	}
 	void adcInitialize() {
 		/*##-1- Enable peripherals and GPIO Clocks #################################*/
@@ -184,7 +191,7 @@ private:
 
 		/*##-1- Configure the ADC peripheral #######################################*/
 		AdcHandle_S.Instance = ADCx_S;
-		AdcHandle_S.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV4;
+		AdcHandle_S.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
 		AdcHandle_S.Init.Resolution = ADC_RESOLUTION12b;
 		AdcHandle_S.Init.ScanConvMode = DISABLE; /* Sequencer disabled (ADC conversion on only 1 channel: channel set on rank 1) */
 		AdcHandle_S.Init.ContinuousConvMode = ENABLE; /* Continuous mode disabled to have only 1 conversion at each conversion trig */
@@ -198,12 +205,12 @@ private:
 		AdcHandle_S.Init.EOCSelection = DISABLE;
 		if (HAL_ADC_Init(&AdcHandle_S) != HAL_OK) {
 			printf("Couldn't Init ADC S\r\n");
-			while (1) {
-			}
+//			while (1) {
+//			}
 		}
 		/*##-1- Configure the ADC peripheral #######################################*/
 		AdcHandle_F.Instance = ADCx_F;
-		AdcHandle_F.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV4;
+		AdcHandle_F.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
 		AdcHandle_F.Init.Resolution = ADC_RESOLUTION12b;
 		AdcHandle_F.Init.ScanConvMode = DISABLE; /* Sequencer disabled (ADC conversion on only 1 channel: channel set on rank 1) */
 		AdcHandle_F.Init.ContinuousConvMode = ENABLE; /* Continuous mode disabled to have only 1 conversion at each conversion trig */
@@ -217,8 +224,8 @@ private:
 		AdcHandle_F.Init.EOCSelection = DISABLE;
 		if (HAL_ADC_Init(&AdcHandle_F) != HAL_OK) {
 			printf("Couldn't Init ADC F\r\n");
-			while (1) {
-			}
+//			while (1) {
+//			}
 		}
 
 		/*##-2- Configure ADC regular channel ######################################*/
@@ -226,6 +233,10 @@ private:
 		sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
 		sConfig.Offset = 0;
 	}
+};
+
+class WallDetector {
+
 };
 
 #endif /* REFLECTOR_H_ */
