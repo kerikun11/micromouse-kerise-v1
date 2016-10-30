@@ -143,48 +143,62 @@ private:
 	Encoder encoderR;
 };
 
+#define ENCODER_UPDATE_PERIOD_US	100
+#define WHEEL_DIAMETER_MM			24.5
+#define WHEEL_GEER_RATIO			0.25
+#define ENCODER_PULSES				(1024*4)
+
 class EncoderMeasure {
 public:
-	EncoderMeasure(Encoder *enc) :
-			_enc(enc) {
-	}
-	void start() {
-		start_position = _enc->value();
-	}
-	int32_t read() {
-		return _enc->value() - start_position;
-	}
-	void reset() {
-		start_position = _enc->value();
-	}
-private:
-	Encoder *_enc;
-	int32_t start_position;
-};
-
-class EncodersMeasure {
-public:
-	EncodersMeasure(Encoders *encs) :
+	EncoderMeasure(Encoders *encs) :
 			_encs(encs) {
+		updateTicker.attach_us(this, &EncoderMeasure::update,
+		ENCODER_UPDATE_PERIOD_US);
+		_dif_position = 0;
+		_prev_position = 0;
+		_position = 0;
+		_int_position = 0;
+		_target_position = 0;
 	}
-	void start() {
-		start_positionL = _encs->left();
-		start_positionR = _encs->right();
+	double get_pid(double Kp, double Ki, double Kd) {
+		return (_target_position - _position) * Kp + (0 - _dif_position) * Kd
+				+ (0 - _int_position) * Ki;
 	}
-	int32_t left() {
-		return _encs->left() - start_positionL;
+	void set_target(double value) {
+		_target_position = value;
 	}
-	int32_t right() {
-		return _encs->right() - start_positionR;
+	void set_target_relative(double value) {
+		_target_position += value;
 	}
-	void reset() {
-		start_positionL = _encs->left();
-		start_positionR = _encs->right();
+	double target() {
+		return _target_position;
+	}
+	double position() {
+		return _position;
+	}
+	double dif_position() {
+		return _dif_position;
+	}
+	double int_position() {
+		return _int_position;
 	}
 private:
 	Encoders *_encs;
-	int32_t start_positionL;
-	int32_t start_positionR;
+	Ticker updateTicker;
+	double _dif_position;
+	double _prev_position;
+	double _position;
+	double _int_position;
+	double _target_position;
+	void update() {
+		_position = (_encs->left() + _encs->right()) * WHEEL_DIAMETER_MM * M_PI
+				* WHEEL_GEER_RATIO / ENCODER_PULSES / 2;
+		_dif_position = (_position - _prev_position)
+				* 1000000/ENCODER_UPDATE_PERIOD_US;
+		_int_position += (_position - _target_position)
+				* ENCODER_UPDATE_PERIOD_US / 1000000;
+		_prev_position = _position;
+	}
 };
 
 #endif /* ENCODER_H_ */

@@ -14,7 +14,7 @@
 
 #define MPU6500_GYRO_RANGE			2000.0f
 #define MPU6500_GYRO_FACTOR			16.4f
-#define MPU6500_GYRO_OFFSET			40
+#define MPU6500_GYRO_OFFSET			80
 
 #define MPU6500_ACCEL_RANGE			16.0f
 #define MPU6500_ACCEL_FACTOR		2048.0f
@@ -147,9 +147,13 @@ public:
 		return (_target_angle - _angle) * Kp + (0 - _gyro) * Kd
 				+ (0 - _int_angle) * Ki;
 	}
-	void target(double new_angle) {
+	void set_target(double new_angle) {
 		_int_angle = 0;
 		_target_angle = new_angle;
+	}
+	void set_target_relative(double value) {
+		_int_angle = 0;
+		_target_angle += value;
 	}
 	double target() {
 		return _target_angle;

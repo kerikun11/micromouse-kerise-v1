@@ -11,31 +11,33 @@
 
 BusOut *led;
 Battery *bat;
-Encoders *enc;
 Motor *mt;
 Buzzer *bz;
 Button *btn;
+Encoders *enc;
+EncoderMeasure *em;
 MPU6500 *mpu;
-Reflector *rfl;
 GyroMeasure *gm;
+Reflector *rfl;
+WallDetector *wd;
 
 Ticker driveTicker;
 Ticker infoTicker;
-Ticker wallTicker;
-
-double target = 0;
-bool wall[3];
 
 void print_info() {
-//			printf(
-//			"Gz: %.2lf\tAngle: %.2lf\tInt: %.2lf\tTargetAngle: %.2lf\tTarget: %.2lf\n",
-//			gm->gyro(), gm->angle(), gm->int_angle(), gm->target(), target);
+	printf("Gyr: %.2lf\tAng: %.2lf\tInt: %.2lf\tTar: %.2lf\t", gm->gyro(),
+			gm->angle(), gm->int_angle(), gm->target());
 
-	printf("%08lu\t%08lu\t%08lu\t%08lu\n", (uint32_t) rfl->sl(),
-			(uint32_t) rfl->fl(), (uint32_t) rfl->fr(), (uint32_t) rfl->sr());
+	printf("Vel: %.2lf\tPos: %.2lf\tInt: %.2lf\tTar: %.2lf\t\n",
+			em->dif_position(), em->position(), em->int_position(),
+			em->target());
 
-//	printf("%s %s %s\n", wall[0] ? "X" : ".", wall[1] ? "X" : ".",
-//			wall[2] ? "X" : ".");
+//	printf("%08lu\t%08lu\t%08lu\t%08lu\n", (uint32_t) rfl->sl(),
+//			(uint32_t) rfl->fl(), (uint32_t) rfl->fr(), (uint32_t) rfl->sr());
+//
+//	printf("%s %s %s %s\n", wd->wall().side[0] ? "X" : ".",
+//			wd->wall().flont[0] ? "X" : ".", wd->wall().flont[1] ? "X" : ".",
+//			wd->wall().side[1] ? "X" : ".");
 }
 
 void motor_drive() {
@@ -47,11 +49,11 @@ void motor_drive() {
 	turn = (turn > 100) ? 100 : turn;
 	turn = (turn < -100) ? -100 : turn;
 
-	left = target - enc->left() - enc->right();
+	left = em->get_pid(10, 0.01, 0.1);
 	left = (left > 50) ? 50 : left;
 	left = (left < -50) ? -50 : left;
 
-	right = target - enc->left() - enc->right();
+	right = em->get_pid(10, 0.01, 0.1);
 	right = (right > 50) ? 50 : right;
 	right = (right < -50) ? -50 : right;
 
@@ -60,15 +62,10 @@ void motor_drive() {
 	mt->drive(valueL, valueR);
 }
 
-void wall_detect() {
-	if (rfl->sl() > 1000000)
-		wall[0] = true;
-	else if (rfl->sl() < 500000)
-		wall[0] = false;
-	if (rfl->sr() > 1000000)
-		wall[2] = true;
-	else if (rfl->sr() < 500000)
-		wall[2] = false;
+void ctrl_machine() {
+	if (wd->wall().side[0]) {
+
+	}
 }
 
 void serial_ctrl() {
@@ -88,16 +85,16 @@ void serial_ctrl() {
 			mt->free();
 			break;
 		case 'h':
-			gm->target(gm->target() + 10);
+			gm->set_target_relative(5);
 			break;
 		case 'j':
-			target -= 5000;
+			em->set_target_relative(-10);
 			break;
 		case 'k':
-			target += 5000;
+			em->set_target_relative(10);
 			break;
 		case 'l':
-			gm->target(gm->target() - 10);
+			gm->set_target_relative(-5);
 			break;
 		}
 	}
@@ -107,14 +104,16 @@ int main() {
 	/* make instances */
 	led = new BusOut(LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN);
 	bat = new Battery(BATTERY_PIN);
-	enc = new Encoders(ENCODER_L_TIMx, ENCODER_R_TIMx);
 	mt = new Motor;
 	bz = new Buzzer(BUZZER_PIN);
 	btn = new Button(BUTTON_PIN);
+	enc = new Encoders(ENCODER_L_TIMx, ENCODER_R_TIMx);
+	em = new EncoderMeasure(enc);
 	mpu = new MPU6500(MPU6500_MOSI_PIN, MPU6500_MISO_PIN, MPU6500_SCLK_PIN,
 	MPU6500_SSEL_PIN);
 	gm = new GyroMeasure(mpu, 0);
 	rfl = new Reflector(IR_LED_SL_FR_PIN, IR_LED_SR_FL_PIN);
+	wd = new WallDetector(rfl);
 
 	printf("\nHello World!\n");
 	float voltage = bat->voltage();
@@ -132,7 +131,6 @@ int main() {
 	*led = 0x9;
 
 	infoTicker.attach_us(print_info, 100000);
-	wallTicker.attach_us(wall_detect, 10000);
 
 	Thread serialCtrlThread;
 	serialCtrlThread.start(serial_ctrl);

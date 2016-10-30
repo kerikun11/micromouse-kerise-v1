@@ -34,13 +34,14 @@
 #define ADCx_CHANNEL_FR					ADC_CHANNEL_12
 #define ADCx_CHANNEL_SR					ADC_CHANNEL_13
 
-#define IR_LED_PERIOD_US				100
-#define IR_LED_DUTY_US					50
+#define IR_LED_PERIOD_US				20
+#define IR_LED_DUTY_US					10
 
 #define IR_RECEIVER_SAMPLING_PERIOD_US	10
-#define IR_RECEIVER_UPDATE_PERIOD_MS	100
 
-#define IR_RECEIVER_SAMPLE_SIZE			64
+#define IR_RECEIVER_SAMPLE_SIZE			32
+
+#define WALL_UPDATE_PERIOD_MS			100
 
 class Reflector {
 public:
@@ -52,6 +53,19 @@ public:
 		sample.state = 0;
 		samplingStart();
 		thread.start(this, &Reflector::task);
+	}
+
+	float side(uint8_t left_or_right) {
+		if (left_or_right == 0)
+			return sl();
+		else
+			return sr();
+	}
+	float flont(uint8_t left_or_right) {
+		if (left_or_right == 0)
+			return fl();
+		else
+			return fr();
 	}
 	float sl() {
 		return distance[0];
@@ -73,6 +87,7 @@ private:
 	ADC_ChannelConfTypeDef sConfig;
 	Ticker samplingTicker;
 	volatile float distance[4];
+	volatile float prev_distance[4];
 	bool is_sampling;
 	volatile struct sampling_buffer {
 		uint16_t buffer[4][IR_RECEIVER_SAMPLE_SIZE];
@@ -155,7 +170,10 @@ private:
 			fft.execute();
 			int m = IR_RECEIVER_SAMPLE_SIZE * IR_RECEIVER_SAMPLING_PERIOD_US
 					/ IR_LED_PERIOD_US;
-			distance[ch] = norm(fft[m]);
+			float value = norm(fft[m]);
+			distance[ch] = (value + prev_distance[ch]) / 2;
+//			prev_distance[ch] = value;
+			prev_distance[ch] = distance[ch];
 		}
 	}
 	void adcInitialize() {
@@ -236,7 +254,38 @@ private:
 };
 
 class WallDetector {
-
+public:
+	WallDetector(Reflector *rfl) :
+			_rfl(rfl), updateTimer(this, &WallDetector::update, osTimerPeriodic) {
+		updateTimer.start(WALL_UPDATE_PERIOD_MS);
+	}
+	struct WALL {
+		bool side[2];
+		bool flont[2];
+	};
+	struct WALL wall() {
+		return _wall;
+	}
+private:
+	Reflector *_rfl;
+	RtosTimer updateTimer;
+	struct WALL _wall;
+	void update() {
+		for (int i = 0; i < 2; i++) {
+			float value = _rfl->side(i);
+			if (value > 50000)
+				_wall.side[i] = true;
+			else if (value < 10000)
+				_wall.side[i] = false;
+		}
+		for (int i = 0; i < 2; i++) {
+			float value = _rfl->flont(i);
+			if (value > 50000)
+				_wall.flont[i] = true;
+			else if (value < 10000)
+				_wall.flont[i] = false;
+		}
+	}
 };
 
 #endif /* REFLECTOR_H_ */
