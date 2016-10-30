@@ -25,40 +25,42 @@ Ticker driveTicker;
 Ticker infoTicker;
 
 void print_info() {
-	printf("Gyr: %.2lf\tAng: %.2lf\tInt: %.2lf\tTar: %.2lf\t", gm->gyro(),
-			gm->angle(), gm->int_angle(), gm->target());
+//	printf("Gyr: %.2lf\tAng: %.2lf\tInt: %.2lf\tTar: %.2lf\t", gm->gyro(),
+//			gm->angle(), gm->int_angle(), gm->target());
+//	printf("Vel: %.2lf\tPos: %.2lf\tInt: %.2lf\tTar: %.2lf\t\n",
+//			em->dif_position(), em->position(), em->int_position(),
+//			em->target());
 
-	printf("Vel: %.2lf\tPos: %.2lf\tInt: %.2lf\tTar: %.2lf\t\n",
-			em->dif_position(), em->position(), em->int_position(),
-			em->target());
+	printf("%05u\t%05u\t%05u\t%05u\n", rfl->sl(), rfl->fl(), rfl->fr(),
+			rfl->sr());
 
-//	printf("%08lu\t%08lu\t%08lu\t%08lu\n", (uint32_t) rfl->sl(),
-//			(uint32_t) rfl->fl(), (uint32_t) rfl->fr(), (uint32_t) rfl->sr());
-//
-//	printf("%s %s %s %s\n", wd->wall().side[0] ? "X" : ".",
-//			wd->wall().flont[0] ? "X" : ".", wd->wall().flont[1] ? "X" : ".",
-//			wd->wall().side[1] ? "X" : ".");
+	printf("%s %s %s %s\n", wd->wall().side[0] ? "X" : ".",
+			wd->wall().flont[0] ? "X" : ".", wd->wall().flont[1] ? "X" : ".",
+			wd->wall().side[1] ? "X" : ".");
 }
 
 void motor_drive() {
-	double turn = 0;
-	double left = 0;
-	double right = 0;
+	double angle = 0;
+	double straight = 0;
+	double wall = 0;
 
-	turn = gm->get_pid(100, 0.1, 1);
-	turn = (turn > 100) ? 100 : turn;
-	turn = (turn < -100) ? -100 : turn;
+	if (wd->wall().side[0] && wd->wall().side[1]) {
+		wall = (rfl->sl() - rfl->sr()) * 0.00001;
+		wall = (wall > 0.01) ? 0.01 : wall;
+		wall = (wall < -0.01) ? -0.01 : wall;
+		gm->set_target_relative(-wall);
+	}
 
-	left = em->get_pid(10, 0.01, 0.1);
-	left = (left > 50) ? 50 : left;
-	left = (left < -50) ? -50 : left;
+	angle = gm->get_pid(100, 0.1, 1);
+	angle = (angle > 100) ? 100 : angle;
+	angle = (angle < -100) ? -100 : angle;
 
-	right = em->get_pid(10, 0.01, 0.1);
-	right = (right > 50) ? 50 : right;
-	right = (right < -50) ? -50 : right;
+	straight = em->get_pid(100, 0.1, 1);
+	straight = (straight > 100) ? 100 : straight;
+	straight = (straight < -100) ? -100 : straight;
 
-	int32_t valueL = left - turn / 2;
-	int32_t valueR = right + turn / 2;
+	int32_t valueL = straight - angle / 2;
+	int32_t valueR = straight + angle / 2;
 	mt->drive(valueL, valueR);
 }
 
@@ -85,7 +87,7 @@ void serial_ctrl() {
 			mt->free();
 			break;
 		case 'h':
-			gm->set_target_relative(5);
+			gm->set_target_relative(15);
 			break;
 		case 'j':
 			em->set_target_relative(-10);
@@ -94,7 +96,7 @@ void serial_ctrl() {
 			em->set_target_relative(10);
 			break;
 		case 'l':
-			gm->set_target_relative(-5);
+			gm->set_target_relative(-15);
 			break;
 		}
 	}

@@ -34,14 +34,12 @@
 #define ADCx_CHANNEL_FR					ADC_CHANNEL_12
 #define ADCx_CHANNEL_SR					ADC_CHANNEL_13
 
-#define IR_LED_PERIOD_US				20
-#define IR_LED_DUTY_US					10
+#define IR_LED_PERIOD_US				500
+#define IR_LED_DUTY_US					100
 
 #define IR_RECEIVER_SAMPLING_PERIOD_US	10
 
-#define IR_RECEIVER_SAMPLE_SIZE			32
-
-#define WALL_UPDATE_PERIOD_MS			100
+#define IR_RECEIVER_SAMPLE_SIZE			50
 
 class Reflector {
 public:
@@ -55,28 +53,28 @@ public:
 		thread.start(this, &Reflector::task);
 	}
 
-	float side(uint8_t left_or_right) {
+	int16_t side(uint8_t left_or_right) {
 		if (left_or_right == 0)
 			return sl();
 		else
 			return sr();
 	}
-	float flont(uint8_t left_or_right) {
+	int16_t flont(uint8_t left_or_right) {
 		if (left_or_right == 0)
 			return fl();
 		else
 			return fr();
 	}
-	float sl() {
+	int16_t sl() {
 		return distance[0];
 	}
-	float fl() {
+	int16_t fl() {
 		return distance[1];
 	}
-	float fr() {
+	int16_t fr() {
 		return distance[2];
 	}
-	float sr() {
+	int16_t sr() {
 		return distance[3];
 	}
 private:
@@ -86,8 +84,8 @@ private:
 	ADC_HandleTypeDef AdcHandle_F;
 	ADC_ChannelConfTypeDef sConfig;
 	Ticker samplingTicker;
-	volatile float distance[4];
-	volatile float prev_distance[4];
+	volatile int16_t distance[4];
+	volatile int16_t prev_distance[4];
 	bool is_sampling;
 	volatile struct sampling_buffer {
 		uint16_t buffer[4][IR_RECEIVER_SAMPLE_SIZE];
@@ -161,18 +159,15 @@ private:
 		HAL_ADC_Start_IT(&AdcHandle_F);
 	}
 	void update() {
-		// read data and fft
 		for (int ch = 0; ch < 4; ch++) {
-			FFT fft(IR_RECEIVER_SAMPLE_SIZE);
+			int16_t max = 0;
 			for (int i = 0; i < IR_RECEIVER_SAMPLE_SIZE; i++) {
-				fft[i] = sample.buffer[ch][i];
+				int16_t value = 2048 - sample.buffer[ch][i];
+				if (value > max) {
+					max = value;
+				}
 			}
-			fft.execute();
-			int m = IR_RECEIVER_SAMPLE_SIZE * IR_RECEIVER_SAMPLING_PERIOD_US
-					/ IR_LED_PERIOD_US;
-			float value = norm(fft[m]);
-			distance[ch] = (value + prev_distance[ch]) / 2;
-//			prev_distance[ch] = value;
+			distance[ch] = (max + prev_distance[ch]) / 2;
 			prev_distance[ch] = distance[ch];
 		}
 	}
@@ -209,7 +204,7 @@ private:
 
 		/*##-1- Configure the ADC peripheral #######################################*/
 		AdcHandle_S.Instance = ADCx_S;
-		AdcHandle_S.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
+		AdcHandle_S.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV4;
 		AdcHandle_S.Init.Resolution = ADC_RESOLUTION12b;
 		AdcHandle_S.Init.ScanConvMode = DISABLE; /* Sequencer disabled (ADC conversion on only 1 channel: channel set on rank 1) */
 		AdcHandle_S.Init.ContinuousConvMode = ENABLE; /* Continuous mode disabled to have only 1 conversion at each conversion trig */
@@ -228,7 +223,7 @@ private:
 		}
 		/*##-1- Configure the ADC peripheral #######################################*/
 		AdcHandle_F.Instance = ADCx_F;
-		AdcHandle_F.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
+		AdcHandle_F.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV4;
 		AdcHandle_F.Init.Resolution = ADC_RESOLUTION12b;
 		AdcHandle_F.Init.ScanConvMode = DISABLE; /* Sequencer disabled (ADC conversion on only 1 channel: channel set on rank 1) */
 		AdcHandle_F.Init.ContinuousConvMode = ENABLE; /* Continuous mode disabled to have only 1 conversion at each conversion trig */
@@ -253,11 +248,14 @@ private:
 	}
 };
 
+#define WALL_UPDATE_PERIOD_US		1000
+
 class WallDetector {
 public:
 	WallDetector(Reflector *rfl) :
-			_rfl(rfl), updateTimer(this, &WallDetector::update, osTimerPeriodic) {
-		updateTimer.start(WALL_UPDATE_PERIOD_MS);
+			_rfl(rfl) {
+		updateTimer.attach_us(this, &WallDetector::update,
+		WALL_UPDATE_PERIOD_US);
 	}
 	struct WALL {
 		bool side[2];
@@ -268,21 +266,21 @@ public:
 	}
 private:
 	Reflector *_rfl;
-	RtosTimer updateTimer;
+	Ticker updateTimer;
 	struct WALL _wall;
 	void update() {
 		for (int i = 0; i < 2; i++) {
-			float value = _rfl->side(i);
-			if (value > 50000)
+			int16_t value = _rfl->side(i);
+			if (value > 300)
 				_wall.side[i] = true;
-			else if (value < 10000)
+			else if (value < 200)
 				_wall.side[i] = false;
 		}
 		for (int i = 0; i < 2; i++) {
-			float value = _rfl->flont(i);
-			if (value > 50000)
+			int16_t value = _rfl->flont(i);
+			if (value > 120)
 				_wall.flont[i] = true;
-			else if (value < 10000)
+			else if (value < 80)
 				_wall.flont[i] = false;
 		}
 	}
