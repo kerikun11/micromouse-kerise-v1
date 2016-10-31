@@ -59,17 +59,28 @@ void motor_drive() {
 
 void ctrl_machine() {
 	double wall = 0;
-	if (wd->wall().side[0]) {
-		wall = (750 - rfl->side(0)) * 0.001;
+	if (wd->wall().side[0] && wd->wall().side[1]) {
+		wall = (rfl->side(1) - rfl->side(0)) * 0.01;
 		wall = (wall > 0.01) ? 0.01 : wall;
 		wall = (wall < -0.01) ? -0.01 : wall;
 		gm->set_target_relative(wall);
-	}
-	if (wd->wall().side[1]) {
-		wall = (420 - rfl->side(1)) * 0.001;
+	} else if (wd->wall().side[0]) {
+		wall = (800 - rfl->side(0)) * 0.01;
+		wall = (wall > 0.01) ? 0.01 : wall;
+		wall = (wall < -0.01) ? -0.01 : wall;
+		gm->set_target_relative(wall);
+	} else if (wd->wall().side[1]) {
+		wall = (800 - rfl->side(1)) * 0.01;
 		wall = (wall > 0.01) ? 0.01 : wall;
 		wall = (wall < -0.01) ? -0.01 : wall;
 		gm->set_target_relative(-wall);
+	}
+
+	if (wd->wall().flont[0] && wd->wall().flont[1]) {
+		wall = (rfl->flont(0) - rfl->flont(1)) * 0.01;
+		wall = (wall > 0.01) ? 0.01 : wall;
+		wall = (wall < -0.01) ? -0.01 : wall;
+		gm->set_target_relative(wall);
 	}
 }
 
@@ -90,16 +101,16 @@ void serial_ctrl() {
 			mt->free();
 			break;
 		case 'h':
-			gm->set_target_relative(90);
+			gm->set_target_relative(10);
 			break;
 		case 'j':
-			em->set_target_relative(-180);
+			em->set_target_relative(-10);
 			break;
 		case 'k':
-			em->set_target_relative(180);
+			em->set_target_relative(10);
 			break;
 		case 'l':
-			gm->set_target_relative(-90);
+			gm->set_target_relative(-10);
 			break;
 		}
 	}
