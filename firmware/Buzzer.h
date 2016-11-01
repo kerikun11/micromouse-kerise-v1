@@ -109,12 +109,31 @@ private:
 					Thread::wait(100);
 					break;
 				case BUZZER_MUSIC_EMERGENCY:
-					for (int i = 0; i < 4; i++) {
-						playC(4);
-						Thread::wait(100);
-						playE(4);
-						Thread::wait(100);
-					}
+//					for (int i = 0; i < 4; i++) {
+//						playC(4);
+//						Thread::wait(100);
+//						playE(4);
+//						Thread::wait(100);
+//					}
+					playC(2);
+					Thread::wait(100);
+					playF(2);
+					Thread::wait(100);
+					mute();
+					Thread::wait(100);
+					playF(2);
+					Thread::wait(75);
+					mute();
+					Thread::wait(25);
+
+					playF(2);
+					Thread::wait(167);
+					playE(2);
+					Thread::wait(167);
+					playD(2);
+					Thread::wait(167);
+					playC(2);
+					Thread::wait(200);
 					mute();
 					Thread::wait(100);
 					break;

@@ -29,6 +29,8 @@
 class Motor {
 public:
 	Motor() {
+		emergency = false;
+
 		GPIO_InitTypeDef GPIO_InitStruct;
 		MOTOR_TIMx_CLK_ENABLE();
 		MOTOR_TIMx_CHANNEL_GPIO_PORT();
@@ -93,49 +95,53 @@ public:
 //		HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_4);
 	}
 	void left(int16_t width) {
-		if (width > MOTOR_PERIOD_VALUE / 2) {
-			width = MOTOR_PERIOD_VALUE / 2;
-		}
-		if (width < -MOTOR_PERIOD_VALUE / 2) {
-			width = -MOTOR_PERIOD_VALUE / 2;
-		}
-		if (width > 0) {
-			sConfig.Pulse = MOTOR_PERIOD_VALUE - width;
-			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_1);
-			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1);
-			sConfig.Pulse = MOTOR_PERIOD_VALUE;
-			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_2);
-			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_2);
-		} else {
-			sConfig.Pulse = MOTOR_PERIOD_VALUE;
-			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_1);
-			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1);
-			sConfig.Pulse = MOTOR_PERIOD_VALUE + width;
-			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_2);
-			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_2);
+		if (!emergency) {
+			if (width > MOTOR_PERIOD_VALUE / 2) {
+				width = MOTOR_PERIOD_VALUE / 2;
+			}
+			if (width < -MOTOR_PERIOD_VALUE / 2) {
+				width = -MOTOR_PERIOD_VALUE / 2;
+			}
+			if (width > 0) {
+				sConfig.Pulse = MOTOR_PERIOD_VALUE - width;
+				HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_1);
+				HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1);
+				sConfig.Pulse = MOTOR_PERIOD_VALUE;
+				HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_2);
+				HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_2);
+			} else {
+				sConfig.Pulse = MOTOR_PERIOD_VALUE;
+				HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_1);
+				HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1);
+				sConfig.Pulse = MOTOR_PERIOD_VALUE + width;
+				HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_2);
+				HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_2);
+			}
 		}
 	}
 	void right(int16_t width) {
-		if (width > MOTOR_PERIOD_VALUE / 2) {
-			width = MOTOR_PERIOD_VALUE / 2;
-		}
-		if (width < -MOTOR_PERIOD_VALUE / 2) {
-			width = -MOTOR_PERIOD_VALUE / 2;
-		}
-		if (width > 0) {
-			sConfig.Pulse = MOTOR_PERIOD_VALUE;
-			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_3);
-			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_3);
-			sConfig.Pulse = MOTOR_PERIOD_VALUE - width;
-			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_4);
-			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_4);
-		} else {
-			sConfig.Pulse = MOTOR_PERIOD_VALUE + width;
-			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_3);
-			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_3);
-			sConfig.Pulse = MOTOR_PERIOD_VALUE;
-			HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_4);
-			HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_4);
+		if (!emergency) {
+			if (width > MOTOR_PERIOD_VALUE / 2) {
+				width = MOTOR_PERIOD_VALUE / 2;
+			}
+			if (width < -MOTOR_PERIOD_VALUE / 2) {
+				width = -MOTOR_PERIOD_VALUE / 2;
+			}
+			if (width > 0) {
+				sConfig.Pulse = MOTOR_PERIOD_VALUE;
+				HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_3);
+				HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_3);
+				sConfig.Pulse = MOTOR_PERIOD_VALUE - width;
+				HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_4);
+				HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_4);
+			} else {
+				sConfig.Pulse = MOTOR_PERIOD_VALUE + width;
+				HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_3);
+				HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_3);
+				sConfig.Pulse = MOTOR_PERIOD_VALUE;
+				HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_4);
+				HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_4);
+			}
 		}
 	}
 	void drive(int16_t valueL, int16_t valueR) {
@@ -156,9 +162,14 @@ public:
 		HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_4);
 		HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_4);
 	}
+	void emergency_stop() {
+		emergency = true;
+		free();
+	}
 private:
 	TIM_HandleTypeDef TimHandle;
 	TIM_OC_InitTypeDef sConfig;
+	bool emergency;
 };
 
 #endif /* MOTOR_H_ */

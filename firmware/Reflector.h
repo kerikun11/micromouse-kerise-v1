@@ -122,7 +122,8 @@ private:
 		case 0:
 			sample.pointer = 0;
 			sample.state = 1;
-			ir_led(true, false);
+			ir_led(true, true);
+//			ir_led(true, false);
 			sConfig.Channel = ADCx_CHANNEL_SL;
 			HAL_ADC_ConfigChannel(&AdcHandle_S, &sConfig);
 			sConfig.Channel = ADCx_CHANNEL_FR;
@@ -135,7 +136,8 @@ private:
 			if (sample.pointer >= IR_RECEIVER_SAMPLE_SIZE) {
 				sample.pointer = 0;
 				sample.state = 2;
-				ir_led(false, true);
+				ir_led(true, true);
+//				ir_led(false, true);
 				sConfig.Channel = ADCx_CHANNEL_SR;
 				HAL_ADC_ConfigChannel(&AdcHandle_S, &sConfig);
 				sConfig.Channel = ADCx_CHANNEL_FL;
@@ -260,6 +262,7 @@ public:
 	struct WALL {
 		bool side[2];
 		bool flont[2];
+		bool side_flont[2];
 	};
 	struct WALL wall() {
 		return _wall;
@@ -271,17 +274,24 @@ private:
 	void update() {
 		for (int i = 0; i < 2; i++) {
 			int16_t value = _rfl->side(i);
-			if (value > 250)
+			if (value > 400)
 				_wall.side[i] = true;
-			else if (value < 200)
+			else if (value < 360)
 				_wall.side[i] = false;
 		}
 		for (int i = 0; i < 2; i++) {
 			int16_t value = _rfl->flont(i);
-			if (value > 120)
+			if (value > 260)
 				_wall.flont[i] = true;
-			else if (value < 80)
+			else if (value < 240)
 				_wall.flont[i] = false;
+		}
+		for (int i = 0; i < 2; i++) {
+			int16_t value = _rfl->flont(i);
+			if (value > 100)
+				_wall.side_flont[i] = true;
+			else if (value < 75)
+				_wall.side_flont[i] = false;
 		}
 	}
 };

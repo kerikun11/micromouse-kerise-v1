@@ -144,7 +144,7 @@ private:
 };
 
 #define ENCODER_UPDATE_PERIOD_US	100
-#define WHEEL_DIAMETER_MM			25
+#define WHEEL_DIAMETER_MM			24.5
 #define WHEEL_GEER_RATIO			0.25
 #define ENCODER_PULSES				(1024*4)
 

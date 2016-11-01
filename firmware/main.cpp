@@ -32,11 +32,11 @@ MoveAction *ma;
 void debug_info() {
 	while (1) {
 		Thread::wait(100);
-//	printf("Gyr: %.2lf\tAng: %.2lf\tInt: %.2lf\tTar: %.2lf\t", gm->gyro(),
-//			gm->angle(), gm->int_angle(), gm->target());
-//	printf("Vel: %.2lf\tPos: %.2lf\tInt: %.2lf\tTar: %.2lf\t\n",
-//			em->dif_position(), em->position(), em->int_position(),
-//			em->target());
+//		printf("Gyr: %.2lf\tAng: %.2lf\tInt: %.2lf\tTar: %.2lf\t", gm->gyro(),
+//				gm->angle(), gm->int_angle(), gm->target());
+//		printf("Vel: %.2lf\tPos: %.2lf\tInt: %.2lf\tTar: %.2lf\t\n",
+//				em->dif_position(), em->position(), em->int_position(),
+//				em->target());
 
 		printf("%05u\t%05u\t%05u\t%05u\n", rfl->sl(), rfl->fl(), rfl->fr(),
 				rfl->sr());
@@ -99,6 +99,22 @@ void serial_ctrl() {
 		case 'e':
 			ma->set_action(MoveAction::ACTION_TURN_RIGHT_45);
 			break;
+		case 'm':
+			ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
+			ma->set_action(MoveAction::ACTION_TURN_RIGHT_90);
+			ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
+			ma->set_action(MoveAction::ACTION_TURN_RIGHT_90);
+			ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
+			ma->set_action(MoveAction::ACTION_TURN_RIGHT_90);
+			ma->set_action(MoveAction::ACTION_TURN_RIGHT_90);
+			ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
+			ma->set_action(MoveAction::ACTION_TURN_LEFT_90);
+			ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
+			ma->set_action(MoveAction::ACTION_TURN_LEFT_90);
+			ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
+			ma->set_action(MoveAction::ACTION_TURN_LEFT_90);
+			ma->set_action(MoveAction::ACTION_TURN_LEFT_90);
+			break;
 		}
 	}
 }
@@ -150,19 +166,6 @@ int main() {
 	Thread serialCtrlThread;
 	serialCtrlThread.start(serial_ctrl);
 
-//	ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
-//	ma->set_action(MoveAction::ACTION_TURN_RIGHT_90);
-//	ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
-//	ma->set_action(MoveAction::ACTION_TURN_RIGHT_90);
-//	ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
-//	ma->set_action(MoveAction::ACTION_TURN_RIGHT_90);
-//	ma->set_action(MoveAction::ACTION_TURN_RIGHT_90);
-//	ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
-//	ma->set_action(MoveAction::ACTION_TURN_LEFT_90);
-//	ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
-//	ma->set_action(MoveAction::ACTION_TURN_LEFT_90);
-//	ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
-
 	while (true) {
 		if (btn->pressed) {
 			btn->flags = 0;
@@ -175,11 +178,10 @@ int main() {
 			bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
 		}
 		if (mpu->accelY() < -2000000) {
-			sc->disable();
-			mt->free();
+			mt->emergency_stop();
 			bz->play(Buzzer::BUZZER_MUSIC_EMERGENCY);
 			while (1) {
-				wait(1);
+				Thread::wait(1);
 			}
 		}
 	}
