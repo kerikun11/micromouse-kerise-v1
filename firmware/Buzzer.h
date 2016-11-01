@@ -8,22 +8,22 @@
 #ifndef BUZZER_H_
 #define BUZZER_H_
 
-enum BUZZER_MUSIC {
-	BUZZER_MUSIC_BOOT,
-	BUZZER_MUSIC_LOW_BATTERY,
-	BUZZER_MUSIC_CONFIRM,
-	BUZZER_MUSIC_CANCEL,
-	BUZZER_MUSIC_SELECT,
-	BUZZER_MUSIC_EMERGENCY,
-	BUZZER_MUSIC_DOREMI,
-};
-
 class Buzzer {
 public:
 	Buzzer(PinName pin) :
 			out(pin) {
 		thread.start(this, &Buzzer::task);
 	}
+	enum BUZZER_MUSIC {
+		BUZZER_MUSIC_BOOT,
+		BUZZER_MUSIC_LOW_BATTERY,
+		BUZZER_MUSIC_CONFIRM,
+		BUZZER_MUSIC_CANCEL,
+		BUZZER_MUSIC_SELECT,
+		BUZZER_MUSIC_EMERGENCY,
+		BUZZER_MUSIC_DOREMI,
+		BUZZER_MUSIC_FROG,
+	};
 	void play(enum BUZZER_MUSIC new_music) {
 		queue.put((enum BUZZER_MUSIC *) new_music);
 	}
@@ -73,6 +73,8 @@ private:
 					Thread::wait(100);
 					playG(2);
 					Thread::wait(100);
+					mute();
+					Thread::wait(100);
 					break;
 				case BUZZER_MUSIC_LOW_BATTERY:
 					playC(4);
@@ -81,11 +83,15 @@ private:
 					Thread::wait(100);
 					playC(4);
 					Thread::wait(600);
+					mute();
+					Thread::wait(100);
 					break;
 				case BUZZER_MUSIC_CONFIRM:
 					playC(2);
 					Thread::wait(100);
 					playE(2);
+					Thread::wait(100);
+					mute();
 					Thread::wait(100);
 					break;
 				case BUZZER_MUSIC_CANCEL:
@@ -93,9 +99,13 @@ private:
 					Thread::wait(100);
 					playC(2);
 					Thread::wait(100);
+					mute();
+					Thread::wait(100);
 					break;
 				case BUZZER_MUSIC_SELECT:
 					playC(2);
+					Thread::wait(100);
+					mute();
 					Thread::wait(100);
 					break;
 				case BUZZER_MUSIC_EMERGENCY:
@@ -105,38 +115,129 @@ private:
 						playE(4);
 						Thread::wait(100);
 					}
+					mute();
+					Thread::wait(100);
 					break;
 				case BUZZER_MUSIC_DOREMI:
 					playC(2);
-					Thread::wait(500);
+					Thread::wait(400);
 					playD(2);
-					Thread::wait(500);
+					Thread::wait(400);
 					playE(2);
-					Thread::wait(500);
+					Thread::wait(400);
 					playF(2);
-					Thread::wait(500);
+					Thread::wait(400);
 					playG(2);
-					Thread::wait(500);
+					Thread::wait(400);
 					playA(2);
-					Thread::wait(500);
+					Thread::wait(400);
 					playB(2);
-					Thread::wait(500);
+					Thread::wait(400);
 					playC(3);
-					Thread::wait(500);
-					playD(3);
-					Thread::wait(500);
-					playE(3);
-					Thread::wait(500);
-					playF(3);
-					Thread::wait(500);
-					playG(3);
-					Thread::wait(500);
-					playA(3);
-					Thread::wait(500);
-					playB(3);
-					Thread::wait(500);
-					playC(4);
-					Thread::wait(500);
+					Thread::wait(400);
+					mute();
+					break;
+				case BUZZER_MUSIC_FROG:
+					const int tempo = 100;
+					playC(2);
+					Thread::wait(4 * tempo);
+					playD(2);
+					Thread::wait(4 * tempo);
+					playE(2);
+					Thread::wait(4 * tempo);
+					playF(2);
+					Thread::wait(4 * tempo);
+					playE(2);
+					Thread::wait(4 * tempo);
+					playD(2);
+					Thread::wait(4 * tempo);
+					playC(2);
+					Thread::wait(4 * tempo);
+					mute();
+					Thread::wait(4 * tempo);
+
+					playE(2);
+					Thread::wait(4 * tempo);
+					playF(2);
+					Thread::wait(4 * tempo);
+					playG(2);
+					Thread::wait(4 * tempo);
+					playA(2);
+					Thread::wait(4 * tempo);
+					playG(2);
+					Thread::wait(4 * tempo);
+					playF(2);
+					Thread::wait(4 * tempo);
+					playE(2);
+					Thread::wait(4 * tempo);
+					mute();
+					Thread::wait(4 * tempo);
+
+					playC(2);
+					Thread::wait(4 * tempo);
+					mute();
+					Thread::wait(4 * tempo);
+					playC(2);
+					Thread::wait(4 * tempo);
+					mute();
+					Thread::wait(4 * tempo);
+					playC(2);
+					Thread::wait(4 * tempo);
+					mute();
+					Thread::wait(4 * tempo);
+					playC(2);
+					Thread::wait(4 * tempo);
+					mute();
+					Thread::wait(4 * tempo);
+
+					playC(2);
+					Thread::wait(1 * tempo);
+					mute();
+					Thread::wait(1 * tempo);
+					playC(2);
+					Thread::wait(1 * tempo);
+					mute();
+					Thread::wait(1 * tempo);
+
+					playD(2);
+					Thread::wait(1 * tempo);
+					mute();
+					Thread::wait(1 * tempo);
+					playD(2);
+					Thread::wait(1 * tempo);
+					mute();
+					Thread::wait(1 * tempo);
+
+					playE(2);
+					Thread::wait(1 * tempo);
+					mute();
+					Thread::wait(1 * tempo);
+					playE(2);
+					Thread::wait(1 * tempo);
+					mute();
+					Thread::wait(1 * tempo);
+
+					playF(2);
+					Thread::wait(1 * tempo);
+					mute();
+					Thread::wait(1 * tempo);
+					playF(2);
+					Thread::wait(1 * tempo);
+					mute();
+					Thread::wait(1 * tempo);
+
+					playE(2);
+					Thread::wait(2 * tempo);
+					mute();
+					Thread::wait(2 * tempo);
+					playD(2);
+					Thread::wait(2 * tempo);
+					mute();
+					Thread::wait(2 * tempo);
+					playC(2);
+					Thread::wait(2 * tempo);
+					mute();
+					Thread::wait(2 * tempo);
 					break;
 				}
 				mute();
