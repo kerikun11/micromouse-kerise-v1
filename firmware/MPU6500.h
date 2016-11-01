@@ -147,6 +147,9 @@ public:
 		return (_target_angle - _angle) * Kp + (0 - _gyro) * Kd
 				+ (0 - _int_angle) * Ki;
 	}
+	double get_p(double Kp = 1) {
+		return (_target_angle - _angle) * Kp;
+	}
 	void set_target(double new_angle) {
 		_int_angle = 0;
 		_target_angle = new_angle;

@@ -144,7 +144,7 @@ private:
 };
 
 #define ENCODER_UPDATE_PERIOD_US	100
-#define WHEEL_DIAMETER_MM			24.5
+#define WHEEL_DIAMETER_MM			25
 #define WHEEL_GEER_RATIO			0.25
 #define ENCODER_PULSES				(1024*4)
 
@@ -163,6 +163,9 @@ public:
 	double get_pid(double Kp, double Ki, double Kd) {
 		return (_target_position - _position) * Kp + (0 - _dif_position) * Kd
 				+ (0 - _int_position) * Ki;
+	}
+	double get_p(double Kp = 1) {
+		return (_target_position - _position) * Kp;
 	}
 	void set_target(double value) {
 		_target_position = value;
