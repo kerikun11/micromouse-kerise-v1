@@ -16,6 +16,11 @@
 
 #define ENCODER_UPDATE_PRIORITY		osPriorityBelowNormal
 
+#define ENCODER_UPDATE_PERIOD_US	100
+#define WHEEL_DIAMETER_MM			24.5
+#define WHEEL_GEER_RATIO			0.25
+#define ENCODER_PULSES				(1024*4)
+
 class Encoder {
 public:
 	Encoder(TIM_TypeDef *TIMx) :
@@ -28,6 +33,10 @@ public:
 	int32_t value() {
 		update();
 		return overflow_count * 65536 + getRawCount();
+	}
+	double position() {
+		return value() * WHEEL_DIAMETER_MM * M_PI * WHEEL_GEER_RATIO
+				/ ENCODER_PULSES;
 	}
 private:
 	TIM_Encoder_InitTypeDef encoder;
@@ -147,15 +156,20 @@ public:
 			return 0;
 		}
 	}
+	double position(uint8_t ch) {
+		switch (ch) {
+		case 0:
+			return -encoderL.position();
+		case 1:
+			return encoderR.position();
+		default:
+			return 0;
+		}
+	}
 private:
 	Encoder encoderL;
 	Encoder encoderR;
 };
-
-#define ENCODER_UPDATE_PERIOD_US	100
-#define WHEEL_DIAMETER_MM			24.5
-#define WHEEL_GEER_RATIO			0.25
-#define ENCODER_PULSES				(1024*4)
 
 class EncoderMeasure {
 public:

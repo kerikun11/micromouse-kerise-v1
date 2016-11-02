@@ -26,6 +26,8 @@ GyroMeasure *gm;
 Reflector *rfl;
 WallDetector *wd;
 
+SpeedController *sc;
+
 void debug_info() {
 	while (1) {
 		Thread::wait(100);
@@ -35,19 +37,19 @@ void debug_info() {
 //				em->dif_position(), em->position(), em->int_position(),
 //				em->target());
 
-//		printf("%05u\t%05u\t%05u\t%05u\n", rfl->sl(), rfl->fl(), rfl->fr(),
-//				rfl->sr());
-//
-//		printf("%s %s %s %s %s %s\n", wd->wall().side[0] ? "X" : ".",
-//				wd->wall().side_flont[0] ? "X" : ".",
-//				wd->wall().flont[0] ? "X" : ".",
-//				wd->wall().flont[1] ? "X" : ".",
-//				wd->wall().side_flont[1] ? "X" : ".",
-//				wd->wall().side[1] ? "X" : ".");
+		printf("%05u\t%05u\t%05u\t%05u\n", rfl->sl(), rfl->fl(), rfl->fr(),
+				rfl->sr());
+
+		printf("%s %s %s %s %s %s\n", wd->wall().side[0] ? "X" : ".",
+				wd->wall().side_flont[0] ? "X" : ".",
+				wd->wall().flont[0] ? "X" : ".",
+				wd->wall().flont[1] ? "X" : ".",
+				wd->wall().side_flont[1] ? "X" : ".",
+				wd->wall().side[1] ? "X" : ".");
 
 //		printf("L: %ld\tR: %ld\n", enc->left(), enc->right());
 
-		printf("Acc Y: %lf\n", mpu->accelY());
+//		printf("Acc Y: %lf\n", mpu->accelY());
 	}
 }
 
@@ -57,26 +59,31 @@ void serial_ctrl() {
 		int c = getchar();
 		if (c == EOF)
 			continue;
-		printf("%c", (char) c);
+		printf("%c\n", (char) c);
 		switch (c) {
 		case 'g':
 			bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
+			sc->enable();
 			break;
 		case 'f':
 			bz->play(Buzzer::BUZZER_MUSIC_SELECT);
+			sc->disable();
 			mt->free();
 			break;
 		case 'h':
-			gm->set_target_relative(10);
+			sc->set_target(200, 15);
 			break;
 		case 'j':
-			em->set_target_relative(-10);
+			sc->set_target(-400, 0);
 			break;
 		case 'k':
-			em->set_target_relative(10);
+			sc->set_target(400, 0);
 			break;
 		case 'l':
-			gm->set_target_relative(-10);
+			sc->set_target(200, -15);
+			break;
+		case 'b':
+			sc->set_target(0, 0);
 			break;
 		}
 	}
@@ -115,6 +122,8 @@ int main() {
 	rfl = new Reflector(IR_LED_SL_FR_PIN, IR_LED_SR_FL_PIN);
 	wd = new WallDetector(rfl);
 
+	sc = new SpeedController(mt, enc);
+
 	/* boot */
 	{
 		printf("\nHello World!\n");
@@ -124,7 +133,7 @@ int main() {
 			bz->play(Buzzer::BUZZER_MUSIC_LOW_BATTERY);
 			printf("Battery Low!\n");
 			while (1) {
-				Thread::wait(1);
+				Thread::wait(1000);
 			}
 		}
 		bz->play(Buzzer::BUZZER_MUSIC_BOOT);
@@ -136,7 +145,7 @@ int main() {
 	/* for debug */
 	Thread debugInfoThread(osPriorityBelowNormal);
 	debugInfoThread.start(debug_info);
-	Thread serialCtrlThread(osPriorityBelowNormal);
+	Thread serialCtrlThread(osPriorityLow);
 	serialCtrlThread.start(serial_ctrl);
 	Thread emergencyThread(osPriorityAboveNormal);
 	emergencyThread.start(emergencyTask);

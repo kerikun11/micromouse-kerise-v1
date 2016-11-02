@@ -8,7 +8,7 @@
 #ifndef BUZZER_H_
 #define BUZZER_H_
 
-#define BUZZER_PRIORITY			osPriorityNormal
+#define BUZZER_PRIORITY			osPriorityBelowNormal
 
 class Buzzer {
 public:
