@@ -8,10 +8,12 @@
 #ifndef BUZZER_H_
 #define BUZZER_H_
 
+#define BUZZER_PRIORITY			osPriorityNormal
+
 class Buzzer {
 public:
 	Buzzer(PinName pin) :
-			out(pin) {
+			out(pin), thread(BUZZER_PRIORITY) {
 		thread.start(this, &Buzzer::task);
 	}
 	enum BUZZER_MUSIC {
@@ -28,9 +30,9 @@ public:
 		queue.put((enum BUZZER_MUSIC *) new_music);
 	}
 private:
+	PwmOut out;
 	Thread thread;
 	Queue<enum BUZZER_MUSIC, 2> queue;
-	PwmOut out;
 
 	void setFrequency(uint32_t freq) {
 		out.period_us(1000000 / freq);

@@ -26,9 +26,6 @@ GyroMeasure *gm;
 Reflector *rfl;
 WallDetector *wd;
 
-StraightControl *sc;
-MoveAction *ma;
-
 void debug_info() {
 	while (1) {
 		Thread::wait(100);
@@ -38,20 +35,25 @@ void debug_info() {
 //				em->dif_position(), em->position(), em->int_position(),
 //				em->target());
 
-		printf("%05u\t%05u\t%05u\t%05u\n", rfl->sl(), rfl->fl(), rfl->fr(),
-				rfl->sr());
-
-		printf("%s %s %s %s\n", wd->wall().side[0] ? "X" : ".",
-				wd->wall().flont[0] ? "X" : ".",
-				wd->wall().flont[1] ? "X" : ".",
-				wd->wall().side[1] ? "X" : ".");
+//		printf("%05u\t%05u\t%05u\t%05u\n", rfl->sl(), rfl->fl(), rfl->fr(),
+//				rfl->sr());
+//
+//		printf("%s %s %s %s %s %s\n", wd->wall().side[0] ? "X" : ".",
+//				wd->wall().side_flont[0] ? "X" : ".",
+//				wd->wall().flont[0] ? "X" : ".",
+//				wd->wall().flont[1] ? "X" : ".",
+//				wd->wall().side_flont[1] ? "X" : ".",
+//				wd->wall().side[1] ? "X" : ".");
 
 //		printf("L: %ld\tR: %ld\n", enc->left(), enc->right());
+
+		printf("Acc Y: %lf\n", mpu->accelY());
 	}
 }
 
 void serial_ctrl() {
 	while (1) {
+		Thread::wait(100);
 		int c = getchar();
 		if (c == EOF)
 			continue;
@@ -59,11 +61,9 @@ void serial_ctrl() {
 		switch (c) {
 		case 'g':
 			bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
-			sc->enable();
 			break;
 		case 'f':
 			bz->play(Buzzer::BUZZER_MUSIC_SELECT);
-			sc->disable();
 			mt->free();
 			break;
 		case 'h':
@@ -78,43 +78,19 @@ void serial_ctrl() {
 		case 'l':
 			gm->set_target_relative(-10);
 			break;
-		case 'w':
-			ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
-			break;
-		case 's':
-			ma->set_action(MoveAction::ACTION_GO_HALF);
-			break;
-		case 'x':
-			ma->set_action(MoveAction::ACTION_GO_DIAGONAL);
-			break;
-		case 'a':
-			ma->set_action(MoveAction::ACTION_TURN_LEFT_90);
-			break;
-		case 'd':
-			ma->set_action(MoveAction::ACTION_TURN_RIGHT_90);
-			break;
-		case 'q':
-			ma->set_action(MoveAction::ACTION_TURN_LEFT_45);
-			break;
-		case 'e':
-			ma->set_action(MoveAction::ACTION_TURN_RIGHT_45);
-			break;
-		case 'm':
-			ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
-			ma->set_action(MoveAction::ACTION_TURN_RIGHT_90);
-			ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
-			ma->set_action(MoveAction::ACTION_TURN_RIGHT_90);
-			ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
-			ma->set_action(MoveAction::ACTION_TURN_RIGHT_90);
-			ma->set_action(MoveAction::ACTION_TURN_RIGHT_90);
-			ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
-			ma->set_action(MoveAction::ACTION_TURN_LEFT_90);
-			ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
-			ma->set_action(MoveAction::ACTION_TURN_LEFT_90);
-			ma->set_action(MoveAction::ACTION_GO_STRAIGHT);
-			ma->set_action(MoveAction::ACTION_TURN_LEFT_90);
-			ma->set_action(MoveAction::ACTION_TURN_LEFT_90);
-			break;
+		}
+	}
+}
+
+void emergencyTask() {
+	while (1) {
+		Thread::wait(1);
+		if (mpu->accelY() < -2000000) {
+			mt->emergency_stop();
+			bz->play(Buzzer::BUZZER_MUSIC_EMERGENCY);
+			while (1) {
+				Thread::wait(1000);
+			}
 		}
 	}
 }
@@ -139,9 +115,6 @@ int main() {
 	rfl = new Reflector(IR_LED_SL_FR_PIN, IR_LED_SR_FL_PIN);
 	wd = new WallDetector(rfl);
 
-	sc = new StraightControl(mt, enc, em, mpu, gm, rfl, wd);
-	ma = new MoveAction(mt, enc, em, mpu, gm, rfl, wd, sc);
-
 	/* boot */
 	{
 		printf("\nHello World!\n");
@@ -151,7 +124,7 @@ int main() {
 			bz->play(Buzzer::BUZZER_MUSIC_LOW_BATTERY);
 			printf("Battery Low!\n");
 			while (1) {
-				wait(1);
+				Thread::wait(1);
 			}
 		}
 		bz->play(Buzzer::BUZZER_MUSIC_BOOT);
@@ -161,28 +134,23 @@ int main() {
 	}
 
 	/* for debug */
-	Thread debugInfoThread;
+	Thread debugInfoThread(osPriorityBelowNormal);
 	debugInfoThread.start(debug_info);
-	Thread serialCtrlThread;
+	Thread serialCtrlThread(osPriorityBelowNormal);
 	serialCtrlThread.start(serial_ctrl);
+	Thread emergencyThread(osPriorityAboveNormal);
+	emergencyThread.start(emergencyTask);
 
 	while (true) {
+		Thread::wait(100);
 		if (btn->pressed) {
 			btn->flags = 0;
 			bz->play(Buzzer::BUZZER_MUSIC_SELECT);
-			sc->disable();
 			mt->free();
 		}
 		if (btn->long_pressed_1) {
 			btn->flags = 0;
 			bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
-		}
-		if (mpu->accelY() < -2000000) {
-			mt->emergency_stop();
-			bz->play(Buzzer::BUZZER_MUSIC_EMERGENCY);
-			while (1) {
-				Thread::wait(1);
-			}
 		}
 	}
 }

@@ -12,10 +12,10 @@
 #include "FFT.h"
 
 /* Definition for ADCx clock resources */
-#define ADCx_S							ADC1
-#define ADCx_F							ADC2
-#define ADCx_S_CLK_ENABLE()				__HAL_RCC_ADC1_CLK_ENABLE()
-#define ADCx_F_CLK_ENABLE()				__HAL_RCC_ADC2_CLK_ENABLE()
+#define ADCx_S							ADC2
+#define ADCx_F							ADC3
+#define ADCx_S_CLK_ENABLE()				__HAL_RCC_ADC2_CLK_ENABLE()
+#define ADCx_F_CLK_ENABLE()				__HAL_RCC_ADC3_CLK_ENABLE()
 #define ADCx_CHANNEL_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOC_CLK_ENABLE()
 
 #define ADCx_FORCE_RESET()              __HAL_RCC_ADC_FORCE_RESET()
@@ -37,20 +37,28 @@
 #define IR_LED_PERIOD_US				500
 #define IR_LED_DUTY_US					100
 
-#define IR_RECEIVER_SAMPLING_PERIOD_US	10
-
-#define IR_RECEIVER_SAMPLE_SIZE			50
+#define IR_RECEIVER_SAMPLE_SIZE			25
+#define IR_RECEIVER_SAMPLING_PERIOD_US	20
+#define IR_RECEIVER_UPDATE_PERIOD_US	1000
+#define IR_RECEIVER_UPDATE_PRIORITY		osPriorityHigh
 
 class Reflector {
 public:
 	Reflector(PinName led_sl_fr_pin, PinName led_sr_fl_pin) :
-			led_sl_fr(led_sl_fr_pin), led_sr_fl(led_sr_fl_pin) {
+			led_sl_fr(led_sl_fr_pin), led_sr_fl(led_sr_fl_pin), updateThread(
+			IR_RECEIVER_UPDATE_PRIORITY) {
 		led_sl_fr.period_us(IR_LED_PERIOD_US);
 		led_sr_fl.period_us(IR_LED_PERIOD_US);
 		adcInitialize();
-		sample.state = 0;
-		samplingStart();
-		thread.start(this, &Reflector::task);
+
+		buffer_pointer = IR_RECEIVER_SAMPLE_SIZE - 1;
+
+		samplingTicker.attach_us(this, &Reflector::samplingIsr,
+		IR_RECEIVER_SAMPLING_PERIOD_US);
+
+		updateThread.start(this, &Reflector::updateTask);
+		updateTicker.attach_us(this, &Reflector::updateIsr,
+		IR_RECEIVER_UPDATE_PERIOD_US);
 	}
 
 	int16_t side(uint8_t left_or_right) {
@@ -66,112 +74,89 @@ public:
 			return fr();
 	}
 	int16_t sl() {
-		return distance[0];
+		return distance[2];
 	}
 	int16_t fl() {
 		return distance[1];
 	}
 	int16_t fr() {
-		return distance[2];
+		return distance[3];
 	}
 	int16_t sr() {
-		return distance[3];
+		return distance[0];
 	}
 private:
 	PwmOut led_sl_fr, led_sr_fl;
-	Thread thread;
+	Thread updateThread;
 	ADC_HandleTypeDef AdcHandle_S;
 	ADC_HandleTypeDef AdcHandle_F;
 	ADC_ChannelConfTypeDef sConfig;
 	Ticker samplingTicker;
+	Ticker updateTicker;
 	volatile int16_t distance[4];
 	volatile int16_t prev_distance[4];
-	bool is_sampling;
-	volatile struct sampling_buffer {
-		uint16_t buffer[4][IR_RECEIVER_SAMPLE_SIZE];
-		int state;
-		int pointer;
-	} sample;
+	volatile uint16_t buffer[4][IR_RECEIVER_SAMPLE_SIZE];
+	volatile int buffer_pointer;
 
 	void ir_led(bool sl_fr, bool sr_fl) {
-		if (sl_fr)
+		if (sl_fr) {
 			led_sl_fr.pulsewidth_us(IR_LED_DUTY_US);
-		else
+		} else {
 			led_sl_fr.pulsewidth_us(0);
-		if (sr_fl)
+		}
+		if (sr_fl) {
 			led_sr_fl.pulsewidth_us(IR_LED_DUTY_US);
-		else
+		} else {
 			led_sr_fl.pulsewidth_us(0);
+		}
 	}
-	void task() {
+	void updateIsr() {
+		updateThread.signal_set(0x01);
+	}
+	void updateTask() {
 		while (1) {
-			update();
-			samplingStart();
-			while (is_sampling) {
-				Thread::wait(1);
+			Thread::signal_wait(0x01);
+			for (int ch = 0; ch < 4; ch++) {
+				int16_t max = 0;
+				for (int i = 0; i < IR_RECEIVER_SAMPLE_SIZE; i++) {
+					int16_t value = 2048 - buffer[ch][i];
+					if (value > max) {
+						max = value;
+					}
+				}
+				distance[ch] = (max + prev_distance[ch]) / 2;
+				prev_distance[ch] = distance[ch];
 			}
 		}
 	}
-	void samplingStart() {
-		is_sampling = true;
-		samplingTicker.attach_us(this, &Reflector::samplingIsr,
-		IR_RECEIVER_SAMPLING_PERIOD_US);
+	void set_adc_sl_fr() {
+		ir_led(true, false);
+		sConfig.Channel = ADCx_CHANNEL_SL;
+		HAL_ADC_ConfigChannel(&AdcHandle_S, &sConfig);
+		sConfig.Channel = ADCx_CHANNEL_FR;
+		HAL_ADC_ConfigChannel(&AdcHandle_F, &sConfig);
+	}
+	void set_adc_sr_fl() {
+		ir_led(false, true);
+		sConfig.Channel = ADCx_CHANNEL_SR;
+		HAL_ADC_ConfigChannel(&AdcHandle_S, &sConfig);
+		sConfig.Channel = ADCx_CHANNEL_FL;
+		HAL_ADC_ConfigChannel(&AdcHandle_F, &sConfig);
 	}
 	void samplingIsr() {
-		switch (sample.state) {
-		case 0:
-			sample.pointer = 0;
-			sample.state = 1;
-			ir_led(true, true);
-//			ir_led(true, false);
-			sConfig.Channel = ADCx_CHANNEL_SL;
-			HAL_ADC_ConfigChannel(&AdcHandle_S, &sConfig);
-			sConfig.Channel = ADCx_CHANNEL_FR;
-			HAL_ADC_ConfigChannel(&AdcHandle_F, &sConfig);
-			break;
-		case 1:
-			sample.buffer[0][sample.pointer] = HAL_ADC_GetValue(&AdcHandle_S);
-			sample.buffer[2][sample.pointer] = HAL_ADC_GetValue(&AdcHandle_F);
-			sample.pointer++;
-			if (sample.pointer >= IR_RECEIVER_SAMPLE_SIZE) {
-				sample.pointer = 0;
-				sample.state = 2;
-				ir_led(true, true);
-//				ir_led(false, true);
-				sConfig.Channel = ADCx_CHANNEL_SR;
-				HAL_ADC_ConfigChannel(&AdcHandle_S, &sConfig);
-				sConfig.Channel = ADCx_CHANNEL_FL;
-				HAL_ADC_ConfigChannel(&AdcHandle_F, &sConfig);
-			}
-			break;
-		case 2:
-			sample.buffer[3][sample.pointer] = HAL_ADC_GetValue(&AdcHandle_S);
-			sample.buffer[1][sample.pointer] = HAL_ADC_GetValue(&AdcHandle_F);
-			sample.pointer++;
-			if (sample.pointer >= IR_RECEIVER_SAMPLE_SIZE) {
-				sample.pointer = 0;
-				sample.state = 0;
-				ir_led(false, false);
-				samplingTicker.detach();
-				is_sampling = false;
-			}
-			break;
+		buffer[buffer_pointer / IR_RECEIVER_SAMPLE_SIZE + 0][buffer_pointer
+				% IR_RECEIVER_SAMPLE_SIZE] = HAL_ADC_GetValue(&AdcHandle_S);
+		buffer[buffer_pointer / IR_RECEIVER_SAMPLE_SIZE + 2][buffer_pointer
+				% IR_RECEIVER_SAMPLE_SIZE] = HAL_ADC_GetValue(&AdcHandle_F);
+		buffer_pointer++;
+		if (buffer_pointer == IR_RECEIVER_SAMPLE_SIZE) {
+			set_adc_sl_fr();
+		} else if (buffer_pointer == IR_RECEIVER_SAMPLE_SIZE * 2) {
+			set_adc_sr_fl();
+			buffer_pointer = 0;
 		}
 		HAL_ADC_Start_IT(&AdcHandle_S);
 		HAL_ADC_Start_IT(&AdcHandle_F);
-	}
-	void update() {
-		for (int ch = 0; ch < 4; ch++) {
-			int16_t max = 0;
-			for (int i = 0; i < IR_RECEIVER_SAMPLE_SIZE; i++) {
-				int16_t value = 2048 - sample.buffer[ch][i];
-				if (value > max) {
-					max = value;
-				}
-			}
-			distance[ch] = (max + prev_distance[ch]) / 2;
-			prev_distance[ch] = distance[ch];
-		}
 	}
 	void adcInitialize() {
 		/*##-1- Enable peripherals and GPIO Clocks #################################*/
@@ -250,48 +235,57 @@ private:
 	}
 };
 
-#define WALL_UPDATE_PERIOD_US		500
+#define WALL_UPDATE_PERIOD_US		1000
+#define WALL_UPDATE_PRIORITY		osPriorityAboveNormal
 
 class WallDetector {
 public:
 	WallDetector(Reflector *rfl) :
-			_rfl(rfl) {
-		updateTimer.attach_us(this, &WallDetector::update,
+			_rfl(rfl), updateThread(WALL_UPDATE_PRIORITY) {
+		updateThread.start(this, &WallDetector::updateTask);
+		updateTicker.attach_us(this, &WallDetector::updateIsr,
 		WALL_UPDATE_PERIOD_US);
 	}
 	struct WALL {
 		bool side[2];
-		bool flont[2];
 		bool side_flont[2];
+		bool flont[2];
 	};
 	struct WALL wall() {
 		return _wall;
 	}
 private:
 	Reflector *_rfl;
-	Ticker updateTimer;
+	Thread updateThread;
+	Ticker updateTicker;
 	struct WALL _wall;
-	void update() {
-		for (int i = 0; i < 2; i++) {
-			int16_t value = _rfl->side(i);
-			if (value > 400)
-				_wall.side[i] = true;
-			else if (value < 360)
-				_wall.side[i] = false;
-		}
-		for (int i = 0; i < 2; i++) {
-			int16_t value = _rfl->flont(i);
-			if (value > 260)
-				_wall.flont[i] = true;
-			else if (value < 240)
-				_wall.flont[i] = false;
-		}
-		for (int i = 0; i < 2; i++) {
-			int16_t value = _rfl->flont(i);
-			if (value > 100)
-				_wall.side_flont[i] = true;
-			else if (value < 75)
-				_wall.side_flont[i] = false;
+	void updateIsr() {
+		updateThread.signal_set(0x01);
+	}
+	void updateTask() {
+		while (1) {
+			Thread::signal_wait(0x01);
+			for (int i = 0; i < 2; i++) {
+				int16_t value = _rfl->side(i);
+				if (value > 400)
+					_wall.side[i] = true;
+				else if (value < 360)
+					_wall.side[i] = false;
+			}
+			for (int i = 0; i < 2; i++) {
+				int16_t value = _rfl->flont(i);
+				if (value > 260)
+					_wall.flont[i] = true;
+				else if (value < 240)
+					_wall.flont[i] = false;
+			}
+			for (int i = 0; i < 2; i++) {
+				int16_t value = _rfl->flont(i);
+				if (value > 100)
+					_wall.side_flont[i] = true;
+				else if (value < 75)
+					_wall.side_flont[i] = false;
+			}
 		}
 	}
 };

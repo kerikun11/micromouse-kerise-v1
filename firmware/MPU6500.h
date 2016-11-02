@@ -10,8 +10,6 @@
 
 #include "mbed.h"
 
-#define MPU6500_UPDATE_PERIOD_US	1000
-
 #define MPU6500_GYRO_RANGE			2000.0f
 #define MPU6500_GYRO_FACTOR			16.4f
 #define MPU6500_GYRO_OFFSET			70
@@ -20,13 +18,21 @@
 #define MPU6500_ACCEL_FACTOR		2048.0f
 #define MPU6500_ACCEL_OFFSET		0
 
+#define MPU6500_UPDATE_PERIOD_US	1000
+#define MPU6500_UPDATE_PRIORITY		osPriorityHigh
+
 class MPU6500: private SPI {
 public:
 	MPU6500(PinName mosi_pin, PinName miso_pin, PinName sclk_pin,
 			PinName cs_pin) :
-			SPI(mosi_pin, miso_pin, sclk_pin), cs(cs_pin, 1) {
+			SPI(mosi_pin, miso_pin, sclk_pin), cs(cs_pin, 1), updateThread(
+			MPU6500_UPDATE_PRIORITY) {
 		setup();
-		ticker.attach_us(this, &MPU6500::update, MPU6500_UPDATE_PERIOD_US);
+		updateThread.start(this, &MPU6500::updateTask);
+		updateTicker.attach_us(this, &MPU6500::updateIsr,
+		MPU6500_UPDATE_PERIOD_US);
+		_accelY = 0;
+		_gyroZ = 0;
 	}
 	double accelY() {
 		return _accelY;
@@ -36,14 +42,21 @@ public:
 	}
 private:
 	DigitalOut cs;
-	Ticker ticker;
-	double _accelY;
-	double _gyroZ;
+	Thread updateThread;
+	Ticker updateTicker;
+	volatile double _accelY;
+	volatile double _gyroZ;
 
-	void update() {
-		_accelY = readAccY() * MPU6500_ACCEL_FACTOR / MPU6500_ACCEL_RANGE;
-		_gyroZ = (readGyrZ() - MPU6500_GYRO_OFFSET) * MPU6500_GYRO_FACTOR
-				/ MPU6500_GYRO_RANGE;
+	void updateIsr() {
+		updateThread.signal_set(0x01);
+	}
+	void updateTask() {
+		while (1) {
+			Thread::signal_wait(0x01);
+			_accelY = readAccY() * MPU6500_ACCEL_FACTOR / MPU6500_ACCEL_RANGE;
+			_gyroZ = (readGyrZ() - MPU6500_GYRO_OFFSET) * MPU6500_GYRO_FACTOR
+					/ MPU6500_GYRO_RANGE;
+		}
 	}
 	void setup() {
 		this->writeReg(0x19, 0x07);	// samplerate
@@ -173,8 +186,8 @@ public:
 private:
 	MPU6500 *_mpu;
 	Ticker updateTicker;
-	double _angle, _gyro, _int_angle;
-	double _target_angle;
+	volatile double _angle, _gyro, _int_angle;
+	volatile double _target_angle;
 	void update() {
 		_gyro = _mpu->gyroZ();
 		_angle += _gyro * MPU6500_UPDATE_PERIOD_US / 1000000;

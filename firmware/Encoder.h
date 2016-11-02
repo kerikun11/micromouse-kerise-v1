@@ -14,11 +14,14 @@
 #define ENCODER_L_TIMx	TIM3
 #define ENCODER_R_TIMx	TIM4
 
+#define ENCODER_UPDATE_PRIORITY		osPriorityBelowNormal
+
 class Encoder {
 public:
-	Encoder(TIM_TypeDef *TIMx) {
+	Encoder(TIM_TypeDef *TIMx) :
+			updateThread(ENCODER_UPDATE_PRIORITY) {
 		EncoderInit(TIMx, 0xffff, TIM_ENCODERMODE_TI12);
-		ticker.attach_us(this, &Encoder::update, 10000);
+		updateThread.start(this, &Encoder::updateTask);
 		prev_count = 0;
 		overflow_count = 0;
 	}
@@ -29,7 +32,7 @@ public:
 private:
 	TIM_Encoder_InitTypeDef encoder;
 	TIM_HandleTypeDef timer;
-	Ticker ticker;
+	Thread updateThread;
 	volatile int32_t overflow_count;
 	volatile int16_t prev_count;
 
@@ -43,6 +46,12 @@ private:
 		if (now_count < prev_count - 20000)
 			overflow_count++;
 		prev_count = now_count;
+	}
+	void updateTask() {
+		while (1) {
+			Thread::wait(10);
+			update();
+		}
 	}
 	void EncoderInit(TIM_TypeDef * TIMx, uint32_t maxcount, uint32_t encmode) {
 		GPIO_InitTypeDef GPIO_InitStruct;

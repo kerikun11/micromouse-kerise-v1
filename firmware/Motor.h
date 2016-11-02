@@ -29,8 +29,6 @@
 class Motor {
 public:
 	Motor() {
-		emergency = false;
-
 		GPIO_InitTypeDef GPIO_InitStruct;
 		MOTOR_TIMx_CLK_ENABLE();
 		MOTOR_TIMx_CHANNEL_GPIO_PORT();
@@ -74,25 +72,8 @@ public:
 		sConfig.OCNIdleState = TIM_OCNIDLESTATE_RESET;
 		sConfig.OCIdleState = TIM_OCIDLESTATE_RESET;
 
-//		/* Set the pulse value for channel 1 */
-//		sConfig.Pulse = 0;
-//		HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_1);
-//		HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1);
-//
-//		/* Set the pulse value for channel 2 */
-//		sConfig.Pulse = 1000;
-//		HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_2);
-//		HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_2);
-//
-//		/* Set the pulse value for channel 3 */
-//		sConfig.Pulse = 1000;
-//		HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_3);
-//		HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_3);
-//
-//		/* Set the pulse value for channel 4 */
-//		sConfig.Pulse = 0;
-//		HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_4);
-//		HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_4);
+		emergency = false;
+		free();
 	}
 	void left(int16_t width) {
 		if (!emergency) {
