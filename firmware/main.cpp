@@ -18,10 +18,7 @@ Button *btn;
 Motor *mt;
 
 Encoders *enc;
-EncoderMeasure *em;
-
 MPU6500 *mpu;
-GyroMeasure *gm;
 
 Reflector *rfl;
 WallDetector *wd;
@@ -32,11 +29,6 @@ MoveAction *ma;
 void debug_info() {
 	while (1) {
 		Thread::wait(100);
-//		printf("Gyr: %.2lf\tAng: %.2lf\tInt: %.2lf\tTar: %.2lf\t", gm->gyro(),
-//				gm->angle(), gm->int_angle(), gm->target());
-//		printf("Vel: %.2lf\tPos: %.2lf\tInt: %.2lf\tTar: %.2lf\t\n",
-//				em->dif_position(), em->position(), em->int_position(),
-//				em->target());
 
 		printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(),
 				rfl->sr());
@@ -113,6 +105,9 @@ void serial_ctrl() {
 		case 'd':
 			ma->set_action(MoveAction::TURN_RIGHT_90);
 			break;
+		case 'r':
+			ma->set_action(MoveAction::RETURN);
+			break;
 		}
 	}
 }
@@ -140,12 +135,9 @@ int main() {
 	mt = new Motor;
 
 	enc = new Encoders(ENCODER_L_TIMx, ENCODER_R_TIMx);
-	em = new EncoderMeasure(enc);
-
 	mpu = new MPU6500(MPU6500_MOSI_PIN, MPU6500_MISO_PIN,
 	MPU6500_SCLK_PIN,
 	MPU6500_SSEL_PIN);
-	gm = new GyroMeasure(mpu, 0);
 
 	rfl = new Reflector(IR_LED_SL_FR_PIN, IR_LED_SR_FL_PIN);
 	wd = new WallDetector(rfl);

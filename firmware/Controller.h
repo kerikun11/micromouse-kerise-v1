@@ -105,6 +105,7 @@ public:
 	MoveAction(Encoders *enc, MPU6500 *mpu, Reflector *rfl, WallDetector *wd,
 			SpeedController *sc) :
 			enc(enc), mpu(mpu), rfl(rfl), wd(wd), sc(sc) {
+		_tasks = 0;
 		thread.start(this, &MoveAction::task);
 	}
 	enum ACTION {
@@ -115,9 +116,14 @@ public:
 		TURN_RIGHT_90,
 		CURVE_LEFT_90,
 		CURVE_RIGHT_90,
+		RETURN,
 	};
 	void set_action(enum ACTION action) {
 		queue.put((enum ACTION*) action);
+		_tasks++;
+	}
+	int tasks() const {
+		return _tasks;
 	}
 private:
 	Thread thread;
@@ -127,6 +133,7 @@ private:
 	Reflector *rfl;
 	WallDetector *wd;
 	SpeedController *sc;
+	int _tasks;
 
 	float wall_avoid(bool side, bool flont) {
 		float wall = 0;
@@ -149,117 +156,143 @@ private:
 	void task() {
 		while (1) {
 			osEvent evt = queue.get();
-			if (evt.status == osEventMessage) {
-				enum ACTION action = (enum ACTION) evt.value.v;
-				float start_position = enc->position();
-				float start_angle = mpu->angleZ();
-				struct WallDetector::WALL start_wall = wd->wall();
-				switch (action) {
-				case GO_STRAIGHT:
-					while (1) {
-						float wall = wall_avoid(true, false);
-						sc->set_target(360, wall);
-						Thread::wait(1);
-						if (enc->position() - start_position > 90) {
-							break;
-						}
+			if (evt.status != osEventMessage) {
+				continue;
+			}
+			enum ACTION action = (enum ACTION) evt.value.v;
+			float start_position = enc->position();
+			float start_angle = mpu->angleZ();
+			struct WallDetector::WALL start_wall = wd->wall();
+			switch (action) {
+			case GO_STRAIGHT:
+				while (1) {
+					float wall = wall_avoid(true, false);
+					sc->set_target(360, wall);
+					Thread::wait(1);
+					if (enc->position() - start_position > 120) {
+						break;
 					}
-					while (1) {
-						float wall = wall_avoid(true, false);
-						sc->set_target(360, wall);
-						Thread::wait(1);
-						if (start_wall.side[0] && !wd->wall().side[0]) {
-							break;
-						}
-						if (start_wall.side[1] && !wd->wall().side[1]) {
-							break;
-						}
-						if (enc->position() - start_position > 180) {
-							break;
-						}
-					}
-					sc->set_target(0, 0);
-					break;
-				case GO_HALF:
-					while (1) {
-						float wall = wall_avoid(true, false);
-						sc->set_target(360, wall);
-						Thread::wait(1);
-						if (enc->position() - start_position > 90) {
-							break;
-						}
-					}
-					sc->set_target(0, 0);
-					break;
-				case GO_DIAGONAL:
-					break;
-				case TURN_LEFT_90:
-					while (mpu->angleZ() - start_angle < 90) {
-						sc->set_target(0, 240 / 30);
-						Thread::wait(1);
-					}
-					sc->set_target(0, 0);
-					break;
-				case TURN_RIGHT_90:
-					while (mpu->angleZ() - start_angle > -90) {
-						sc->set_target(0, -240 / 30);
-						Thread::wait(1);
-					}
-					sc->set_target(0, 0);
-					break;
-				case CURVE_LEFT_90:
-					while (1) {
-						float wall = wall_avoid(true, true);
-						sc->set_target(240, wall);
-						Thread::wait(1);
-						if (wd->wall().side_flont[0]
-								&& wd->wall().side_flont[1]) {
-							if (wd->wall_difference().flont[0] < 0
-									|| wd->wall_difference().flont[1] < 0) {
-								break;
-							}
-						} else {
-							if (enc->position() - start_position > 90) {
-								break;
-							}
-						}
-					}
-					start_angle = mpu->angleZ();
-					while (mpu->angleZ() - start_angle < 90) {
-						sc->set_target(200, 200 / 20);
-						Thread::wait(1);
-					}
-					sc->set_target(0, 0);
-					break;
-				case CURVE_RIGHT_90:
-					while (1) {
-						float wall = wall_avoid(true, true);
-						sc->set_target(240, wall);
-						Thread::wait(1);
-						if (wd->wall().side_flont[0]
-								&& wd->wall().side_flont[1]) {
-							if (wd->wall_difference().flont[0] < 0
-									|| wd->wall_difference().flont[1] < 0) {
-								break;
-							}
-						} else {
-							if (enc->position() - start_position > 90) {
-								break;
-							}
-						}
-					}
-					start_angle = mpu->angleZ();
-					while (mpu->angleZ() - start_angle > -90) {
-						sc->set_target(200, -200 / 20);
-						Thread::wait(1);
-					}
-					sc->set_target(0, 0);
-					break;
 				}
+				while (1) {
+					float wall = wall_avoid(true, true);
+					sc->set_target(360, wall);
+					Thread::wait(1);
+					if (start_wall.side[0] && !wd->wall().side[0]) {
+						break;
+					}
+					if (start_wall.side[1] && !wd->wall().side[1]) {
+						break;
+					}
+					if (wd->wall_difference().flont[0] < 0
+							&& wd->wall_difference().flont[1] < 0) {
+						break;
+					}
+					if (enc->position() - start_position > 180) {
+						break;
+					}
+				}
+				sc->set_target(0, 0);
+				break;
+			case GO_HALF:
+				while (1) {
+					float wall = wall_avoid(true, false);
+					sc->set_target(360, wall);
+					Thread::wait(1);
+					if (enc->position() - start_position > 90) {
+						break;
+					}
+				}
+				sc->set_target(0, 0);
+				break;
+			case GO_DIAGONAL:
+				break;
+			case TURN_LEFT_90:
+				while (mpu->angleZ() - start_angle < 90) {
+					sc->set_target(0, 240 / 30);
+					Thread::wait(1);
+				}
+				sc->set_target(0, 0);
+				break;
+			case TURN_RIGHT_90:
+				while (mpu->angleZ() - start_angle > -90) {
+					sc->set_target(0, -240 / 30);
+					Thread::wait(1);
+				}
+				sc->set_target(0, 0);
+				break;
+			case CURVE_LEFT_90:
+				while (1) {
+					float wall = wall_avoid(true, true);
+					sc->set_target(240, wall);
+					Thread::wait(1);
+					if (wd->wall().side_flont[0] && wd->wall().side_flont[1]) {
+						if (wd->wall_difference().flont[0] < 0
+								|| wd->wall_difference().flont[1] < 0) {
+							break;
+						}
+					} else {
+						if (enc->position() - start_position > 90) {
+							break;
+						}
+					}
+				}
+				start_angle = mpu->angleZ();
+				while (mpu->angleZ() - start_angle < 90) {
+					sc->set_target(200, 200 / 20);
+					Thread::wait(1);
+				}
+				sc->set_target(0, 0);
+				break;
+			case CURVE_RIGHT_90:
+				while (1) {
+					float wall = wall_avoid(true, true);
+					sc->set_target(240, wall);
+					Thread::wait(1);
+					if (wd->wall().side_flont[0] && wd->wall().side_flont[1]) {
+						if (wd->wall_difference().flont[0] < 0
+								|| wd->wall_difference().flont[1] < 0) {
+							break;
+						}
+					} else {
+						if (enc->position() - start_position > 90) {
+							break;
+						}
+					}
+				}
+				start_angle = mpu->angleZ();
+				while (mpu->angleZ() - start_angle > -90) {
+					sc->set_target(200, -200 / 20);
+					Thread::wait(1);
+				}
+				sc->set_target(0, 0);
+				break;
+			case RETURN:
+				while (mpu->angleZ() - start_angle < 180) {
+					sc->set_target(0, 240 / 30);
+					Thread::wait(1);
+				}
+				start_position = enc->position();
+				start_wall = wd->wall();
+				while (1) {
+					float wall = wall_avoid(true, false);
+					sc->set_target(360, wall);
+					Thread::wait(1);
+					if (start_wall.side[0] && !wd->wall().side[0]) {
+						break;
+					}
+					if (start_wall.side[1] && !wd->wall().side[1]) {
+						break;
+					}
+					if (enc->position() - start_position > 40) {
+						break;
+					}
+				}
+				sc->set_target(0, 0);
+				break;
 			}
 		}
+		_tasks--;
 	}
-}
-;
+};
 
 #endif /* CONTROLLER_H_ */
