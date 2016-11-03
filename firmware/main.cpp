@@ -27,6 +27,7 @@ Reflector *rfl;
 WallDetector *wd;
 
 SpeedController *sc;
+MoveAction *ma;
 
 void debug_info() {
 	while (1) {
@@ -37,9 +38,8 @@ void debug_info() {
 //				em->dif_position(), em->position(), em->int_position(),
 //				em->target());
 
-		printf("%05u\t%05u\t%05u\t%05u\n", rfl->sl(), rfl->fl(), rfl->fr(),
+		printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(),
 				rfl->sr());
-
 		printf("%s %s %s %s %s %s\n", wd->wall().side[0] ? "X" : ".",
 				wd->wall().side_flont[0] ? "X" : ".",
 				wd->wall().flont[0] ? "X" : ".",
@@ -47,9 +47,19 @@ void debug_info() {
 				wd->wall().side_flont[1] ? "X" : ".",
 				wd->wall().side[1] ? "X" : ".");
 
+		printf("Angle: %05d\n", (int) mpu->angleZ());
+
 //		printf("L: %ld\tR: %ld\n", enc->left(), enc->right());
 
 //		printf("Acc Y: %lf\n", mpu->accelY());
+
+//		for (int i = 0; i < 2; i++) {
+//			printf("P:%05d\tI:%05d\tD:%05d\t", (int) sc->wheel_p[i],
+//					(int) sc->wheel_i[i], (int) sc->wheel_d[i]);
+//		}
+//		printf("L:%05d\tR:%05d\t", (int) sc->target.wheel[0],
+//				(int) sc->target.wheel[1]);
+//		printf("\n");
 	}
 }
 
@@ -71,19 +81,37 @@ void serial_ctrl() {
 			mt->free();
 			break;
 		case 'h':
-			sc->set_target(200, 15);
+			sc->set_target(360, 720 / 90);
 			break;
 		case 'j':
-			sc->set_target(-400, 0);
+			sc->set_target(-360, 0);
 			break;
 		case 'k':
-			sc->set_target(400, 0);
+			sc->set_target(360, 0);
 			break;
 		case 'l':
-			sc->set_target(200, -15);
+			sc->set_target(360, -720 / 90);
 			break;
 		case 'b':
 			sc->set_target(0, 0);
+			break;
+		case 'w':
+			ma->set_action(MoveAction::GO_STRAIGHT);
+			break;
+		case 'q':
+			ma->set_action(MoveAction::CURVE_LEFT_90);
+			break;
+		case 'e':
+			ma->set_action(MoveAction::CURVE_RIGHT_90);
+			break;
+		case 's':
+			ma->set_action(MoveAction::GO_HALF);
+			break;
+		case 'a':
+			ma->set_action(MoveAction::TURN_LEFT_90);
+			break;
+		case 'd':
+			ma->set_action(MoveAction::TURN_RIGHT_90);
 			break;
 		}
 	}
@@ -123,6 +151,7 @@ int main() {
 	wd = new WallDetector(rfl);
 
 	sc = new SpeedController(mt, enc);
+	ma = new MoveAction(enc, mpu, rfl, wd, sc);
 
 	/* boot */
 	{
@@ -155,6 +184,7 @@ int main() {
 		if (btn->pressed) {
 			btn->flags = 0;
 			bz->play(Buzzer::BUZZER_MUSIC_SELECT);
+			sc->disable();
 			mt->free();
 		}
 		if (btn->long_pressed_1) {

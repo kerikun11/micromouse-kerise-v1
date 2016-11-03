@@ -33,6 +33,7 @@ public:
 		MPU6500_UPDATE_PERIOD_US);
 		_accelY = 0;
 		_gyroZ = 0;
+		_angleZ = 0;
 	}
 	double accelY() {
 		return _accelY;
@@ -40,12 +41,16 @@ public:
 	double gyroZ() {
 		return _gyroZ;
 	}
+	double angleZ() {
+		return _angleZ;
+	}
 private:
 	DigitalOut cs;
 	Thread updateThread;
 	Ticker updateTicker;
 	volatile double _accelY;
 	volatile double _gyroZ;
+	volatile double _angleZ;
 
 	void updateIsr() {
 		updateThread.signal_set(0x01);
@@ -56,6 +61,7 @@ private:
 			_accelY = readAccY() * MPU6500_ACCEL_FACTOR / MPU6500_ACCEL_RANGE;
 			_gyroZ = (readGyrZ() - MPU6500_GYRO_OFFSET) * MPU6500_GYRO_FACTOR
 					/ MPU6500_GYRO_RANGE;
+			_angleZ += _gyroZ * MPU6500_UPDATE_PERIOD_US / 1000000;
 		}
 	}
 	void setup() {

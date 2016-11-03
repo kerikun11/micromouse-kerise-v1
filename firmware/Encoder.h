@@ -156,12 +156,14 @@ public:
 			return 0;
 		}
 	}
-	double position(uint8_t ch) {
+	double position(uint8_t ch = 2) {
 		switch (ch) {
 		case 0:
 			return -encoderL.position();
 		case 1:
 			return encoderR.position();
+		case 2:
+			return (encoderR.position() - encoderL.position()) / 2;
 		default:
 			return 0;
 		}
