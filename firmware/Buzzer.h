@@ -22,6 +22,7 @@ public:
 		BUZZER_MUSIC_CONFIRM,
 		BUZZER_MUSIC_CANCEL,
 		BUZZER_MUSIC_SELECT,
+		BUZZER_MUSIC_ERROR,
 		BUZZER_MUSIC_EMERGENCY,
 		BUZZER_MUSIC_DOREMI,
 		BUZZER_MUSIC_FROG,
@@ -107,6 +108,16 @@ private:
 				case BUZZER_MUSIC_SELECT:
 					playC(2);
 					Thread::wait(100);
+					mute();
+					Thread::wait(100);
+					break;
+				case BUZZER_MUSIC_ERROR:
+					for (int i = 0; i < 2; i++) {
+						playC(3);
+						Thread::wait(100);
+						playE(3);
+						Thread::wait(100);
+					}
 					mute();
 					Thread::wait(100);
 					break;

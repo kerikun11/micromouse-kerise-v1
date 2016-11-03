@@ -32,14 +32,16 @@ void debug_info() {
 
 		printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(),
 				rfl->sr());
-		printf("%s %s %s %s %s %s\n", wd->wall().side[0] ? "X" : ".",
-				wd->wall().side_flont[0] ? "X" : ".",
+		printf("%s %s "
+				"%s %s "
+				"%s %s\n", wd->wall().side[0] ? "X" : ".",
 				wd->wall().flont[0] ? "X" : ".",
+				wd->wall().flont_flont[0] ? "X" : ".",
+				wd->wall().flont_flont[1] ? "X" : ".",
 				wd->wall().flont[1] ? "X" : ".",
-				wd->wall().side_flont[1] ? "X" : ".",
 				wd->wall().side[1] ? "X" : ".");
 
-		printf("Angle: %05d\n", (int) mpu->angleZ());
+//		printf("Angle: %05d\n", (int) mpu->angleZ());
 
 //		printf("L: %ld\tR: %ld\n", enc->left(), enc->right());
 
@@ -68,7 +70,7 @@ void serial_ctrl() {
 			sc->enable();
 			break;
 		case 'f':
-			bz->play(Buzzer::BUZZER_MUSIC_SELECT);
+			bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
 			sc->disable();
 			mt->free();
 			break;
@@ -143,7 +145,7 @@ int main() {
 	wd = new WallDetector(rfl);
 
 	sc = new SpeedController(mt, enc);
-	ma = new MoveAction(enc, mpu, rfl, wd, sc);
+	ma = new MoveAction(bz, enc, mpu, rfl, wd, sc);
 
 	/* boot */
 	{
