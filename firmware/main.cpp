@@ -74,18 +74,6 @@ void serial_ctrl() {
 			sc->disable();
 			mt->free();
 			break;
-		case 'h':
-			sc->set_target(360, 720 / 90);
-			break;
-		case 'j':
-			sc->set_target(-360, 0);
-			break;
-		case 'k':
-			sc->set_target(360, 0);
-			break;
-		case 'l':
-			sc->set_target(360, -720 / 90);
-			break;
 		case 'b':
 			sc->set_target(0, 0);
 			break;
@@ -93,18 +81,9 @@ void serial_ctrl() {
 			ma->set_action(MoveAction::GO_STRAIGHT);
 			break;
 		case 'q':
-			ma->set_action(MoveAction::CURVE_LEFT_90);
-			break;
-		case 'e':
-			ma->set_action(MoveAction::CURVE_RIGHT_90);
-			break;
-		case 's':
-			ma->set_action(MoveAction::GO_HALF);
-			break;
-		case 'a':
 			ma->set_action(MoveAction::TURN_LEFT_90);
 			break;
-		case 'd':
+		case 'e':
 			ma->set_action(MoveAction::TURN_RIGHT_90);
 			break;
 		case 'r':

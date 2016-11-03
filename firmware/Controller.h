@@ -114,8 +114,6 @@ public:
 		GO_DIAGONAL,
 		TURN_LEFT_90,
 		TURN_RIGHT_90,
-		CURVE_LEFT_90,
-		CURVE_RIGHT_90,
 		RETURN,
 	};
 	void set_action(enum ACTION action) {
@@ -190,7 +188,7 @@ private:
 					if (start_wall.side[1] && !wd->wall().side[1]) {
 						break;
 					}
-					if (enc->position() - start_position > 160) {
+					if (enc->position() - start_position > 100) {
 						break;
 					}
 				}
@@ -199,7 +197,7 @@ private:
 					float wall = wall_avoid(true, true);
 					sc->set_target(240, wall);
 					Thread::wait(1);
-					if (enc->position() - start_position > 20) {
+					if (enc->position() - start_position > 80) {
 						break;
 					}
 				}
@@ -219,54 +217,23 @@ private:
 			case GO_DIAGONAL:
 				break;
 			case TURN_LEFT_90:
-				while (mpu->angleZ() - start_angle < 90) {
-					sc->set_target(0, 240 / 30);
-					Thread::wait(1);
-				}
-				sc->set_target(0, 0);
-				break;
 			case TURN_RIGHT_90:
-				while (mpu->angleZ() - start_angle > -90) {
-					sc->set_target(0, -240 / 30);
-					Thread::wait(1);
-				}
-				sc->set_target(0, 0);
-				break;
-			case CURVE_LEFT_90:
-			case CURVE_RIGHT_90:
-				if (action == CURVE_LEFT_90 && wd->wall().side[0]) {
+				if (action == TURN_LEFT_90 && wd->wall().side[0]) {
 					bz->play(Buzzer::BUZZER_MUSIC_ERROR);
 					break;
-				} else if (action == CURVE_RIGHT_90 && wd->wall().side[1]) {
+				} else if (action == TURN_RIGHT_90 && wd->wall().side[1]) {
 					bz->play(Buzzer::BUZZER_MUSIC_ERROR);
 					break;
 				}
 				bz->play(Buzzer::BUZZER_MUSIC_SELECT);
 				while (1) {
-					float wall = wall_avoid(true, true);
-					sc->set_target(240, wall);
-					Thread::wait(1);
-					if (wd->wall().flont_flont[0]
-							&& wd->wall().flont_flont[1]) {
-						if (wd->wall_difference().flont[0] < 0
-								|| wd->wall_difference().flont[1] < 0) {
-							break;
-						}
-					} else {
-						if (enc->position() - start_position > 80) {
-							break;
-						}
-					}
-				}
-				start_angle = mpu->angleZ();
-				while (1) {
-					if (action == CURVE_LEFT_90) {
-						sc->set_target(150, 150 / 20);
+					if (action == TURN_LEFT_90) {
+						sc->set_target(200, 200 / 25);
 						if (mpu->angleZ() - start_angle > 90) {
 							break;
 						}
 					} else {
-						sc->set_target(150, -150 / 20);
+						sc->set_target(200, -200 / 25);
 						if (mpu->angleZ() - start_angle < -90) {
 							break;
 						}
@@ -278,53 +245,23 @@ private:
 					float wall = wall_avoid(true, true);
 					sc->set_target(240, wall);
 					Thread::wait(1);
-					if (enc->position() - start_position > 20) {
+					if (enc->position() - start_position > 80) {
 						break;
 					}
 				}
 				sc->set_target(0, 0);
 				break;
 			case RETURN:
-				while (1) {
-					float wall = wall_avoid(true, true);
-					sc->set_target(240, wall);
-					Thread::wait(1);
-					if (enc->position() - start_position > 90) {
-						break;
-					}
-				}
-				start_angle = mpu->angleZ();
 				while (mpu->angleZ() - start_angle < 180) {
 					sc->set_target(0, 240 / 30);
 					Thread::wait(1);
 				}
 				start_position = enc->position();
 				while (1) {
-					float wall = wall_avoid(true, false);
-					sc->set_target(240, wall);
-					Thread::wait(1);
-					if (start_wall.side[0] && !wd->wall().side[1]) {
-						break;
-					}
-					if (start_wall.side[1] && !wd->wall().side[0]) {
-						break;
-					}
-					if (!start_wall.side[0] && wd->wall().side[1]) {
-						break;
-					}
-					if (!start_wall.side[1] && wd->wall().side[0]) {
-						break;
-					}
-					if (enc->position() - start_position > 30) {
-						break;
-					}
-				}
-				start_position = enc->position();
-				while (1) {
 					float wall = wall_avoid(true, true);
 					sc->set_target(240, wall);
 					Thread::wait(1);
-					if (enc->position() - start_position > 20) {
+					if (enc->position() - start_position > 60) {
 						break;
 					}
 				}
