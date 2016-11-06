@@ -238,7 +238,7 @@ public:
 	WallDetector(Reflector *rfl) :
 			_rfl(rfl), updateThread(PRIORITY_WALL_UPDATE) {
 
-		const float gain = 1.0;
+		const float gain = 0.6;
 
 		_wall_ref.side[0] = 260 * gain;
 		_wall_ref.side[1] = 260 * gain;

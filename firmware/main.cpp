@@ -43,14 +43,13 @@ void debug_info() {
 //				wd->wall().flont[1] ? "X" : ".",
 //				wd->wall().side[1] ? "X" : ".");
 
-		printf(
-				"x: %07.3f\ty: %07.3f\ttheta: %07.3f\ttrans: %07.3f\tomega: %07.3f\n",
-				sc->position.x, sc->position.y, sc->position.theta,
-				sc->actual().trans, sc->actual().rot);
+//		printf("x: %07.3f\ty: %07.3f\ttheta: %07.3f\ttrans: %07.3f\tomega: %07.3f\n",
+//				sc->position.x, sc->position.y, sc->position.theta / M_PI * 180, sc->actual().trans,
+//				sc->actual().rot);
 
 //		printf("trans: %07.3f\n", sc->actual().trans);
 
-		printf("Angle: %09.3f\n", mpu->angleZ());
+//		printf("Angle: %09.3f\n", mpu->angleZ());
 
 //		printf("L: %ld\tR: %ld\n", enc->left(), enc->right());
 
@@ -96,6 +95,9 @@ void serial_ctrl() {
 				break;
 			case 'r':
 				ma->set_action(MoveAction::RETURN);
+				break;
+			case 'i':
+				ma->set_action(MoveAction::START_RETURN);
 				break;
 			case 's':
 				ma->set_action(MoveAction::START_STEP);

@@ -23,10 +23,8 @@
 
 class MPU6500: private SPI {
 public:
-	MPU6500(PinName mosi_pin, PinName miso_pin, PinName sclk_pin,
-			PinName cs_pin) :
-			SPI(mosi_pin, miso_pin, sclk_pin), cs(cs_pin, 1),
-					updateThread(PRIORITY_MPU6500_UPDATE) {
+	MPU6500(PinName mosi_pin, PinName miso_pin, PinName sclk_pin, PinName cs_pin) :
+			SPI(mosi_pin, miso_pin, sclk_pin), cs(cs_pin, 1), updateThread(PRIORITY_MPU6500_UPDATE) {
 		setup();
 		updateThread.start(this, &MPU6500::updateTask);
 		updateTicker.attach_us(this, &MPU6500::updateIsr,
@@ -59,8 +57,7 @@ private:
 		while (1) {
 			Thread::signal_wait(0x01);
 			_accelY = readAccY() * MPU6500_ACCEL_FACTOR / MPU6500_ACCEL_RANGE;
-			_gyroZ = (readGyrZ() - MPU6500_GYRO_OFFSET) * MPU6500_GYRO_FACTOR
-					/ MPU6500_GYRO_RANGE;
+			_gyroZ = (readGyrZ() - MPU6500_GYRO_OFFSET) * MPU6500_GYRO_FACTOR / MPU6500_GYRO_RANGE;
 			_angleZ += _gyroZ * MPU6500_UPDATE_PERIOD_US / 1000000;
 		}
 	}
