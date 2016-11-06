@@ -43,23 +43,25 @@ void debug_info() {
 //				wd->wall().flont[1] ? "X" : ".",
 //				wd->wall().side[1] ? "X" : ".");
 
-//		printf("x: %07.3f\ty: %07.3f\ttheta: %07.3f\n", sc->position.x,
-//				sc->position.y, sc->position.theta);
+		printf(
+				"x: %07.3f\ty: %07.3f\ttheta: %07.3f\ttrans: %07.3f\tomega: %07.3f\n",
+				sc->position.x, sc->position.y, sc->position.theta,
+				sc->actual().trans, sc->actual().rot);
 
 //		printf("trans: %07.3f\n", sc->actual().trans);
 
-//		printf("Angle: %05d\n", (int) mpu->angleZ());
+		printf("Angle: %09.3f\n", mpu->angleZ());
 
 //		printf("L: %ld\tR: %ld\n", enc->left(), enc->right());
 
 //		printf("Acc Y: %lf\n", mpu->accelY());
 
 //		for (int i = 0; i < 2; i++) {
-//			printf("P:%05d\tI:%05d\tD:%05d\t", (int) sc->wheel_p[i],
-//					(int) sc->wheel_i[i], (int) sc->wheel_d[i]);
+//			printf("P:%09.2f\tI:%09.2f\tD:%09.2f\t", sc->actual_p.wheel[i],
+//					sc->actual_i.wheel[i], sc->actual_d.wheel[i]);
 //		}
-//		printf("L:%05d\tR:%05d\t", (int) sc->target.wheel[0],
-//				(int) sc->target.wheel[1]);
+//		printf("L:%09.2f\tR:%09.2f\t", sc->target_p.wheel[0],
+//				sc->target_p.wheel[1]);
 //		printf("\n");
 	}
 }
@@ -97,6 +99,15 @@ void serial_ctrl() {
 				break;
 			case 's':
 				ma->set_action(MoveAction::START_STEP);
+				break;
+			case 'z':
+				sc->set_target(500, 0);
+				break;
+			case 'x':
+				sc->set_target(-500, 0);
+				break;
+			case 'c':
+				sc->set_target(0, 10);
 				break;
 		}
 	}
