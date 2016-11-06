@@ -8,6 +8,9 @@
 #ifndef MOTOR_H_
 #define MOTOR_H_
 
+#include "mbed.h"
+#include "config.h"
+
 #define MOTOR_TIMx						TIM2
 #define MOTOR_TIMx_CLK_ENABLE()			__HAL_RCC_TIM2_CLK_ENABLE()
 #define MOTOR_TIMx_CHANNEL_GPIO_PORT()	__HAL_RCC_GPIOA_CLK_ENABLE()
@@ -19,10 +22,7 @@
 #define MOTOR_TIMx_GPIO_PIN_CHANNEL2	GPIO_PIN_1
 #define MOTOR_TIMx_GPIO_PIN_CHANNEL3	GPIO_PIN_2
 #define MOTOR_TIMx_GPIO_PIN_CHANNEL4	GPIO_PIN_3
-#define MOTOR_TIMx_GPIO_AF_CHANNEL1		GPIO_AF1_TIM2
-#define MOTOR_TIMx_GPIO_AF_CHANNEL2		GPIO_AF1_TIM2
-#define MOTOR_TIMx_GPIO_AF_CHANNEL3		GPIO_AF1_TIM2
-#define MOTOR_TIMx_GPIO_AF_CHANNEL4		GPIO_AF1_TIM2
+#define MOTOR_TIMx_GPIO_AF_CHANNEL		GPIO_AF1_TIM2
 
 #define MOTOR_PERIOD_VALUE				(1000 - 1)
 
@@ -37,19 +37,19 @@ public:
 		GPIO_InitStruct.Pull = GPIO_PULLUP;
 		GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
 
-		GPIO_InitStruct.Alternate = MOTOR_TIMx_GPIO_AF_CHANNEL1;
+		GPIO_InitStruct.Alternate = MOTOR_TIMx_GPIO_AF_CHANNEL;
 		GPIO_InitStruct.Pin = MOTOR_TIMx_GPIO_PIN_CHANNEL1;
 		HAL_GPIO_Init(MOTOR_TIMx_GPIO_PORT_CHANNEL1, &GPIO_InitStruct);
 
-		GPIO_InitStruct.Alternate = MOTOR_TIMx_GPIO_AF_CHANNEL2;
+		GPIO_InitStruct.Alternate = MOTOR_TIMx_GPIO_AF_CHANNEL;
 		GPIO_InitStruct.Pin = MOTOR_TIMx_GPIO_PIN_CHANNEL2;
 		HAL_GPIO_Init(MOTOR_TIMx_GPIO_PORT_CHANNEL2, &GPIO_InitStruct);
 
-		GPIO_InitStruct.Alternate = MOTOR_TIMx_GPIO_AF_CHANNEL3;
+		GPIO_InitStruct.Alternate = MOTOR_TIMx_GPIO_AF_CHANNEL;
 		GPIO_InitStruct.Pin = MOTOR_TIMx_GPIO_PIN_CHANNEL3;
 		HAL_GPIO_Init(MOTOR_TIMx_GPIO_PORT_CHANNEL3, &GPIO_InitStruct);
 
-		GPIO_InitStruct.Alternate = MOTOR_TIMx_GPIO_AF_CHANNEL4;
+		GPIO_InitStruct.Alternate = MOTOR_TIMx_GPIO_AF_CHANNEL;
 		GPIO_InitStruct.Pin = MOTOR_TIMx_GPIO_PIN_CHANNEL4;
 		HAL_GPIO_Init(MOTOR_TIMx_GPIO_PORT_CHANNEL4, &GPIO_InitStruct);
 
@@ -126,8 +126,8 @@ public:
 		}
 	}
 	void drive(int16_t valueL, int16_t valueR) {
-		left(valueL);
 		right(valueR);
+		left(valueL);
 	}
 	void free() {
 		sConfig.Pulse = 0;
@@ -145,6 +145,10 @@ public:
 	}
 	void emergency_stop() {
 		emergency = true;
+		free();
+	}
+	void emergency_release() {
+		emergency = false;
 		free();
 	}
 private:

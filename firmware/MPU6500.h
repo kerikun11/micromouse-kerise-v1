@@ -9,6 +9,7 @@
 #define MPU6500_H_
 
 #include "mbed.h"
+#include "config.h"
 
 #define MPU6500_GYRO_RANGE			2000.0f
 #define MPU6500_GYRO_FACTOR			16.4f
@@ -19,14 +20,13 @@
 #define MPU6500_ACCEL_OFFSET		0
 
 #define MPU6500_UPDATE_PERIOD_US	1000
-#define MPU6500_UPDATE_PRIORITY		osPriorityHigh
 
 class MPU6500: private SPI {
 public:
 	MPU6500(PinName mosi_pin, PinName miso_pin, PinName sclk_pin,
 			PinName cs_pin) :
-			SPI(mosi_pin, miso_pin, sclk_pin), cs(cs_pin, 1), updateThread(
-			MPU6500_UPDATE_PRIORITY) {
+			SPI(mosi_pin, miso_pin, sclk_pin), cs(cs_pin, 1),
+					updateThread(PRIORITY_MPU6500_UPDATE) {
 		setup();
 		updateThread.start(this, &MPU6500::updateTask);
 		updateTicker.attach_us(this, &MPU6500::updateIsr,

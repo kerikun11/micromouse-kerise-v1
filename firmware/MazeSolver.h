@@ -8,6 +8,8 @@
 #ifndef MAZESOLVER_H_
 #define MAZESOLVER_H_
 
+#include "mbed.h"
+#include "config.h"
 #include "Controller.h"
 #include "MazeSolver.h"
 #include "MazeSolver/Agent.h"
@@ -17,7 +19,7 @@
 class MazeSolver {
 public:
 	MazeSolver(MoveAction *ma) :
-			ma(ma), agent(maze) {
+			ma(ma), agent(maze), thread(PRIORITY_MAZE_SOLVER) {
 	}
 public:
 	MoveAction *ma;
@@ -25,7 +27,11 @@ public:
 	Agent agent;
 	Thread thread;
 	Agent::State prevState = Agent::IDLE;
+	IndexVec pos;
 
+	void start() {
+		thread.start(this, &MazeSolver::task);
+	}
 	void robotMove(const Direction &dir) {
 
 	}
@@ -43,7 +49,6 @@ public:
 		return dir;
 	}
 	IndexVec getRobotPosion() {
-		IndexVec pos;
 		return pos;
 	}
 	void task() {

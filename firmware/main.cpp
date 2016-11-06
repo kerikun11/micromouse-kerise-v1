@@ -8,6 +8,7 @@
 #include "MPU6500.h"
 #include "Reflector.h"
 #include "Controller.h"
+#include "MazeSolver.h"
 
 /* define each pointer */
 BusOut *led;
@@ -25,21 +26,27 @@ WallDetector *wd;
 
 SpeedController *sc;
 MoveAction *ma;
+MazeSolver *ms;
 
 void debug_info() {
 	while (1) {
 		Thread::wait(100);
 
-		printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(),
-				rfl->sr());
-		printf("%s %s "
-				"%s %s "
-				"%s %s\n", wd->wall().side[0] ? "X" : ".",
-				wd->wall().flont[0] ? "X" : ".",
-				wd->wall().flont_flont[0] ? "X" : ".",
-				wd->wall().flont_flont[1] ? "X" : ".",
-				wd->wall().flont[1] ? "X" : ".",
-				wd->wall().side[1] ? "X" : ".");
+//		printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(),
+//				rfl->sr());
+//		printf("%s %s "
+//				"%s %s "
+//				"%s %s\n", wd->wall().side[0] ? "X" : ".",
+//				wd->wall().flont[0] ? "X" : ".",
+//				wd->wall().flont_flont[0] ? "X" : ".",
+//				wd->wall().flont_flont[1] ? "X" : ".",
+//				wd->wall().flont[1] ? "X" : ".",
+//				wd->wall().side[1] ? "X" : ".");
+
+//		printf("x: %07.3f\ty: %07.3f\ttheta: %07.3f\n", sc->position.x,
+//				sc->position.y, sc->position.theta);
+
+//		printf("trans: %07.3f\n", sc->actual().trans);
 
 //		printf("Angle: %05d\n", (int) mpu->angleZ());
 
@@ -61,34 +68,36 @@ void serial_ctrl() {
 	while (1) {
 		Thread::wait(100);
 		int c = getchar();
-		if (c == EOF)
-			continue;
+		if (c == EOF) continue;
 		printf("%c\n", (char) c);
 		switch (c) {
-		case 'g':
-			bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
-			sc->enable();
-			break;
-		case 'f':
-			bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
-			sc->disable();
-			mt->free();
-			break;
-		case 'b':
-			sc->set_target(0, 0);
-			break;
-		case 'w':
-			ma->set_action(MoveAction::GO_STRAIGHT);
-			break;
-		case 'q':
-			ma->set_action(MoveAction::TURN_LEFT_90);
-			break;
-		case 'e':
-			ma->set_action(MoveAction::TURN_RIGHT_90);
-			break;
-		case 'r':
-			ma->set_action(MoveAction::RETURN);
-			break;
+			case 'g':
+				bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
+				sc->enable();
+				break;
+			case 'f':
+				bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
+				sc->disable();
+				mt->free();
+				break;
+			case 'b':
+				sc->set_target(0, 0);
+				break;
+			case 'w':
+				ma->set_action(MoveAction::GO_STRAIGHT);
+				break;
+			case 'q':
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				break;
+			case 'e':
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				break;
+			case 'r':
+				ma->set_action(MoveAction::RETURN);
+				break;
+			case 's':
+				ma->set_action(MoveAction::START_STEP);
+				break;
 		}
 	}
 }
@@ -96,7 +105,7 @@ void serial_ctrl() {
 void emergencyTask() {
 	while (1) {
 		Thread::wait(1);
-		if (mpu->accelY() < -2000000) {
+		if (mpu->accelY() < -2500000) {
 			mt->emergency_stop();
 			bz->play(Buzzer::BUZZER_MUSIC_EMERGENCY);
 			while (1) {
@@ -123,8 +132,9 @@ int main() {
 	rfl = new Reflector(IR_LED_SL_FR_PIN, IR_LED_SR_FL_PIN);
 	wd = new WallDetector(rfl);
 
-	sc = new SpeedController(mt, enc);
+	sc = new SpeedController(mt, enc, mpu);
 	ma = new MoveAction(bz, enc, mpu, rfl, wd, sc);
+	ms = new MazeSolver(ma);
 
 	/* boot */
 	{
@@ -145,11 +155,11 @@ int main() {
 	}
 
 	/* for debug */
-	Thread debugInfoThread(osPriorityBelowNormal);
+	Thread debugInfoThread(PRIORITY_DEBUG_INFO);
 	debugInfoThread.start(debug_info);
-	Thread serialCtrlThread(osPriorityLow);
+	Thread serialCtrlThread(PRIORITY_SERIAL_CTRL);
 	serialCtrlThread.start(serial_ctrl);
-	Thread emergencyThread(osPriorityAboveNormal);
+	Thread emergencyThread(PRIORITY_EMERGENCY_STOP);
 	emergencyThread.start(emergencyTask);
 
 	while (true) {

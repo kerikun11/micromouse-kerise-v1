@@ -8,6 +8,54 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+/* Thread Priorities */
+
+#define PRIORITY_IR_RECEIVER_UPDATE	osPriorityHigh
+#define PRIORITY_MPU6500_UPDATE		osPriorityHigh
+
+#define PRIORITY_WALL_UPDATE		osPriorityAboveNormal
+#define PRIORITY_ENCODER_UPDATE		osPriorityAboveNormal
+
+#define PRIORITY_EMERGENCY_STOP		osPriorityAboveNormal
+#define PRIORITY_SPEED_CONTROLLER	osPriorityAboveNormal
+
+#define PRIORITY_MOVE_ACTION		osPriorityNormal
+#define PRIORITY_BUZZER				osPriorityNormal
+
+#define PRIORITY_MAZE_SOLVER		osPriorityBelowNormal
+
+#define PRIORITY_DEBUG_INFO			osPriorityLow
+
+#define PRIORITY_SERIAL_CTRL		osPriorityIdle
+
+/* Hardware Parameter */
+
+#define MACHINE_ROTATION_RADIUS		33.0f	// [mm]
+#define WHEEL_DIAMETER_MM			24.5
+#define WHEEL_GEER_RATIO			0.25
+#define ENCODER_PULSES				(1024*4)
+
+/* Pin Mapping */
+
+#define BATTERY_PIN			PB_1
+
+#define BUZZER_PIN			PB_9	//< Modify PeripheralPins.c PWM Pin using Timer11
+
+#define BUTTON_PIN			PB_0
+
+#define LED1_PIN			PC_5
+#define LED2_PIN			PC_6
+#define LED3_PIN			PC_7
+#define LED4_PIN			PC_8
+
+#define MPU6500_MOSI_PIN	PA_7
+#define MPU6500_MISO_PIN	PA_6
+#define MPU6500_SCLK_PIN	PA_5
+#define MPU6500_SSEL_PIN	PA_4
+
+#define IR_LED_SL_FR_PIN	PB_14
+#define IR_LED_SR_FL_PIN	PB_15
+
 /*
  * PA0	Motor IN1 L		TIM2_CH1				HAL
  * PA1	Motor IN2 L		TIM2_CH2				HAL
@@ -59,33 +107,6 @@
  * PC13	NC
  * PC14	NC
  * PC15	NC
- *
- * P
  */
-
-#define BATTERY_PIN			PB_1
-
-//#define MOTOR_L_CTRL1_PIN	PA_0
-//#define MOTOR_L_CTRL2_PIN	PA_1
-//#define MOTOR_R_CTRL1_PIN	PA_2
-//#define MOTOR_R_CTRL2_PIN	PA_3
-
-// Modify PeripheralPins.c PWM Pin using Timer11
-#define BUZZER_PIN			PB_9
-
-#define BUTTON_PIN			PB_0
-
-#define LED1_PIN			PC_5
-#define LED2_PIN			PC_6
-#define LED3_PIN			PC_7
-#define LED4_PIN			PC_8
-
-#define MPU6500_MOSI_PIN	PA_7
-#define MPU6500_MISO_PIN	PA_6
-#define MPU6500_SCLK_PIN	PA_5
-#define MPU6500_SSEL_PIN	PA_4
-
-#define IR_LED_SL_FR_PIN	PB_14
-#define IR_LED_SR_FL_PIN	PB_15
 
 #endif /* CONFIG_H_ */

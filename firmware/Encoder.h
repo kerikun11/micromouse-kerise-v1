@@ -8,23 +8,21 @@
 #ifndef ENCODER_H_
 #define ENCODER_H_
 
+#include "mbed.h"
+#include "config.h"
+
 #define MOTOR_CH_L	0
 #define MOTOR_CH_R	1
 
 #define ENCODER_L_TIMx	TIM3
 #define ENCODER_R_TIMx	TIM4
 
-#define ENCODER_UPDATE_PRIORITY		osPriorityBelowNormal
-
 #define ENCODER_UPDATE_PERIOD_US	100
-#define WHEEL_DIAMETER_MM			24.5
-#define WHEEL_GEER_RATIO			0.25
-#define ENCODER_PULSES				(1024*4)
 
 class Encoder {
 public:
 	Encoder(TIM_TypeDef *TIMx) :
-			updateThread(ENCODER_UPDATE_PRIORITY) {
+			updateThread(PRIORITY_ENCODER_UPDATE) {
 		EncoderInit(TIMx, 0xffff, TIM_ENCODERMODE_TI12);
 		updateThread.start(this, &Encoder::updateTask);
 		prev_count = 0;

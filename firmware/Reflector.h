@@ -9,7 +9,8 @@
 #define REFLECTOR_H_
 
 #include "mbed.h"
-#include "FFT.h"
+#include "config.h"
+#include "QuadratureDemodulator.h"
 
 /* Definition for ADCx clock resources */
 #define ADCx_S							ADC2
@@ -40,13 +41,12 @@
 #define IR_RECEIVER_SAMPLE_SIZE			25
 #define IR_RECEIVER_SAMPLING_PERIOD_US	20
 #define IR_RECEIVER_UPDATE_PERIOD_US	1000
-#define IR_RECEIVER_UPDATE_PRIORITY		osPriorityHigh
 
 class Reflector {
 public:
 	Reflector(PinName led_sl_fr_pin, PinName led_sr_fl_pin) :
-			led_sl_fr(led_sl_fr_pin), led_sr_fl(led_sr_fl_pin), updateThread(
-			IR_RECEIVER_UPDATE_PRIORITY) {
+			led_sl_fr(led_sl_fr_pin), led_sr_fl(led_sr_fl_pin),
+					updateThread(PRIORITY_IR_RECEIVER_UPDATE) {
 		led_sl_fr.period_us(IR_LED_PERIOD_US);
 		led_sr_fl.period_us(IR_LED_PERIOD_US);
 		adcInitialize();
@@ -62,16 +62,12 @@ public:
 	}
 
 	int16_t side(uint8_t left_or_right) {
-		if (left_or_right == 0)
-			return sl();
-		else
-			return sr();
+		if (left_or_right == 0) return sl();
+		else return sr();
 	}
 	int16_t flont(uint8_t left_or_right) {
-		if (left_or_right == 0)
-			return fl();
-		else
-			return fr();
+		if (left_or_right == 0) return fl();
+		else return fr();
 	}
 	int16_t sl() {
 		return distance[1];
@@ -236,26 +232,25 @@ private:
 };
 
 #define WALL_UPDATE_PERIOD_US		1000
-#define WALL_UPDATE_PRIORITY		osPriorityAboveNormal
 
 class WallDetector {
 public:
 	WallDetector(Reflector *rfl) :
-			_rfl(rfl), updateThread(WALL_UPDATE_PRIORITY) {
+			_rfl(rfl), updateThread(PRIORITY_WALL_UPDATE) {
 
 		const float gain = 1.0;
 
-		_wall_ref.side[0] = 240 * gain;
-		_wall_ref.side[1] = 240 * gain;
+		_wall_ref.side[0] = 260 * gain;
+		_wall_ref.side[1] = 260 * gain;
 		_wall_ref.flont[0] = 230 * gain;
 		_wall_ref.flont[1] = 230 * gain;
 		_wall_ref.flont_flont[0] = 65 * gain;
 		_wall_ref.flont_flont[1] = 65 * gain;
 
-		_wall_distance.side[0] = 660 * gain;
-		_wall_distance.side[1] = 460 * gain;
-		_wall_distance.flont[0] = 250 * gain;
-		_wall_distance.flont[1] = 250 * gain;
+		_wall_distance.side[0] = 900 * gain;
+		_wall_distance.side[1] = 670 * gain;
+		_wall_distance.flont[0] = 200 * gain;
+		_wall_distance.flont[1] = 200 * gain;
 		_wall_distance.flont_flont[0] = 100 * gain;
 		_wall_distance.flont_flont[1] = 100 * gain;
 
@@ -298,28 +293,26 @@ private:
 			Thread::signal_wait(0x01);
 			for (int i = 0; i < 2; i++) {
 				int16_t value = _rfl->side(i);
-				if (value > _wall_ref.side[i] * 1.05)
-					_wall.side[i] = true;
-				else if (value < _wall_ref.side[i] * 0.95)
-					_wall.side[i] = false;
+				if (value > _wall_ref.side[i] * 1.05) _wall.side[i] = true;
+				else if (value < _wall_ref.side[i] * 0.95) _wall.side[i] =
+						false;
 				_wall_difference.side[i] = (_wall_distance.side[i] - value)
 						/ _wall_distance.side[i];
 			}
 			for (int i = 0; i < 2; i++) {
 				int16_t value = _rfl->flont(i);
-				if (value > _wall_ref.flont[i] * 1.05)
-					_wall.flont[i] = true;
-				else if (value < _wall_ref.flont[i] * 0.95)
-					_wall.flont[i] = false;
+				if (value > _wall_ref.flont[i] * 1.05) _wall.flont[i] = true;
+				else if (value < _wall_ref.flont[i] * 0.95) _wall.flont[i] =
+						false;
 				_wall_difference.flont[i] = (_wall_distance.flont[i] - value)
 						/ _wall_distance.flont[i];
 			}
 			for (int i = 0; i < 2; i++) {
 				int16_t value = _rfl->flont(i);
-				if (value > _wall_ref.flont_flont[i] * 1.05)
-					_wall.flont_flont[i] = true;
-				else if (value < _wall_ref.flont_flont[i] * 0.95)
-					_wall.flont_flont[i] = false;
+				if (value > _wall_ref.flont_flont[i] * 1.05) _wall.flont_flont[i] =
+						true;
+				else if (value < _wall_ref.flont_flont[i] * 0.95) _wall
+						.flont_flont[i] = false;
 				_wall_difference.flont_flont[i] = (_wall_distance.flont_flont[i]
 						- value) / _wall_distance.flont_flont[i];
 			}

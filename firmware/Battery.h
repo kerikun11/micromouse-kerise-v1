@@ -8,6 +8,7 @@
 #define BATTERY_H_
 
 #include "mbed.h"
+#include "config.h"
 
 class Battery{
 public:
