@@ -5,13 +5,12 @@
  * 迷路に関するパラメータ
  ***************************************/
 //迷路の大きさ
-#define MAZE_SIZE 16
+#define MAZE_SIZE 8
 
 //迷路のゴール座標
 //ゴールとしたい座標を並べる
 //4個でなくてもよい
-#define MAZE_GOAL_LIST { IndexVec(7,7), IndexVec(7,8), IndexVec(8,7), IndexVec(8,8) }
-
+#define MAZE_GOAL_LIST {IndexVec(7,7)}
 
 /****************************************
  * 探索アルゴリズムに関するパラメータ
@@ -21,7 +20,6 @@
 
 //探索が終了し、最終的な走行ルートを計算するときのk
 #define SEARCH_DEPTH2 20
-
 
 //経路のコストを計算するときに使うロボットの走行性能
 //90度曲がるブロックを進むのにかかる時間[s]
@@ -41,6 +39,5 @@
 
 //1区画の長さ[m]
 #define MAZE_1BLOCK_LENGTH 	0.18
-
 
 #endif /* MAZESOLVER_CONF_H_ */

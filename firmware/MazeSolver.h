@@ -18,22 +18,81 @@
 
 class MazeSolver {
 public:
-	MazeSolver(MoveAction *ma) :
-			ma(ma), agent(maze), thread(PRIORITY_MAZE_SOLVER) {
+	MazeSolver(MoveAction *ma, WallDetector *wd) :
+			ma(ma), wd(wd), agent(maze), thread(PRIORITY_MAZE_SOLVER) {
 	}
 public:
 	MoveAction *ma;
+	WallDetector *wd;
 	Maze maze, maze_backup;
 	Agent agent;
 	Thread thread;
 	Agent::State prevState = Agent::IDLE;
+	Direction dir;
 	IndexVec pos;
 
 	void start() {
+		ma->enable();
 		thread.start(this, &MazeSolver::task);
 	}
-	void robotMove(const Direction &dir) {
-
+	void robotMove(const Direction &nextDir) {
+		if (dir == NORTH) {
+			if (nextDir == NORTH) {
+				ma->set_action(MoveAction::GO_STRAIGHT);
+				pos.y++;
+			} else if (nextDir == EAST) {
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				pos.x++;
+			} else if (nextDir == SOUTH) {
+				ma->set_action(MoveAction::RETURN);
+				pos.y--;
+			} else if (nextDir == WEST) {
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				pos.x--;
+			}
+		} else if (dir == EAST) {
+			if (nextDir == NORTH) {
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				pos.y++;
+			} else if (nextDir == EAST) {
+				ma->set_action(MoveAction::GO_STRAIGHT);
+				pos.x++;
+			} else if (nextDir == SOUTH) {
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				pos.y--;
+			} else if (nextDir == WEST) {
+				ma->set_action(MoveAction::RETURN);
+				pos.x--;
+			}
+		} else if (dir == SOUTH) {
+			if (nextDir == NORTH) {
+				ma->set_action(MoveAction::RETURN);
+				pos.y++;
+			} else if (nextDir == EAST) {
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				pos.x++;
+			} else if (nextDir == SOUTH) {
+				ma->set_action(MoveAction::GO_STRAIGHT);
+				pos.y--;
+			} else if (nextDir == WEST) {
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				pos.x--;
+			}
+		} else if (dir == WEST) {
+			if (nextDir == NORTH) {
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				pos.y++;
+			} else if (nextDir == EAST) {
+				ma->set_action(MoveAction::RETURN);
+				pos.x++;
+			} else if (nextDir == SOUTH) {
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				pos.y--;
+			} else if (nextDir == WEST) {
+				ma->set_action(MoveAction::GO_STRAIGHT);
+				pos.x--;
+			}
+		}
 	}
 	void robotMove(const Operation &op) {
 
@@ -45,15 +104,65 @@ public:
 		return false;
 	}
 	Direction getWallData() {
-		Direction dir;
-		return dir;
+		printf("%s %s %s %s\n", wd->wall().side[0] ? "X" : ".", wd->wall().flont[0] ? "X" : ".",
+				wd->wall().flont[1] ? "X" : ".", wd->wall().side[1] ? "X" : ".");
+		Direction wall;
+		if (dir == NORTH) {
+			if (wd->wall().side[0]) {
+				wall |= WEST;
+			}
+			if (wd->wall().side[1]) {
+				wall |= EAST;
+			}
+			if (wd->wall().flont[0] && wd->wall().flont[1]) {
+				wall |= NORTH;
+			}
+		} else if (dir == EAST) {
+			if (wd->wall().side[0]) {
+				wall |= NORTH;
+			}
+			if (wd->wall().side[1]) {
+				wall |= SOUTH;
+			}
+			if (wd->wall().flont[0] && wd->wall().flont[1]) {
+				wall |= EAST;
+			}
+		} else if (dir == SOUTH) {
+			if (wd->wall().side[0]) {
+				wall |= EAST;
+			}
+			if (wd->wall().side[1]) {
+				wall |= WEST;
+			}
+			if (wd->wall().flont[0] && wd->wall().flont[1]) {
+				wall |= SOUTH;
+			}
+		} else if (dir == WEST) {
+			if (wd->wall().side[0]) {
+				wall |= SOUTH;
+			}
+			if (wd->wall().side[1]) {
+				wall |= NORTH;
+			}
+			if (wd->wall().flont[0] && wd->wall().flont[1]) {
+				wall |= WEST;
+			}
+		}
+		wall |= DONE_NORTH;
+		wall |= DONE_EAST;
+		wall |= DONE_SOUTH;
+		wall |= DONE_WEST;
+		return wall;
 	}
 	IndexVec getRobotPosion() {
 		return pos;
 	}
 	void task() {
+		ma->set_action(MoveAction::START_STEP);
+		pos.y++;
 		while (1) {
-			Thread::signal_wait(0x01);
+			while (ma->actions()) {
+			}
 
 			Direction wallData = getWallData();		//< センサから取得した壁情報を入れる
 			IndexVec robotPos = getRobotPosion();	//< ロボットの座標を取得
@@ -76,7 +185,7 @@ public:
 //				agent.forceGotoStart();
 //			}
 
-			Direction nextDir = agent.getNextDirection();//< Agentの状態が探索中の場合は次に進むべき方向を取得する
+			Direction nextDir = agent.getNextDirection();		//< Agentの状態が探索中の場合は次に進むべき方向を取得する
 			robotMove(nextDir);  //< robotMove関数はDirection型を受け取ってロボットをそっちに動かす関数
 		}
 

@@ -128,15 +128,17 @@ public:
 		_actions = 0;
 	}
 	enum ACTION {
-		START_STEP, START_RETURN, GO_STRAIGHT, TURN_LEFT_90, TURN_RIGHT_90, RETURN,
+		START_STEP, START_INIT, GO_STRAIGHT, TURN_LEFT_90, TURN_RIGHT_90, RETURN,
 //		GO_DIAGONAL,
 //		TURN_LEFT_45,
 //		TURN_RIGHT_45,
 	};
 	void enable() {
+		sc->enable();
 		thread.start(this, &MoveAction::task);
 	}
 	void disable() {
+		sc->disable();
 		thread.terminate();
 	}
 	void set_action(enum ACTION action) {
@@ -159,6 +161,11 @@ private:
 	int _actions;
 	struct WallDetector::WALL start_wall;
 
+	const char* action_string(enum ACTION action) {
+		static const char name[][32] = { "start_step", "start_init", "go_straight", "turn_left_90",
+				"turn_right_90", "return" };
+		return name[action];
+	}
 	float wall_avoid(bool side, bool flont) {
 		float wall = 0;
 		if (side) {
@@ -262,6 +269,7 @@ private:
 				continue;
 			}
 			enum ACTION action = (enum ACTION) evt.value.v;
+			printf("Action: %s\n", action_string(action));
 			start_wall = wd->wall();
 			sc->position.x = 0;
 			sc->position.y = 0;
@@ -271,7 +279,7 @@ private:
 					straight(500, 180 - 24);
 					sc->set_target(0, 0);
 					break;
-				case START_RETURN:
+				case START_INIT:
 					straight(500, 100);
 					uturn();
 					sc->set_target(-100, 0);
