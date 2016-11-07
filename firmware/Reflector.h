@@ -238,7 +238,8 @@ public:
 	WallDetector(Reflector *rfl) :
 			_rfl(rfl), updateThread(PRIORITY_WALL_UPDATE) {
 
-		const float gain = 0.6;
+//		const float gain = 0.6;
+		const float gain = 1.0f;
 
 		_wall_ref.side[0] = 260 * gain;
 		_wall_ref.side[1] = 260 * gain;
@@ -249,8 +250,8 @@ public:
 
 		_wall_distance.side[0] = 900 * gain;
 		_wall_distance.side[1] = 670 * gain;
-		_wall_distance.flont[0] = 200 * gain;
-		_wall_distance.flont[1] = 200 * gain;
+		_wall_distance.flont[0] = 450 * gain;
+		_wall_distance.flont[1] = 450 * gain;
 		_wall_distance.flont_flont[0] = 100 * gain;
 		_wall_distance.flont_flont[1] = 100 * gain;
 
@@ -294,27 +295,23 @@ private:
 			for (int i = 0; i < 2; i++) {
 				int16_t value = _rfl->side(i);
 				if (value > _wall_ref.side[i] * 1.05) _wall.side[i] = true;
-				else if (value < _wall_ref.side[i] * 0.95) _wall.side[i] =
-						false;
+				else if (value < _wall_ref.side[i] * 0.95) _wall.side[i] = false;
 				_wall_difference.side[i] = (_wall_distance.side[i] - value)
 						/ _wall_distance.side[i];
 			}
 			for (int i = 0; i < 2; i++) {
 				int16_t value = _rfl->flont(i);
 				if (value > _wall_ref.flont[i] * 1.05) _wall.flont[i] = true;
-				else if (value < _wall_ref.flont[i] * 0.95) _wall.flont[i] =
-						false;
+				else if (value < _wall_ref.flont[i] * 0.95) _wall.flont[i] = false;
 				_wall_difference.flont[i] = (_wall_distance.flont[i] - value)
 						/ _wall_distance.flont[i];
 			}
 			for (int i = 0; i < 2; i++) {
 				int16_t value = _rfl->flont(i);
-				if (value > _wall_ref.flont_flont[i] * 1.05) _wall.flont_flont[i] =
-						true;
-				else if (value < _wall_ref.flont_flont[i] * 0.95) _wall
-						.flont_flont[i] = false;
-				_wall_difference.flont_flont[i] = (_wall_distance.flont_flont[i]
-						- value) / _wall_distance.flont_flont[i];
+				if (value > _wall_ref.flont_flont[i] * 1.05) _wall.flont_flont[i] = true;
+				else if (value < _wall_ref.flont_flont[i] * 0.95) _wall.flont_flont[i] = false;
+				_wall_difference.flont_flont[i] = (_wall_distance.flont_flont[i] - value)
+						/ _wall_distance.flont_flont[i];
 			}
 		}
 	}

@@ -177,6 +177,9 @@ private:
 		return wall;
 	}
 	void straight(float speed, float target_position) {
+		sc->position.x = 0;
+		sc->position.y = 0;
+		sc->position.theta = 0;
 		timer.reset();
 		timer.start();
 		while (1) {
@@ -196,15 +199,13 @@ private:
 				break;
 			}
 			Thread::wait(1);
-			if (sc->actual().trans < 0.1) break;
+			if (abs(sc->actual().trans) < 0.1) break;
 		}
-		error.x = sc->position.x - target_position;
-//		error.y = sc->position.y - 0;
-		error.y = 0;
-		error.theta = sc->position.theta - 0;
-		printf("Position Error: x:%07.2f\ty:%07.2f\tth:%07.2f\n", error.x, error.y, error.theta);
 	}
 	void uturn() {
+		sc->position.x = 0;
+		sc->position.y = 0;
+		sc->position.theta = 0;
 		timer.reset();
 		timer.start();
 		float speed = 1.2 * M_PI;
@@ -224,61 +225,33 @@ private:
 				break;
 			}
 			Thread::wait(1);
-			if (sc->actual().rot < 0.01) break;
+			if (abs(sc->actual().rot) < 0.01) break;
 		}
-		error.x = (sc->position.x - 0) * (-1);
-		error.y = (sc->position.y - 0) * (-1);
-		error.theta = sc->position.theta - M_PI;
-		printf("Position Error: x:%07.2f\ty:%07.2f\tth:%07.2f\n", error.x, error.y, error.theta);
 	}
-	void turn(bool isLeft) {
+	void turn(float speed, float target_angle) {
 		timer.reset();
 		timer.start();
-		float speed = 270.0f;
-		float sign = isLeft ? (1) : (-1);
 		while (1) {
-			float x = sc->position.x;
-			float y = sign * sc->position.y;
-//			float theta = sign * sc->position.theta;
-			float trans = timer.read() * 1800;
-			float err = 1 - (x * x + (y - 90) * (y - 90)) / 90 / 90;
-			sc->set_target(trans, sign * err + sign * trans / 90);
-			Thread::wait(1);
-			if (sc->actual().trans > speed) break;
-		}
-		while (1) {
-			float x = sc->position.x;
-			float y = sign * sc->position.y;
-//			float theta = sign * sc->position.theta;
-			float trans = speed;
-			float err = 1 - (x * x + (y - 90) * (y - 90)) / 90 / 90;
-			sc->set_target(trans, sign * err + sign * trans / 90);
-			Thread::wait(1);
-			if (y > 80) break;
-		}
-		while (1) {
-//			float x = sc->position.x;
-			float y = sign * sc->position.y;
-//			float theta = sign * sc->position.theta;
-			float extra = 90 - y;
-			if (extra > 0) {
-				float trans = sqrt(2 * 1800 * extra);
-				trans = (trans > speed) ? speed : trans;
-				sc->set_target(trans, sign * trans / 90);
+			if (target_angle > 0) {
+				sc->set_target(0, timer.read() * 16 * M_PI);
 			} else {
-				break;
+				sc->set_target(0, -timer.read() * 16 * M_PI);
 			}
 			Thread::wait(1);
-			if (sc->actual().trans < 0.1) break;
+			if (abs(sc->actual().rot) > speed) break;
 		}
-		float error_x = sc->position.x - 90;
-		float error_y = sc->position.y - sign * 90;
-		float error_theta = sign * M_PI / 2 - sc->position.theta;
-		printf("Position Error: x:%07.2f\ty:%07.2f\tth:%07.2f\n", error_x, error_y, error_theta);
-		error.x = isLeft ? error_y : (-error_y);
-		error.y = isLeft ? (-error_x) : error_x;
-		error.theta = error_theta;
-		printf("Position Error: x:%07.2f\ty:%07.2f\tth:%07.2f\n", error.x, error.y, error.theta);
+		while (1) {
+			float extra = target_angle - sc->position.theta;
+			float target_speed = sqrt(2 * 16 * M_PI * abs(extra));
+			target_speed = (target_speed > speed) ? speed : target_speed;
+			if (extra > 0) {
+				sc->set_target(0, target_speed);
+			} else {
+				sc->set_target(0, -target_speed);
+			}
+			Thread::wait(1);
+			if (abs(sc->actual().rot) < 0.01) break;
+		}
 	}
 	void task() {
 		while (1) {
@@ -289,9 +262,12 @@ private:
 			}
 			enum ACTION action = (enum ACTION) evt.value.v;
 			start_wall = wd->wall();
-			sc->position.x = error.x;
-			sc->position.y = error.y;
-			sc->position.theta = error.theta;
+//			sc->position.x = error.x;
+//			sc->position.y = error.y;
+//			sc->position.theta = error.theta;
+			sc->position.x = 0;
+			sc->position.y = 0;
+			sc->position.theta = 0;
 			switch (action) {
 				case START_STEP:
 					straight(500, 180 - 24);
@@ -306,11 +282,15 @@ private:
 					sc->set_target(0, 0);
 					break;
 				case TURN_LEFT_90:
-					turn(true);
+					straight(500, 90);
+					turn(1.2 * M_PI, M_PI / 2 * 1.06);
+					straight(500, 90);
 					sc->set_target(0, 0);
 					break;
 				case TURN_RIGHT_90:
-					turn(false);
+					straight(500, 90);
+					turn(1.2 * M_PI, -M_PI / 2 * 1.06);
+					straight(500, 90);
 					sc->set_target(0, 0);
 					break;
 				case RETURN:

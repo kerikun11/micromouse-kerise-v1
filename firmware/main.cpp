@@ -32,16 +32,12 @@ void debug_info() {
 	while (1) {
 		Thread::wait(100);
 
-//		printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(),
-//				rfl->sr());
-//		printf("%s %s "
-//				"%s %s "
-//				"%s %s\n", wd->wall().side[0] ? "X" : ".",
-//				wd->wall().flont[0] ? "X" : ".",
-//				wd->wall().flont_flont[0] ? "X" : ".",
-//				wd->wall().flont_flont[1] ? "X" : ".",
-//				wd->wall().flont[1] ? "X" : ".",
-//				wd->wall().side[1] ? "X" : ".");
+		printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(), rfl->sr());
+		printf("%s %s "
+				"%s %s "
+				"%s %s\n", wd->wall().side[0] ? "X" : ".", wd->wall().flont[0] ? "X" : ".",
+				wd->wall().flont_flont[0] ? "X" : ".", wd->wall().flont_flont[1] ? "X" : ".",
+				wd->wall().flont[1] ? "X" : ".", wd->wall().side[1] ? "X" : ".");
 
 //		printf("x: %07.3f\ty: %07.3f\ttheta: %07.3f\ttrans: %07.3f\tomega: %07.3f\n",
 //				sc->position.x, sc->position.y, sc->position.theta / M_PI * 180, sc->actual().trans,
