@@ -71,9 +71,11 @@ void serial_ctrl() {
 			case 'g':
 				bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
 				sc->enable();
+				ma->enable();
 				break;
 			case 'f':
 				bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
+				ma->disable();
 				sc->disable();
 				mt->free();
 				break;

@@ -12,7 +12,7 @@
 #include "config.h"
 
 #define MPU6500_GYRO_RANGE			2000.0f
-#define MPU6500_GYRO_FACTOR			16.4f
+#define MPU6500_GYRO_FACTOR			15.4f
 #define MPU6500_GYRO_OFFSET			65
 
 #define MPU6500_ACCEL_RANGE			16.0f

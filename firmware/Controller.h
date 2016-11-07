@@ -126,10 +126,6 @@ public:
 			SpeedController *sc) :
 			bz(bz), enc(enc), mpu(mpu), rfl(rfl), wd(wd), sc(sc), thread(PRIORITY_MOVE_ACTION) {
 		_actions = 0;
-		error.x = 0;
-		error.y = 0;
-		error.theta = 0;
-		thread.start(this, &MoveAction::task);
 	}
 	enum ACTION {
 		START_STEP, START_RETURN, GO_STRAIGHT, TURN_LEFT_90, TURN_RIGHT_90, RETURN,
@@ -137,6 +133,12 @@ public:
 //		TURN_LEFT_45,
 //		TURN_RIGHT_45,
 	};
+	void enable() {
+		thread.start(this, &MoveAction::task);
+	}
+	void disable() {
+		thread.terminate();
+	}
 	void set_action(enum ACTION action) {
 		queue.put((enum ACTION*) action);
 		_actions++;
@@ -155,7 +157,6 @@ private:
 	Queue<enum ACTION, 128> queue;
 	Timer timer;
 	int _actions;
-	SpeedController::position_t error;
 	struct WallDetector::WALL start_wall;
 
 	float wall_avoid(bool side, bool flont) {
@@ -262,9 +263,6 @@ private:
 			}
 			enum ACTION action = (enum ACTION) evt.value.v;
 			start_wall = wd->wall();
-//			sc->position.x = error.x;
-//			sc->position.y = error.y;
-//			sc->position.theta = error.theta;
 			sc->position.x = 0;
 			sc->position.y = 0;
 			sc->position.theta = 0;
@@ -274,21 +272,28 @@ private:
 					sc->set_target(0, 0);
 					break;
 				case START_RETURN:
-					straight(500, 120);
+					straight(500, 100);
 					uturn();
+					sc->set_target(-100, 0);
+					Thread::wait(100);
+					while (1) {
+						Thread::wait(1);
+						if (sc->position.x > 170) break;
+					}
+					straight(0, 0);
 					break;
 				case GO_STRAIGHT:
 					straight(500, 180);
 					sc->set_target(0, 0);
 					break;
 				case TURN_LEFT_90:
-					straight(500, 90);
+					straight(300, 90);
 					turn(1.2 * M_PI, M_PI / 2 * 1.06);
 					straight(500, 90);
 					sc->set_target(0, 0);
 					break;
 				case TURN_RIGHT_90:
-					straight(500, 90);
+					straight(300, 90);
 					turn(1.2 * M_PI, -M_PI / 2 * 1.06);
 					straight(500, 90);
 					sc->set_target(0, 0);
