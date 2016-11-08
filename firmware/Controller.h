@@ -142,8 +142,8 @@ public:
 		thread.terminate();
 	}
 	void set_action(enum ACTION action) {
-		queue.put((enum ACTION*) action);
 		_actions++;
+		queue.put((enum ACTION*) action);
 	}
 	int actions() const {
 		return _actions;
@@ -210,32 +210,6 @@ private:
 			if (abs(sc->actual().trans) < 0.1) break;
 		}
 	}
-	void uturn() {
-		sc->position.x = 0;
-		sc->position.y = 0;
-		sc->position.theta = 0;
-		timer.reset();
-		timer.start();
-		float speed = 1.2 * M_PI;
-		while (1) {
-			sc->set_target(0, timer.read() * 16 * M_PI);
-			Thread::wait(1);
-			if (sc->actual().rot > speed) break;
-		}
-		float target_position = M_PI;
-		while (1) {
-			float extra = target_position - sc->position.theta;
-			float target_speed = sqrt(2 * 2 * M_PI * extra);
-			target_speed = (target_speed > speed) ? speed : target_speed;
-			if (extra > 0) {
-				sc->set_target(0, target_speed);
-			} else {
-				break;
-			}
-			Thread::wait(1);
-			if (abs(sc->actual().rot) < 0.01) break;
-		}
-	}
 	void turn(float speed, float target_angle) {
 		timer.reset();
 		timer.start();
@@ -281,33 +255,33 @@ private:
 					break;
 				case START_INIT:
 					straight(500, 100);
-					uturn();
+					turn(1.2 * M_PI, M_PI * 1.06);
 					sc->set_target(-100, 0);
 					Thread::wait(100);
 					while (1) {
 						Thread::wait(1);
 						if (sc->position.x > 170) break;
 					}
-					straight(0, 0);
+					sc->set_target(0, 0);
 					break;
 				case GO_STRAIGHT:
 					straight(500, 180);
 					sc->set_target(0, 0);
 					break;
 				case TURN_LEFT_90:
-					straight(300, 90);
+					straight(200, 90);
 					turn(1.2 * M_PI, M_PI / 2 * 1.06);
-					straight(500, 90);
+					straight(200, 90);
 					sc->set_target(0, 0);
 					break;
 				case TURN_RIGHT_90:
-					straight(300, 90);
+					straight(200, 90);
 					turn(1.2 * M_PI, -M_PI / 2 * 1.06);
-					straight(500, 90);
+					straight(200, 90);
 					sc->set_target(0, 0);
 					break;
 				case RETURN:
-					uturn();
+					turn(1.2 * M_PI, M_PI * 1.06);
 					sc->set_target(0, 0);
 					break;
 			}

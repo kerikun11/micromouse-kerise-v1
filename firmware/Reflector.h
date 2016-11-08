@@ -245,11 +245,11 @@ public:
 		_wall_ref.side[1] = 260 * gain;
 		_wall_ref.flont[0] = 230 * gain;
 		_wall_ref.flont[1] = 230 * gain;
-		_wall_ref.flont_flont[0] = 65 * gain;
-		_wall_ref.flont_flont[1] = 65 * gain;
+		_wall_ref.flont_flont[0] = 70 * gain;
+		_wall_ref.flont_flont[1] = 70 * gain;
 
-		_wall_distance.side[0] = 900 * gain;
-		_wall_distance.side[1] = 670 * gain;
+		_wall_distance.side[0] = 700 * gain;
+		_wall_distance.side[1] = 690 * gain;
 		_wall_distance.flont[0] = 450 * gain;
 		_wall_distance.flont[1] = 450 * gain;
 		_wall_distance.flont_flont[0] = 100 * gain;
