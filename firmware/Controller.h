@@ -11,7 +11,7 @@
 #include "mbed.h"
 #include "config.h"
 
-#define SPEED_CONTROLLER_PERIOD_US	1000
+#define SPEED_CONTROLLER_PERIOD_US	500
 
 class SpeedController {
 public:
@@ -94,8 +94,8 @@ private:
 			actual_p.rot = mpu->gyroZ() * M_PI / 180.0f;
 			pole2wheel(&actual_p);
 			const float Kp = 2;
-			const float Ki = 0.2;
-			const float Kd = 0.4;
+			const float Ki = 0.1;
+			const float Kd = 0.2;
 			float pwm_value[2];
 			for (int i = 0; i < 2; i++) {
 				pwm_value[i] = Kp * (target_p.wheel[i] - actual_p.wheel[i])
@@ -128,11 +128,28 @@ public:
 		_actions = 0;
 	}
 	enum ACTION {
-		START_STEP, START_INIT, GO_STRAIGHT, TURN_LEFT_90, TURN_RIGHT_90, RETURN,
-//		GO_DIAGONAL,
-//		TURN_LEFT_45,
-//		TURN_RIGHT_45,
+		START_STEP,
+		START_INIT,
+		GO_STRAIGHT,
+		TURN_LEFT_90,
+		TURN_RIGHT_90,
+		RETURN,
+		FAST_START_STEP,
+		FAST_GO_STRAIGHT,
+		FAST_GO_DIAGONAL,
+		FAST_TURN_LEFT_45,
+		FAST_TURN_LEFT_90,
+		FAST_TURN_RIGHT_45,
+		FAST_TURN_RIGHT_90,
+		FAST_STOP,
 	};
+	const char* action_string(enum ACTION action) {
+		static const char name[][32] = { "start_step", "start_init", "go_straight", "turn_left_90",
+				"turn_right_90", "return", "fast_start_step", "fast_go_straight",
+				"fast_go_diagonal", "fast_turn_left_45", "fast_turn_left_90", "fast_turn_right_45",
+				"fast_turn_right_90", "fast_stop" };
+		return name[action];
+	}
 	void enable() {
 		sc->enable();
 		thread.start(this, &MoveAction::task);
@@ -161,11 +178,6 @@ private:
 	int _actions;
 	struct WallDetector::WALL start_wall;
 
-	const char* action_string(enum ACTION action) {
-		static const char name[][32] = { "start_step", "start_init", "go_straight", "turn_left_90",
-				"turn_right_90", "return" };
-		return name[action];
-	}
 	float wall_avoid(bool side, bool flont) {
 		float wall = 0;
 		if (side) {
@@ -178,53 +190,70 @@ private:
 		}
 		if (flont) {
 			if (wd->wall().flont[0] && wd->wall().flont[1]) {
-				wall += wd->wall_difference().flont[0] * 1;
-				wall -= wd->wall_difference().flont[1] * 1;
+				wall += wd->wall_difference().flont[0] * 2;
+				wall -= wd->wall_difference().flont[1] * 2;
 			}
 		}
 		return wall;
 	}
+	void acceleration(float speed, float target_position, float accel = 2000, float wall_gain = 1) {
+		timer.reset();
+		timer.start();
+		float v0 = sc->actual().trans;
+		while (1) {
+			float wall = wall_avoid(true, false);
+			sc->set_target(v0 + timer.read() * accel, wall * wall_gain);
+			Thread::wait(1);
+			if (sc->actual().trans > speed) break;
+			if (sc->position.x > target_position) break;
+		}
+		while (1) {
+			float wall = wall_avoid(true, false);
+			sc->set_target(speed, wall * wall_gain);
+			Thread::wait(1);
+			if (sc->position.x > target_position) break;
+		}
+	}
+	void deceleration(float speed, float target_position, float accel = 2000, float wall_gain = 1) {
+		while (1) {
+			float wall = wall_avoid(true, true);
+			float extra = target_position - sc->position.x;
+			float target_speed = sqrt(2 * accel * abs(extra));
+			target_speed = (target_speed > speed) ? speed : target_speed;
+			if (extra > 0) {
+				sc->set_target(target_speed, wall * wall_gain);
+			} else {
+				sc->set_target(-target_speed, wall * wall_gain);
+			}
+			Thread::wait(1);
+			if (abs(sc->actual().trans) < 0.1) break;
+		}
+	}
 	void straight(float speed, float target_position) {
+		sc->position.x = 0;
+		sc->position.y = 0;
+		sc->position.theta = 0;
+		acceleration(speed, target_position / 2);
+		deceleration(speed, target_position);
+	}
+	void turn(float speed, float target_angle, float accel = 16 * M_PI) {
 		sc->position.x = 0;
 		sc->position.y = 0;
 		sc->position.theta = 0;
 		timer.reset();
 		timer.start();
 		while (1) {
-			float wall = wall_avoid(true, false);
-			sc->set_target(timer.read() * 2000, wall);
-			Thread::wait(1);
-			if (sc->actual().trans > speed) break;
-		}
-		while (1) {
-			float wall = wall_avoid(true, true);
-			float extra = target_position - sc->position.x;
-			if (extra > 0) {
-				float target_speed = sqrt(2 * 2000 * extra);
-				target_speed = (target_speed > speed) ? speed : target_speed;
-				sc->set_target(target_speed, wall);
-			} else {
-				break;
-			}
-			Thread::wait(1);
-			if (abs(sc->actual().trans) < 0.1) break;
-		}
-	}
-	void turn(float speed, float target_angle) {
-		timer.reset();
-		timer.start();
-		while (1) {
 			if (target_angle > 0) {
-				sc->set_target(0, timer.read() * 16 * M_PI);
+				sc->set_target(0, timer.read() * accel);
 			} else {
-				sc->set_target(0, -timer.read() * 16 * M_PI);
+				sc->set_target(0, -timer.read() * accel);
 			}
 			Thread::wait(1);
 			if (abs(sc->actual().rot) > speed) break;
 		}
 		while (1) {
 			float extra = target_angle - sc->position.theta;
-			float target_speed = sqrt(2 * 16 * M_PI * abs(extra));
+			float target_speed = sqrt(2 * accel * abs(extra));
 			target_speed = (target_speed > speed) ? speed : target_speed;
 			if (extra > 0) {
 				sc->set_target(0, target_speed);
@@ -248,47 +277,76 @@ private:
 			sc->position.x = 0;
 			sc->position.y = 0;
 			sc->position.theta = 0;
+			const float fast_accel = 3000;
+			const float fast_speed = 500;
 			switch (action) {
 				case START_STEP:
-					straight(500, 180 - 24);
+					straight(200, 60 - 24);
 					sc->set_target(0, 0);
 					break;
 				case START_INIT:
-					straight(500, 100);
-					turn(1.2 * M_PI, M_PI * 1.06);
-					sc->set_target(-100, 0);
-					Thread::wait(100);
-					while (1) {
-						Thread::wait(1);
-						if (sc->position.x > 170) break;
-					}
+					straight(160, 60);
+					turn(2 * M_PI, M_PI);
 					sc->set_target(0, 0);
 					break;
 				case GO_STRAIGHT:
-					straight(500, 180);
+					straight(400, 180);
 					sc->set_target(0, 0);
 					break;
 				case TURN_LEFT_90:
-					straight(200, 90);
-					turn(1.2 * M_PI, M_PI / 2 * 1.06);
-					straight(200, 90);
+					straight(200, 30);
+					turn(2 * M_PI, M_PI / 2);
+					straight(400, 150);
 					sc->set_target(0, 0);
 					break;
 				case TURN_RIGHT_90:
-					straight(200, 90);
-					turn(1.2 * M_PI, -M_PI / 2 * 1.06);
-					straight(200, 90);
+					straight(200, 30);
+					turn(2 * M_PI, -M_PI / 2);
+					straight(400, 150);
 					sc->set_target(0, 0);
 					break;
 				case RETURN:
-					turn(1.2 * M_PI, M_PI * 1.06);
+					turn(2 * M_PI, M_PI);
+					straight(400, 120);
+					sc->set_target(0, 0);
+					break;
+				case FAST_START_STEP:
+					acceleration(fast_speed, 180 - 24, fast_accel);
+					break;
+				case FAST_GO_STRAIGHT:
+					acceleration(fast_speed, 180, fast_accel);
+					break;
+				case FAST_GO_DIAGONAL:
+					acceleration(fast_speed, 180 * 1.4142, fast_accel);
+					break;
+				case FAST_TURN_LEFT_45:
+					break;
+				case FAST_TURN_LEFT_90:
+					deceleration(fast_speed, 80 - 24, fast_accel);
+					turn(2 * M_PI, M_PI / 2);
+					sc->position.x = 0;
+					sc->position.y = 0;
+					sc->position.theta = 0;
+					acceleration(fast_speed, 90 + 24, fast_accel);
+					break;
+				case FAST_TURN_RIGHT_45:
+					break;
+				case FAST_TURN_RIGHT_90:
+					deceleration(fast_speed, 80 - 24, fast_accel);
+					turn(2 * M_PI, -M_PI / 2);
+					sc->position.x = 0;
+					sc->position.y = 0;
+					sc->position.theta = 0;
+					acceleration(fast_speed, 90 + 24, fast_accel);
+					break;
+				case FAST_STOP:
+					deceleration(fast_speed, 60, fast_accel);
 					sc->set_target(0, 0);
 					break;
 			}
 			_actions--;
 		}
 	}
-}
-;
+};
 
 #endif /* CONTROLLER_H_ */

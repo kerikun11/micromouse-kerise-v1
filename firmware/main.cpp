@@ -33,10 +33,7 @@ void debug_info() {
 		Thread::wait(100);
 
 //		printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(), rfl->sr());
-//		printf("%s %s "
-//				"%s %s "
-//				"%s %s\n", wd->wall().side[0] ? "X" : ".", wd->wall().flont[0] ? "X" : ".",
-//				wd->wall().flont_flont[0] ? "X" : ".", wd->wall().flont_flont[1] ? "X" : ".",
+//		printf("%s %s %s %s\n", wd->wall().side[0] ? "X" : ".", wd->wall().flont[0] ? "X" : ".",
 //				wd->wall().flont[1] ? "X" : ".", wd->wall().side[1] ? "X" : ".");
 
 //		printf("x: %07.3f\ty: %07.3f\ttheta: %07.3f\ttrans: %07.3f\tomega: %07.3f\n",
@@ -45,7 +42,7 @@ void debug_info() {
 
 //		printf("trans: %07.3f\n", sc->actual().trans);
 
-//		printf("Angle: %09.3f\n", mpu->angleZ());
+//		printf("Gyro: %9.3f\tAngle: %09.3f\n", mpu->gyroZ(), mpu->angleZ());
 
 //		printf("L: %ld\tR: %ld\n", enc->left(), enc->right());
 
@@ -79,9 +76,6 @@ void serial_ctrl() {
 				sc->disable();
 				mt->free();
 				break;
-			case 'b':
-				sc->set_target(0, 0);
-				break;
 			case 'w':
 				ma->set_action(MoveAction::GO_STRAIGHT);
 				break;
@@ -100,29 +94,40 @@ void serial_ctrl() {
 			case 's':
 				ma->set_action(MoveAction::START_STEP);
 				break;
-			case 'z':
-				sc->set_target(500, 0);
-				break;
-			case 'x':
-				sc->set_target(-500, 0);
-				break;
-			case 'c':
-				sc->set_target(0, 10);
-				break;
 			case 'm':
+				bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
+				Thread::wait(2000);
+				mpu->calibration();
 				ms->start();
+				break;
+			case 'u':
+				mpu->calibration();
 				break;
 			case 'p':
 				printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(), rfl->sr());
 				printf("%s %s "
-						"%s %s "
 						"%s %s\n", wd->wall().side[0] ? "X" : ".", wd->wall().flont[0] ? "X" : ".",
-						wd->wall().flont_flont[0] ? "X" : ".",
-						wd->wall().flont_flont[1] ? "X" : ".", wd->wall().flont[1] ? "X" : ".",
-						wd->wall().side[1] ? "X" : ".");
+						wd->wall().flont[1] ? "X" : ".", wd->wall().side[1] ? "X" : ".");
 				printf("x: %07.3f\ty: %07.3f\ttheta: %07.3f\ttrans: %07.3f\tomega: %07.3f\n",
 						sc->position.x, sc->position.y, sc->position.theta / M_PI * 180,
 						sc->actual().trans, sc->actual().rot);
+				printf("Gyro: %7.4f\tAngle: %07.4f\n", mpu->gyroZ(), mpu->angleZ());
+				printf("L: %ld\tR: %ld\n", enc->left(), enc->right());
+				break;
+			case 'z':
+				ma->set_action(MoveAction::FAST_START_STEP);
+				break;
+			case 'x':
+				ma->set_action(MoveAction::FAST_TURN_LEFT_90);
+				break;
+			case 'c':
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT);
+				break;
+			case 'v':
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				break;
+			case 'b':
+				ma->set_action(MoveAction::FAST_STOP);
 				break;
 		}
 	}
@@ -131,7 +136,7 @@ void serial_ctrl() {
 void emergencyTask() {
 	while (1) {
 		Thread::wait(1);
-		if (mpu->accelY() < -2500000) {
+		if (mpu->accelY() < -2) {
 			mt->emergency_stop();
 			bz->play(Buzzer::BUZZER_MUSIC_EMERGENCY);
 //			bz->play(Buzzer::BUZZER_MUSIC_FROG);
@@ -200,6 +205,9 @@ int main() {
 		if (btn->long_pressed_1) {
 			btn->flags = 0;
 			bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
+			Thread::wait(2000);
+			mpu->calibration();
+			ms->start();
 		}
 	}
 }

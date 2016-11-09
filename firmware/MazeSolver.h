@@ -19,7 +19,7 @@
 class MazeSolver {
 public:
 	MazeSolver(MoveAction *ma, WallDetector *wd) :
-			ma(ma), wd(wd), agent(maze), thread(PRIORITY_MAZE_SOLVER) {
+			ma(ma), wd(wd), agent(maze), thread(PRIORITY_MAZE_SOLVER, 4096) {
 		dir = NORTH;
 		pos = IndexVec(0, 0);
 	}
@@ -116,31 +116,31 @@ private:
 		for (int i = 0; i < op.n; i++) {
 			switch (op.op) {
 				case Operation::FORWARD:
-					ma->set_action(MoveAction::GO_STRAIGHT);
+					ma->set_action(MoveAction::FAST_GO_STRAIGHT);
 					break;
 				case Operation::FORWARD_DIAG:
+					ma->set_action(MoveAction::FAST_GO_DIAGONAL);
 					break;
 				case Operation::TURN_LEFT90:
-					ma->set_action(MoveAction::TURN_LEFT_90);
+					ma->set_action(MoveAction::FAST_TURN_LEFT_90);
 					break;
 				case Operation::TURN_LEFT45:
+					ma->set_action(MoveAction::FAST_TURN_LEFT_45);
 					break;
 				case Operation::TURN_RIGHT90:
-					ma->set_action(MoveAction::TURN_RIGHT_90);
+					ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
 					break;
 				case Operation::TURN_RIGHT45:
+					ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
 					break;
 				case Operation::STOP:
-					ma->set_action(MoveAction::START_INIT);
+					ma->set_action(MoveAction::FAST_STOP);
 					break;
 			}
 		}
 	}
 	void robotPositionInit() {
 		ma->set_action(MoveAction::START_INIT);
-	}
-	bool operationFinished() {
-		return false;
 	}
 	Direction getWallData() {
 		Direction wall;
@@ -151,16 +151,10 @@ private:
 			if (wd->wall().side[1]) {
 				wall |= EAST;
 			}
-			if (wd->wall().flont_flont[0] && wd->wall().flont_flont[1]) {
+			if (wd->wall().flont[0] && wd->wall().flont[1]) {
 				wall |= NORTH;
-				wall |= DONE_NORTH;
-			} else if (!wd->wall().flont_flont[0] && !wd->wall().flont_flont[1]) {
-				wall |= DONE_NORTH;
-			} else {
-				if (wd->wall().side[0] && wd->wall().side[1]) {
-					wall |= DONE_NORTH;
-				}
 			}
+			wall |= DONE_NORTH;
 			wall |= DONE_EAST;
 			wall |= DONE_SOUTH;
 			wall |= DONE_WEST;
@@ -171,17 +165,11 @@ private:
 			if (wd->wall().side[1]) {
 				wall |= SOUTH;
 			}
-			if (wd->wall().flont_flont[0] && wd->wall().flont_flont[1]) {
+			if (wd->wall().flont[0] && wd->wall().flont[1]) {
 				wall |= EAST;
-				wall |= DONE_EAST;
-			} else if (!wd->wall().flont_flont[0] && !wd->wall().flont_flont[1]) {
-				wall |= DONE_EAST;
-			} else {
-				if (wd->wall().side[0] && wd->wall().side[1]) {
-					wall |= DONE_EAST;
-				}
 			}
 			wall |= DONE_NORTH;
+			wall |= DONE_EAST;
 			wall |= DONE_SOUTH;
 			wall |= DONE_WEST;
 		} else if (dir == SOUTH) {
@@ -191,18 +179,12 @@ private:
 			if (wd->wall().side[1]) {
 				wall |= WEST;
 			}
-			if (wd->wall().flont_flont[0] && wd->wall().flont_flont[1]) {
+			if (wd->wall().flont[0] && wd->wall().flont[1]) {
 				wall |= SOUTH;
-				wall |= DONE_SOUTH;
-			} else if (!wd->wall().flont_flont[0] && !wd->wall().flont_flont[1]) {
-				wall |= DONE_SOUTH;
-			} else {
-				if (wd->wall().side[0] && wd->wall().side[1]) {
-					wall |= DONE_SOUTH;
-				}
 			}
 			wall |= DONE_NORTH;
 			wall |= DONE_EAST;
+			wall |= DONE_SOUTH;
 			wall |= DONE_WEST;
 		} else if (dir == WEST) {
 			if (wd->wall().side[0]) {
@@ -211,19 +193,13 @@ private:
 			if (wd->wall().side[1]) {
 				wall |= NORTH;
 			}
-			if (wd->wall().flont_flont[0] && wd->wall().flont_flont[1]) {
+			if (wd->wall().flont[0] && wd->wall().flont[1]) {
 				wall |= WEST;
-				wall |= DONE_WEST;
-			} else if (!wd->wall().flont_flont[0] && !wd->wall().flont_flont[1]) {
-				wall |= DONE_WEST;
-			} else {
-				if (wd->wall().side[0] && wd->wall().side[1]) {
-					wall |= DONE_WEST;
-				}
 			}
 			wall |= DONE_NORTH;
 			wall |= DONE_EAST;
 			wall |= DONE_SOUTH;
+			wall |= DONE_WEST;
 		}
 		return wall;
 	}
@@ -232,7 +208,6 @@ private:
 	}
 	void task() {
 		ma->set_action(MoveAction::START_STEP);
-		pos.y++;
 		while (1) {
 			while (ma->actions()) {
 				Thread::wait(1);
@@ -263,32 +238,67 @@ private:
 			robotMove(nextDir);  //< robotMove関数はDirection型を受け取ってロボットをそっちに動かす関数
 		}
 
-		printf("robotPositionInit();");
+		printf("robotPositionInit();\n");
 		robotPositionInit();	//< ロボットを停止させ、スタートする向きに戻す
+
+		printf("maze.printWall();\n");
+		maze.printWall();
+
+		Thread::wait(2000);
 
 		//最短経路の計算 割と時間がかかる(数秒)
 		//引数は斜め走行をするかしないか
 		//trueだと斜め走行をする
-		printf("agent.calcRunSequence(false);\n");
+		printf("agent.calcRunSequence();\n");
 		agent.calcRunSequence(false);
 
 		/**********************************
 		 * 計測走行
 		 *********************************/
 		//コマンドリストみたいなやつを取り出す
-		printf("agent.getRunSequence()\n");
+		printf("agent.getRunSequence();\n");
 		const OperationList &runSequence = agent.getRunSequence();
+
+		printf("runSequence.size() => %d\n", runSequence.size());
 
 		//Operationを先頭から順番に実行していく
 		for (size_t i = 0; i < runSequence.size(); i++) {
-			//Operationの実行が終わるまで待つ(nマス進んだ,右に曲がった)
-			while (!operationFinished())
-				;
-
-			//i番目のを実行
+			printf("runSequence[i].n => %d, runSequence[i].op => %d\n", runSequence[i].n,
+					runSequence[i].op);
 			robotMove(runSequence[i]); //robotMode関数はOperation型を受け取ってそれを実行する関数
 		}
-		printf("End.\n");
+//		printf("End.\n");
+//		Maze field;
+//		Maze mazeInRobot;
+//		field.loadFromArray(mazeData_66test);
+//
+//		Agent agent(mazeInRobot);
+//
+//		IndexVec cur(0, 0);
+//		while (1) {
+//			bool pos[MAZE_SIZE][MAZE_SIZE] = { false };
+//			pos[cur.y][cur.x] = true;
+//			mazeInRobot.printWall(pos);
+//
+//			agent.update(cur, field.getWall(cur));
+//			if (agent.getState() == Agent::FINISHED) break;
+//
+//			Direction dir = agent.getNextDirection();
+//			for (int i = 0; i < 4; i++) {
+//				if (dir[i]) cur += IndexVec::vecDir[i];
+//			}
+//			Thread::wait(100);
+//		}
+//
+//		agent.calcRunSequence(false);
+//		const OperationList &runSequence = agent.getRunSequence();
+//		printf("runSequence.size() => %d\n", runSequence.size());
+//
+//		bool route[MAZE_SIZE][MAZE_SIZE] = { false };
+//		for (auto &index : agent.getShortestPath()) {
+//			route[index.y][index.x] = true;
+//		}
+//		mazeInRobot.printWall(route);
 	}
 };
 

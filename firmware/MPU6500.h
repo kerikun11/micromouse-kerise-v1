@@ -11,11 +11,8 @@
 #include "mbed.h"
 #include "config.h"
 
-#define MPU6500_GYRO_RANGE			2000.0f
-#define MPU6500_GYRO_FACTOR			15.4f
-#define MPU6500_GYRO_OFFSET			70
+#define MPU6500_GYRO_FACTOR			16.3835f
 
-#define MPU6500_ACCEL_RANGE			16.0f
 #define MPU6500_ACCEL_FACTOR		2048.0f
 #define MPU6500_ACCEL_OFFSET		0
 
@@ -32,6 +29,7 @@ public:
 		_accelY = 0;
 		_gyroZ = 0;
 		_angleZ = 0;
+		_offset_gyroZ = 0.6f;
 	}
 	double accelY() {
 		return _accelY;
@@ -42,6 +40,16 @@ public:
 	double angleZ() {
 		return _angleZ;
 	}
+	void calibration() {
+		double sum = 0;
+		const int ave_count = 100;
+		for (int i = 0; i < ave_count; i++) {
+			sum += gyroZ();
+			Thread::wait(1);
+		}
+		sum /= ave_count;
+		_offset_gyroZ += sum;
+	}
 private:
 	DigitalOut cs;
 	Thread updateThread;
@@ -49,6 +57,7 @@ private:
 	volatile double _accelY;
 	volatile double _gyroZ;
 	volatile double _angleZ;
+	double _offset_gyroZ;
 
 	void updateIsr() {
 		updateThread.signal_set(0x01);
@@ -56,12 +65,14 @@ private:
 	void updateTask() {
 		while (1) {
 			Thread::signal_wait(0x01);
-			_accelY = readAccY() * MPU6500_ACCEL_FACTOR / MPU6500_ACCEL_RANGE;
-			_gyroZ = (readGyrZ() - MPU6500_GYRO_OFFSET) * MPU6500_GYRO_FACTOR / MPU6500_GYRO_RANGE;
+			_accelY = readAccY() / MPU6500_ACCEL_FACTOR;
+			_gyroZ = readGyrZ() / MPU6500_GYRO_FACTOR - _offset_gyroZ;
 			_angleZ += _gyroZ * MPU6500_UPDATE_PERIOD_US / 1000000;
 		}
 	}
 	void setup() {
+//		this->writeReg(0x6b, 0x80);	// reset
+//		Thread::wait(100);
 		this->writeReg(0x19, 0x07);	// samplerate
 		this->writeReg(0x1b, 0x18); // +-2000dps
 //		this->writeReg(0x1b, 0x10); // +-1000dps
@@ -71,7 +82,6 @@ private:
 //		this->writeReg(0x1c, 0x10); // +-8g
 //		this->writeReg(0x1c, 0x08); // +-4g
 //		this->writeReg(0x1c, 0x00); // +-2g
-		this->writeReg(0x6b, 0x80);	// reset
 	}
 	bool readReg(uint8_t reg, uint8_t& byte) {
 		uint8_t data;

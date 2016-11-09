@@ -120,7 +120,8 @@ private:
 						max = value;
 					}
 				}
-				distance[ch] = (max + prev_distance[ch]) / 2;
+//				distance[ch] = (max + prev_distance[ch]) / 2;
+				distance[ch] = max;
 				prev_distance[ch] = distance[ch];
 			}
 		}
@@ -243,17 +244,13 @@ public:
 
 		_wall_ref.side[0] = 260 * gain;
 		_wall_ref.side[1] = 260 * gain;
-		_wall_ref.flont[0] = 230 * gain;
-		_wall_ref.flont[1] = 230 * gain;
-		_wall_ref.flont_flont[0] = 70 * gain;
-		_wall_ref.flont_flont[1] = 70 * gain;
+		_wall_ref.flont[0] = 180 * gain;
+		_wall_ref.flont[1] = 180 * gain;
 
-		_wall_distance.side[0] = 700 * gain;
-		_wall_distance.side[1] = 690 * gain;
-		_wall_distance.flont[0] = 450 * gain;
-		_wall_distance.flont[1] = 450 * gain;
-		_wall_distance.flont_flont[0] = 100 * gain;
-		_wall_distance.flont_flont[1] = 100 * gain;
+		_wall_distance.side[0] = 750 * gain;
+		_wall_distance.side[1] = 750 * gain;
+		_wall_distance.flont[0] = 400 * gain;
+		_wall_distance.flont[1] = 400 * gain;
 
 		updateThread.start(this, &WallDetector::updateTask);
 		updateTicker.attach_us(this, &WallDetector::updateIsr,
@@ -262,12 +259,10 @@ public:
 	struct WALL {
 		bool side[2];
 		bool flont[2];
-		bool flont_flont[2];
 	};
 	struct WALL_VALUE {
 		float side[2];
 		float flont[2];
-		float flont_flont[2];
 	};
 	struct WALL wall() {
 		return _wall;
@@ -294,24 +289,17 @@ private:
 			Thread::signal_wait(0x01);
 			for (int i = 0; i < 2; i++) {
 				int16_t value = _rfl->side(i);
-				if (value > _wall_ref.side[i] * 1.05) _wall.side[i] = true;
-				else if (value < _wall_ref.side[i] * 0.95) _wall.side[i] = false;
+				if (value > _wall_ref.side[i] * 1.02) _wall.side[i] = true;
+				else if (value < _wall_ref.side[i] * 0.98) _wall.side[i] = false;
 				_wall_difference.side[i] = (_wall_distance.side[i] - value)
 						/ _wall_distance.side[i];
 			}
 			for (int i = 0; i < 2; i++) {
 				int16_t value = _rfl->flont(i);
-				if (value > _wall_ref.flont[i] * 1.05) _wall.flont[i] = true;
-				else if (value < _wall_ref.flont[i] * 0.95) _wall.flont[i] = false;
+				if (value > _wall_ref.flont[i] * 1.02) _wall.flont[i] = true;
+				else if (value < _wall_ref.flont[i] * 0.98) _wall.flont[i] = false;
 				_wall_difference.flont[i] = (_wall_distance.flont[i] - value)
 						/ _wall_distance.flont[i];
-			}
-			for (int i = 0; i < 2; i++) {
-				int16_t value = _rfl->flont(i);
-				if (value > _wall_ref.flont_flont[i] * 1.05) _wall.flont_flont[i] = true;
-				else if (value < _wall_ref.flont_flont[i] * 0.95) _wall.flont_flont[i] = false;
-				_wall_difference.flont_flont[i] = (_wall_distance.flont_flont[i] - value)
-						/ _wall_distance.flont_flont[i];
 			}
 		}
 	}
