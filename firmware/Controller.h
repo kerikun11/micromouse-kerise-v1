@@ -159,6 +159,13 @@ public:
 		thread.terminate();
 		sc->disable();
 		rfl->disable();
+		while (1) {
+			osEvent evt = queue.get(0);
+			if (evt.status != osEventMessage) {
+				break;
+			}
+		}
+		_actions = 0;
 	}
 	void set_action(enum ACTION action) {
 		_actions++;
@@ -184,16 +191,16 @@ private:
 		float wall = 0;
 		if (side) {
 			if (wd->wall().side[0]) {
-				wall += wd->wall_difference().side[0] * 0.4;
+				wall += wd->wall_difference().side[0] * 0.8;
 			}
 			if (wd->wall().side[1]) {
-				wall -= wd->wall_difference().side[1] * 0.4;
+				wall -= wd->wall_difference().side[1] * 0.8;
 			}
 		}
 		if (flont) {
 			if (wd->wall().flont[0] && wd->wall().flont[1]) {
-				wall += wd->wall_difference().flont[0] * 2;
-				wall -= wd->wall_difference().flont[1] * 2;
+//				wall += wd->wall_difference().flont[0] * 2;
+//				wall -= wd->wall_difference().flont[1] * 2;
 			}
 		}
 		return wall;
@@ -203,9 +210,9 @@ private:
 			if (wd->wall().flont[0] && wd->wall().flont[1]) {
 				float trans = wd->wall_difference().flont[0] + wd->wall_difference().flont[1];
 				float rot = wd->wall_difference().flont[1] - wd->wall_difference().flont[0];
-				sc->set_target(trans * 500, rot * 5);
-				Thread::wait(1);
+				sc->set_target(trans * 1000, rot * 10);
 				if (abs(trans) < 0.1 && abs(rot) < 0.1) break;
+				Thread::wait(1);
 			} else {
 				break;
 			}
@@ -241,7 +248,7 @@ private:
 				sc->set_target(-target_speed, wall * wall_gain);
 			}
 			Thread::wait(1);
-			if (abs(sc->actual().trans) < 0.1) break;
+			if (abs(sc->actual().trans) < 1) break;
 		}
 	}
 	void straight(float speed, float target_position) {
@@ -276,7 +283,7 @@ private:
 				sc->set_target(0, -target_speed);
 			}
 			Thread::wait(1);
-			if (abs(sc->actual().rot) < 0.01) break;
+			if (abs(sc->actual().rot) < 0.1) break;
 		}
 	}
 	void task() {

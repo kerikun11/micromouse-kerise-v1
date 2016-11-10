@@ -164,14 +164,14 @@ private:
 						Thread::wait(100);
 						break;
 					case BUZZER_MUSIC_COMPLETE:
-						playC(2);
-						Thread::wait(400);
-						playG(2);
-						Thread::wait(400);
-						playC(2);
-						Thread::wait(400);
-						playG(2);
-						Thread::wait(400);
+						playC(3);
+						Thread::wait(100);
+						playE(3);
+						Thread::wait(100);
+						playC(3);
+						Thread::wait(100);
+						playE(3);
+						Thread::wait(100);
 						mute();
 						break;
 					case BUZZER_MUSIC_DOREMI:
