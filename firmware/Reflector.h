@@ -249,10 +249,10 @@ public:
 	WallDetector(Reflector *rfl) :
 			_rfl(rfl), updateThread(PRIORITY_WALL_UPDATE) {
 
-		_wall_ref.side[0] = 260;
-		_wall_ref.side[1] = 260;
-		_wall_ref.flont[0] = 120;
-		_wall_ref.flont[1] = 120;
+		_wall_ref.side[0] = 300;
+		_wall_ref.side[1] = 300;
+		_wall_ref.flont[0] = 200;
+		_wall_ref.flont[1] = 200;
 
 		_wall_distance.side[0] = 900;
 		_wall_distance.side[1] = 700;

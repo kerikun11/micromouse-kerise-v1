@@ -13,6 +13,67 @@
 
 #define SPEED_CONTROLLER_PERIOD_US	500
 
+class Position {
+public:
+	Position(float x = 0, float y = 0, float theta = 0) :
+			x(x), y(y), theta(theta) {
+	}
+	float x, y, theta;
+	void reset() {
+		x = 0;
+		y = 0;
+		theta = 0;
+	}
+	void set(float x = 0, float y = 0, float theta = 0) {
+		this->x = x;
+		this->y = y;
+		this->theta = theta;
+	}
+	Position rotate(float angle) {
+		return Position(x * cos(angle) - y * sin(angle), x * sin(angle) + y * cos(angle),
+				theta + angle);
+	}
+	Position operator=(const Position &obj) {
+		x = obj.x;
+		y = obj.y;
+		theta = obj.theta;
+		return *this;
+	}
+	Position operator-(const Position &obj) const {
+		return Position(x - obj.x, y - obj.y, theta - obj.theta);
+	}
+	Position operator+(const Position &obj) const {
+		return Position(x + obj.x, y + obj.y, theta + obj.theta);
+	}
+	Position operator/(const float &div) {
+		return Position(x / div, y / div, theta / div);
+	}
+	Position operator-() const {
+		return Position(-x, -y, -theta);
+	}
+	Position operator+() const {
+		return Position(x, y, theta);
+	}
+};
+
+class WheelParameter {
+public:
+	WheelParameter(float trans = 0, float rot = 0) :
+			trans(trans), rot(rot) {
+	}
+	float trans;	//< translation
+	float rot;		//< rotation
+	float wheel[2];	//< wheel [0]: left, [1]: right
+	void pole2wheel() {
+		wheel[0] = trans - MACHINE_ROTATION_RADIUS * rot;
+		wheel[1] = trans + MACHINE_ROTATION_RADIUS * rot;
+	}
+	void wheel2pole() {
+		rot = (wheel[1] - wheel[0]) / 2.0f / MACHINE_ROTATION_RADIUS;
+		trans = (wheel[1] + wheel[0]) / 2.0f;
+	}
+};
+
 class SpeedController {
 public:
 	SpeedController(Motor *mt, Encoders *enc, MPU6500 *mpu) :
@@ -38,29 +99,12 @@ public:
 	void set_target(float trans, float rot) {
 		target_p.trans = trans;
 		target_p.rot = rot;
-		pole2wheel(&target_p);
+		target_p.pole2wheel();
 	}
-	typedef struct {
-		float trans;	//< translation
-		float rot;		//< rotation
-		float wheel[2];	//< wheel [0]: left, [1]: right
-	} params_t;
-	params_t target() {
-		return target_p;
-	}
-	params_t actual() {
+	WheelParameter& actual() {
 		return actual_p;
 	}
-	typedef struct {
-		float x = 0;
-		float y = 0;
-		float theta = 0;
-	} position_t;
-	position_t position;
-	params_t target_p;
-	params_t actual_p;
-	params_t actual_i;
-	params_t actual_d;
+	Position position;
 private:
 	Motor *mt;
 	Encoders *enc;
@@ -68,6 +112,10 @@ private:
 	Thread ctrlThread;
 	Ticker ctrlTicker;
 	float wheel_position[3][2];
+	WheelParameter target_p;
+	WheelParameter actual_p;
+	WheelParameter actual_i;
+	WheelParameter actual_d;
 
 	void ctrlIsr() {
 		ctrlThread.signal_set(0x01);
@@ -90,12 +138,12 @@ private:
 				actual_d.wheel[i] = (wheel_position[0][i] - 2 * wheel_position[1][i]
 						+ wheel_position[2][i]) * 1000000 / SPEED_CONTROLLER_PERIOD_US;
 			}
-			wheel2pole(&actual_p);
+			actual_p.wheel2pole();
 			actual_p.rot = mpu->gyroZ() * M_PI / 180.0f;
-			pole2wheel(&actual_p);
-			const float Kp = 2;
-			const float Ki = 0.5;
-			const float Kd = 0.5;
+			actual_p.pole2wheel();
+			const float Kp = 1;
+			const float Ki = 0.1;
+			const float Kd = 0.2;
 			float pwm_value[2];
 			for (int i = 0; i < 2; i++) {
 				pwm_value[i] = Kp * (target_p.wheel[i] - actual_p.wheel[i])
@@ -109,14 +157,6 @@ private:
 			position.y += actual_p.trans * sin(position.theta) * SPEED_CONTROLLER_PERIOD_US
 					/ 1000000;
 		}
-	}
-	void pole2wheel(params_t *params) {
-		params->wheel[0] = params->trans - MACHINE_ROTATION_RADIUS * params->rot;
-		params->wheel[1] = params->trans + MACHINE_ROTATION_RADIUS * params->rot;
-	}
-	void wheel2pole(params_t *params) {
-		params->rot = (params->wheel[1] - params->wheel[0]) / 2.0f / MACHINE_ROTATION_RADIUS;
-		params->trans = (params->wheel[1] + params->wheel[0]) / 2.0f;
 	}
 };
 
@@ -151,6 +191,8 @@ public:
 		return name[action];
 	}
 	void enable() {
+		error.reset();
+		sc->position = error;
 		rfl->enable();
 		sc->enable();
 		thread.start(this, &MoveAction::task);
@@ -186,24 +228,15 @@ private:
 	Timer timer;
 	int _actions;
 	struct WallDetector::WALL start_wall;
+	Position error;
 
-	float wall_avoid(bool side, bool flont) {
-		float wall = 0;
-		if (side) {
-			if (wd->wall().side[0]) {
-				wall += wd->wall_difference().side[0] * 0.8;
-			}
-			if (wd->wall().side[1]) {
-				wall -= wd->wall_difference().side[1] * 0.8;
-			}
+	void wall_avoid() {
+		if (wd->wall().side[0]) {
+			sc->position.y -= wd->wall_difference().side[0] * 0.01;
 		}
-		if (flont) {
-			if (wd->wall().flont[0] && wd->wall().flont[1]) {
-//				wall += wd->wall_difference().flont[0] * 2;
-//				wall -= wd->wall_difference().flont[1] * 2;
-			}
+		if (wd->wall().side[1]) {
+			sc->position.y += wd->wall_difference().side[1] * 0.01;
 		}
-		return wall;
 	}
 	void wall_attach() {
 		while (1) {
@@ -217,51 +250,61 @@ private:
 				break;
 			}
 		}
+		error = sc->position;
+		error.x = 0;
+		error.theta = 0;
+		sc->position = error;
+		printf("Wall Attach error: (%07.3f, %07.3f, %07.3f)\n", error.x, error.y, error.theta);
 	}
-	void acceleration(float speed, float target_position, float accel = 2000, float wall_gain = 1) {
+	void acceleration(float speed, float target_distance, float accel = 2000) {
 		timer.reset();
 		timer.start();
 		float v0 = sc->actual().trans;
 		while (1) {
-			float wall = wall_avoid(true, false);
-			sc->set_target(v0 + timer.read() * accel, wall * wall_gain);
+			wall_avoid();
+			float trans = v0 + timer.read() * accel;
+			sc->set_target(trans, -sc->position.y * 0.01);
 			Thread::wait(1);
 			if (sc->actual().trans > speed) break;
-			if (sc->position.x > target_position) break;
+			if (sc->position.x > target_distance) break;
 		}
 		while (1) {
-			float wall = wall_avoid(true, false);
-			sc->set_target(speed, wall * wall_gain);
+			wall_avoid();
+			sc->set_target(speed, -sc->position.y * 0.01);
 			Thread::wait(1);
-			if (sc->position.x > target_position) break;
+			if (sc->position.x > target_distance) break;
 		}
+		error = sc->position - Position(target_distance, 0, 0);
+		sc->position = error;
+		printf("Acceleration: %07.3f, error: (%07.3f, %07.3f, %07.3f)\n", target_distance, error.x,
+				error.y, error.theta);
 	}
-	void deceleration(float speed, float target_position, float accel = 2000, float wall_gain = 1) {
+	void deceleration(float speed, float target_distance, float accel = 2000) {
 		while (1) {
-			float wall = wall_avoid(true, true);
-			float extra = target_position - sc->position.x;
+			wall_avoid();
+			float extra = target_distance - sc->position.x;
 			float target_speed = sqrt(2 * accel * abs(extra));
 			target_speed = (target_speed > speed) ? speed : target_speed;
 			if (extra > 0) {
-				sc->set_target(target_speed, wall * wall_gain);
+				sc->set_target(target_speed, -sc->position.y * 0.01);
 			} else {
-				sc->set_target(-target_speed, wall * wall_gain);
+				sc->set_target(-target_speed, -sc->position.y * 0.01);
 			}
 			Thread::wait(1);
 			if (abs(sc->actual().trans) < 1) break;
 		}
+		printf("Position: (%07.3f, %07.3f, %07.3f)\n", sc->position.x, sc->position.y,
+				sc->position.theta);
+		error = sc->position - Position(target_distance, 0, 0);
+		sc->position = error;
+		printf("Deceleration: %07.3f, error: (%07.3f, %07.3f, %07.3f)\n", target_distance, error.x,
+				error.y, error.theta);
 	}
-	void straight(float speed, float target_position) {
-		sc->position.x = 0;
-		sc->position.y = 0;
-		sc->position.theta = 0;
-		acceleration(speed, target_position / 2);
-		deceleration(speed, target_position);
+	void straight(float speed, float target_distance) {
+		acceleration(speed, target_distance / 2);
+		deceleration(speed, target_distance / 2);
 	}
 	void turn(float speed, float target_angle, float accel = 8 * M_PI) {
-		sc->position.x = 0;
-		sc->position.y = 0;
-		sc->position.theta = 0;
 		timer.reset();
 		timer.start();
 		while (1) {
@@ -285,6 +328,12 @@ private:
 			Thread::wait(1);
 			if (abs(sc->actual().rot) < 0.1) break;
 		}
+		printf("Position: (%07.3f, %07.3f, %07.3f)\n", sc->position.x, sc->position.y,
+				sc->position.theta);
+		error = sc->position.rotate(target_angle) - Position(0, 0, 2 * target_angle);
+		sc->position = error;
+		printf("Turn: %07.3f, error: (%07.3f, %07.3f, %07.3f)\n", target_angle, error.x, error.y,
+				error.theta);
 	}
 	void task() {
 		while (1) {
@@ -296,9 +345,6 @@ private:
 			enum ACTION action = (enum ACTION) evt.value.v;
 			printf("Action: %s\n", action_string(action));
 			start_wall = wd->wall();
-			sc->position.x = 0;
-			sc->position.y = 0;
-			sc->position.theta = 0;
 			const float fast_accel = 3000;
 			const float fast_speed = 1000;
 			switch (action) {
@@ -309,13 +355,10 @@ private:
 				case START_INIT:
 					straight(200, 30);
 					turn(1.2 * M_PI, M_PI);
-					sc->position.x = 0;
-					sc->position.y = 0;
-					sc->position.theta = 0;
-					while (1) {
-						sc->set_target(-100, 0);
-						if (sc->position.x < 24 - 60) break;
-					}
+					sc->position.reset();
+					sc->set_target(-200, 0);
+					Thread::wait(1000);
+					sc->position.reset();
 					sc->set_target(0, 0);
 					break;
 				case GO_STRAIGHT:
@@ -355,13 +398,7 @@ private:
 				case FAST_TURN_LEFT_90:
 					deceleration(fast_speed, 90, fast_accel);
 					wall_attach();
-					sc->position.x = 0;
-					sc->position.y = 0;
-					sc->position.theta = 0;
 					turn(3 * M_PI, M_PI / 2, 16 * M_PI);
-					sc->position.x = 0;
-					sc->position.y = 0;
-					sc->position.theta = 0;
 					acceleration(fast_speed, 90, fast_accel);
 					break;
 				case FAST_TURN_RIGHT_45:
@@ -369,13 +406,7 @@ private:
 				case FAST_TURN_RIGHT_90:
 					deceleration(fast_speed, 90, fast_accel);
 					wall_attach();
-					sc->position.x = 0;
-					sc->position.y = 0;
-					sc->position.theta = 0;
 					turn(3 * M_PI, -M_PI / 2, 16 * M_PI);
-					sc->position.x = 0;
-					sc->position.y = 0;
-					sc->position.theta = 0;
 					acceleration(fast_speed, 90, fast_accel);
 					break;
 				case FAST_STOP:

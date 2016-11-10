@@ -71,7 +71,7 @@ void serial_ctrl() {
 				ma->enable();
 				break;
 			case 'f':
-				bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
+				bz->play(Buzzer::BUZZER_MUSIC_CANCEL);
 				ma->disable();
 				sc->disable();
 				mt->free();
@@ -194,7 +194,7 @@ int main() {
 		Thread::wait(100);
 		if (btn->pressed) {
 			btn->flags = 0;
-			bz->play(Buzzer::BUZZER_MUSIC_SELECT);
+			bz->play(Buzzer::BUZZER_MUSIC_CANCEL);
 			sc->disable();
 			mt->free();
 		}
@@ -203,7 +203,7 @@ int main() {
 			bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
 			Thread::wait(2000);
 			rfl->enable();
-			while (rfl->side(1) < 800) {
+			while (rfl->side(1) < 1024) {
 				Thread::wait(100);
 			}
 			bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
