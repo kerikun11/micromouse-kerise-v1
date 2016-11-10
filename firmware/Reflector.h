@@ -42,6 +42,9 @@
 #define IR_RECEIVER_SAMPLING_PERIOD_US	20
 #define IR_RECEIVER_UPDATE_PERIOD_US	1000
 
+#define WALL_DETECTOR_GAIN_SIDE			1.34f
+#define WALL_DETECTOR_GAIN_FLONT		1.24f
+
 class Reflector {
 public:
 	Reflector(PinName led_sl_fr_pin, PinName led_sr_fl_pin) :
@@ -50,7 +53,9 @@ public:
 		led_sl_fr.period_us(IR_LED_PERIOD_US);
 		led_sr_fl.period_us(IR_LED_PERIOD_US);
 		adcInitialize();
-
+		buffer_pointer = IR_RECEIVER_SAMPLE_SIZE - 1;
+	}
+	void enable() {
 		buffer_pointer = IR_RECEIVER_SAMPLE_SIZE - 1;
 
 		samplingTicker.attach_us(this, &Reflector::samplingIsr,
@@ -60,7 +65,12 @@ public:
 		updateTicker.attach_us(this, &Reflector::updateIsr,
 		IR_RECEIVER_UPDATE_PERIOD_US);
 	}
-
+	void disable() {
+		updateTicker.detach();
+		updateThread.terminate();
+		samplingTicker.detach();
+		ir_led(false, false);
+	}
 	int16_t side(uint8_t left_or_right) {
 		if (left_or_right == 0) return sl();
 		else return sr();
@@ -70,16 +80,16 @@ public:
 		else return fr();
 	}
 	int16_t sl() {
-		return distance[1];
+		return distance[1] * WALL_DETECTOR_GAIN_SIDE;
 	}
 	int16_t fl() {
-		return distance[2];
+		return distance[2] * WALL_DETECTOR_GAIN_FLONT;
 	}
 	int16_t fr() {
-		return distance[3];
+		return distance[3] * WALL_DETECTOR_GAIN_FLONT;
 	}
 	int16_t sr() {
-		return distance[0];
+		return distance[0] * WALL_DETECTOR_GAIN_SIDE;
 	}
 private:
 	PwmOut led_sl_fr, led_sr_fl;
@@ -239,18 +249,15 @@ public:
 	WallDetector(Reflector *rfl) :
 			_rfl(rfl), updateThread(PRIORITY_WALL_UPDATE) {
 
-//		const float gain = 0.6;
-		const float gain = 1.0f;
+		_wall_ref.side[0] = 260;
+		_wall_ref.side[1] = 260;
+		_wall_ref.flont[0] = 120;
+		_wall_ref.flont[1] = 120;
 
-		_wall_ref.side[0] = 260 * gain;
-		_wall_ref.side[1] = 260 * gain;
-		_wall_ref.flont[0] = 180 * gain;
-		_wall_ref.flont[1] = 180 * gain;
-
-		_wall_distance.side[0] = 750 * gain;
-		_wall_distance.side[1] = 750 * gain;
-		_wall_distance.flont[0] = 400 * gain;
-		_wall_distance.flont[1] = 400 * gain;
+		_wall_distance.side[0] = 900;
+		_wall_distance.side[1] = 700;
+		_wall_distance.flont[0] = 560;
+		_wall_distance.flont[1] = 560;
 
 		updateThread.start(this, &WallDetector::updateTask);
 		updateTicker.attach_us(this, &WallDetector::updateIsr,
@@ -287,6 +294,7 @@ private:
 	void updateTask() {
 		while (1) {
 			Thread::signal_wait(0x01);
+
 			for (int i = 0; i < 2; i++) {
 				int16_t value = _rfl->side(i);
 				if (value > _wall_ref.side[i] * 1.02) _wall.side[i] = true;

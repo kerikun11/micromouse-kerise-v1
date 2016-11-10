@@ -96,7 +96,6 @@ void serial_ctrl() {
 				break;
 			case 'm':
 				bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
-				Thread::wait(2000);
 				mpu->calibration();
 				ms->start();
 				break;
@@ -138,6 +137,7 @@ void emergencyTask() {
 		Thread::wait(1);
 		if (mpu->accelY() < -2) {
 			mt->emergency_stop();
+			ma->disable();
 			bz->play(Buzzer::BUZZER_MUSIC_EMERGENCY);
 //			bz->play(Buzzer::BUZZER_MUSIC_FROG);
 			while (1) {
@@ -166,13 +166,11 @@ int main() {
 
 	sc = new SpeedController(mt, enc, mpu);
 	ma = new MoveAction(bz, enc, mpu, rfl, wd, sc);
-	ms = new MazeSolver(ma, wd);
+	ms = new MazeSolver(bz, ma, wd);
 
 	/* boot */
 	{
 		printf("\nHello World!\n");
-		float voltage = bat->voltage();
-		printf("Battery Voltage: %.3f [V]\n", voltage);
 		if (!bat->check()) {
 			bz->play(Buzzer::BUZZER_MUSIC_LOW_BATTERY);
 			printf("Battery Low!\n");
@@ -181,9 +179,7 @@ int main() {
 			}
 		}
 		bz->play(Buzzer::BUZZER_MUSIC_BOOT);
-		*led = 0x6;
-		wait(0.2);
-		*led = 0x9;
+		*led = bat->gage(16);
 	}
 
 	/* for debug */
@@ -206,6 +202,11 @@ int main() {
 			btn->flags = 0;
 			bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
 			Thread::wait(2000);
+			rfl->enable();
+			while (rfl->side(1) < 800) {
+				Thread::wait(100);
+			}
+			bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
 			mpu->calibration();
 			ms->start();
 		}

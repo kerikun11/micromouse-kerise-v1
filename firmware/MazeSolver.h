@@ -18,8 +18,8 @@
 
 class MazeSolver {
 public:
-	MazeSolver(MoveAction *ma, WallDetector *wd) :
-			ma(ma), wd(wd), agent(maze), thread(PRIORITY_MAZE_SOLVER, 4096) {
+	MazeSolver(Buzzer *bz, MoveAction *ma, WallDetector *wd) :
+			bz(bz), ma(ma), wd(wd), agent(maze), thread(PRIORITY_MAZE_SOLVER, 4096) {
 		dir = NORTH;
 		pos = IndexVec(0, 0);
 	}
@@ -28,6 +28,7 @@ public:
 		thread.start(this, &MazeSolver::task);
 	}
 private:
+	Buzzer *bz;
 	MoveAction *ma;
 	WallDetector *wd;
 	Maze maze, maze_backup;
@@ -113,31 +114,30 @@ private:
 		}
 	}
 	void robotMove(const Operation &op) {
-		for (int i = 0; i < op.n; i++) {
+		for (int i = 0; i < op.n; i++)
 			switch (op.op) {
 				case Operation::FORWARD:
 					ma->set_action(MoveAction::FAST_GO_STRAIGHT);
 					break;
 				case Operation::FORWARD_DIAG:
-					ma->set_action(MoveAction::FAST_GO_DIAGONAL);
+//					ma->set_action(MoveAction::FAST_GO_DIAGONAL);
 					break;
 				case Operation::TURN_LEFT90:
 					ma->set_action(MoveAction::FAST_TURN_LEFT_90);
 					break;
 				case Operation::TURN_LEFT45:
-					ma->set_action(MoveAction::FAST_TURN_LEFT_45);
+//					ma->set_action(MoveAction::FAST_TURN_LEFT_45);
 					break;
 				case Operation::TURN_RIGHT90:
 					ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
 					break;
 				case Operation::TURN_RIGHT45:
-					ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
+//					ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
 					break;
 				case Operation::STOP:
 					ma->set_action(MoveAction::FAST_STOP);
 					break;
 			}
-		}
 	}
 	void robotPositionInit() {
 		ma->set_action(MoveAction::START_INIT);
@@ -235,16 +235,24 @@ private:
 
 			Direction nextDir = agent.getNextDirection();		//< Agentの状態が探索中の場合は次に進むべき方向を取得する
 			printf("agent.getNextDirection() => %x\n", (int) nextDir);
+			if (nextDir == 0) {
+				bz->play(Buzzer::BUZZER_MUSIC_ERROR);
+				while (1) {
+					Thread::wait(100);
+				}
+			}
 			robotMove(nextDir);  //< robotMove関数はDirection型を受け取ってロボットをそっちに動かす関数
 		}
+		maze_backup = maze;
 
 		printf("robotPositionInit();\n");
 		robotPositionInit();	//< ロボットを停止させ、スタートする向きに戻す
+		bz->play(Buzzer::BUZZER_MUSIC_SELECT);
 
 		printf("maze.printWall();\n");
 		maze.printWall();
 
-		Thread::wait(2000);
+		Thread::wait(3000);
 
 		//最短経路の計算 割と時間がかかる(数秒)
 		//引数は斜め走行をするかしないか
@@ -261,12 +269,28 @@ private:
 
 		printf("runSequence.size() => %d\n", runSequence.size());
 
+		bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
 		//Operationを先頭から順番に実行していく
 		for (size_t i = 0; i < runSequence.size(); i++) {
-			printf("runSequence[i].n => %d, runSequence[i].op => %d\n", runSequence[i].n,
+			printf("runSequence[%d].n => %d, runSequence[%d].op => %d\n", i, runSequence[i].n, i,
 					runSequence[i].op);
-			robotMove(runSequence[i]); //robotMode関数はOperation型を受け取ってそれを実行する関数
+			if (i == 0) {
+				ma->set_action(MoveAction::FAST_START_STEP);
+				for (int j = 0; j < runSequence[i].n - 1; j++) {
+					ma->set_action(MoveAction::FAST_GO_STRAIGHT);
+				}
+			} else {
+				robotMove(runSequence[i]); //robotMode関数はOperation型を受け取ってそれを実行する関数
+			}
+			Thread::wait(1);
 		}
+		ma->set_action(MoveAction::FAST_STOP);
+
+		while (ma->actions()) {
+			Thread::wait(1);
+		}
+		bz->play(Buzzer::BUZZER_MUSIC_COMPLETE);
+
 //		printf("End.\n");
 //		Maze field;
 //		Maze mazeInRobot;
