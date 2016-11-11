@@ -48,18 +48,16 @@ public:
 		sc->position = error;
 		this->fast_speed = fast_speed;
 		this->fast_accel = fast_accel;
-		if (actions() == 0) {
-			rfl->enable();
-			sc->enable();
-			thread.start(this, &MoveAction::task);
-		}
+		rfl->enable();
+		sc->enable();
+		thread.start(this, &MoveAction::task);
 	}
 	void disable() {
 		thread.terminate();
 		sc->disable();
 		rfl->disable();
 		while (1) {
-			osEvent evt = queue.get(0);
+			osEvent evt = queue.get(1);
 			if (evt.status != osEventMessage) {
 				break;
 			}
@@ -113,8 +111,8 @@ private:
 			while (1) {
 				float trans = wd->wall_difference().flont[0] + wd->wall_difference().flont[1];
 				float rot = wd->wall_difference().flont[1] - wd->wall_difference().flont[0];
-				sc->set_target(trans * 500, rot * 50);
-				if (fabs(trans) < 0.1 && fabs(rot) < 0.01) break;
+				sc->set_target(trans * 500, rot * 100);
+				if (fabs(trans) < 0.5 && fabs(rot) < 0.1) break;
 				Thread::wait(1);
 			}
 			error = sc->position;

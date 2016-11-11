@@ -151,6 +151,9 @@ public:
 		emergency = false;
 		free();
 	}
+	bool isEmergency() {
+		return emergency;
+	}
 private:
 	TIM_HandleTypeDef TimHandle;
 	TIM_OC_InitTypeDef sConfig;

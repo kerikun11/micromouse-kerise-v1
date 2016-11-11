@@ -101,7 +101,7 @@ void serial_ctrl() {
 			case 'm':
 				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();
-				ms->start();
+				ms->start(MazeSolver::ALL);
 				break;
 			case 'p':
 				printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(), rfl->sr());
@@ -140,6 +140,12 @@ void emergencyTask() {
 			mt->emergency_stop();
 			ma->disable();
 			bz->play(Buzzer::EMERGENCY);
+			while (mt->isEmergency()) {
+				*led = 0x0A;
+				Thread::wait(100);
+				*led = 0x05;
+				Thread::wait(100);
+			}
 		}
 	}
 }
@@ -163,7 +169,7 @@ int main() {
 
 	sc = new SpeedController(mt, enc, mpu);
 	ma = new MoveAction(bz, enc, mpu, rfl, wd, sc);
-	ms = new MazeSolver(bz, ma, wd);
+	ms = new MazeSolver(bz, mpu, rfl, ma, wd);
 
 	/* boot */
 	{
@@ -177,7 +183,7 @@ int main() {
 		}
 		bz->play(Buzzer::BOOT);
 		*led = bat->gage(16);
-		Thread::wait(500);
+		Thread::wait(1000);
 		*led = 0;
 	}
 
@@ -189,44 +195,41 @@ int main() {
 	Thread emergencyThread(PRIORITY_EMERGENCY_STOP);
 	emergencyThread.start(emergencyTask);
 
-	MazeSolver::ACTION act = MazeSolver::ALL;
 	while (true) {
 		Thread::wait(10);
-		if (ms->isRunning()) {
+		if (mt->isEmergency()) {
 			if (btn->pressed) {
 				btn->flags = 0;
-				bz->play(Buzzer::CANCEL);
-				sc->disable();
-				mt->free();
+				bz->play(Buzzer::BOOT);
 				mt->emergency_release();
+				*led = 0;
+				printf("Release Emergency\n");
 			}
-		} else {
-			int cnt = enc->position() / 10;
-			cnt %= 3;
-			act = (enum MazeSolver::ACTION) cnt;
-			switch (act) {
-				case MazeSolver::ALL:
-					*led = 15;
-					break;
-				case MazeSolver::SEARCH_RUN:
-					*led = 9;
-					break;
-				case MazeSolver::FAST_RUN:
-					*led = 6;
-					break;
-			}
-			if (btn->pressed) {
-				btn->flags = 0;
-				bz->play(Buzzer::CONFIRM);
-				Thread::wait(2000);
-				rfl->enable();
-				while (rfl->side(1) < 1024) {
-					Thread::wait(100);
-				}
-				bz->play(Buzzer::CONFIRM);
-				mpu->calibration();
-				ms->start(act);
-			}
+			continue;
+		}
+		uint8_t cnt = enc->position() / 5;
+		cnt %= 3;
+		MazeSolver::ACTION act = (enum MazeSolver::ACTION) cnt;
+		switch (act) {
+			case MazeSolver::ALL:
+				*led = 15;
+				break;
+			case MazeSolver::SEARCH_RUN:
+				*led = 9;
+				break;
+			case MazeSolver::FAST_RUN:
+				*led = 6;
+				break;
+		}
+		if (btn->pressed) {
+			btn->flags = 0;
+			bz->play(Buzzer::CANCEL);
+			ms->terminate();
+		}
+		if (btn->long_pressing_1) {
+			btn->flags = 0;
+			bz->play(Buzzer::CONFIRM);
+			ms->start(act);
 		}
 	}
 }

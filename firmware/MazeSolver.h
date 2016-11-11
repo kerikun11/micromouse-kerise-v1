@@ -18,15 +18,22 @@
 
 class MazeSolver {
 public:
-	MazeSolver(Buzzer *bz, MoveAction *ma, WallDetector *wd) :
-			bz(bz), ma(ma), wd(wd), agent(maze), thread(PRIORITY_MAZE_SOLVER, 4096) {
+	MazeSolver(Buzzer *bz, MPU6500 *mpu, Reflector *rfl, MoveAction *ma, WallDetector *wd) :
+			bz(bz), mpu(mpu), rfl(rfl), ma(ma), wd(wd), agent(maze),
+					thread(PRIORITY_MAZE_SOLVER, 4096) {
 		dir = NORTH;
 		pos = IndexVec(0, 0);
 	}
 	enum ACTION {
 		ALL, SEARCH_RUN, FAST_RUN,
 	};
-	void start(enum ACTION act = ALL) {
+	void start(enum ACTION act) {
+		rfl->enable();
+		while (rfl->side(1) < 1024) {
+			Thread::wait(100);
+		}
+		bz->play(Buzzer::CONFIRM);
+		mpu->calibration();
 		switch (act) {
 			case ALL:
 				thread.start(this, &MazeSolver::all);
@@ -41,12 +48,12 @@ public:
 	}
 	void terminate() {
 		thread.terminate();
-	}
-	bool isRunning() {
-		return thread.get_state() == Thread::Running;
+		ma->disable();
 	}
 private:
 	Buzzer *bz;
+	MPU6500 *mpu;
+	Reflector *rfl;
 	MoveAction *ma;
 	WallDetector *wd;
 	Maze maze, maze_backup;
@@ -263,6 +270,9 @@ private:
 		}
 		maze_backup = maze;
 		ma->set_action(MoveAction::START_INIT);
+		while (ma->actions()) {
+			Thread::wait(1);
+		}
 		ma->disable();
 		bz->play(Buzzer::COMPLETE);
 
