@@ -193,9 +193,11 @@ public:
 	void enable() {
 		error.reset();
 		sc->position = error;
-		rfl->enable();
-		sc->enable();
-		thread.start(this, &MoveAction::task);
+		if (actions() == 0) {
+			rfl->enable();
+			sc->enable();
+			thread.start(this, &MoveAction::task);
+		}
 	}
 	void disable() {
 		thread.terminate();
@@ -238,23 +240,31 @@ private:
 			sc->position.y += wd->wall_difference().side[1] * 0.01;
 		}
 	}
+	float fix_y(float gain = 0.1f) {
+		float diff = -sc->position.theta * 0.1 - sc->position.y;
+		const float saturation = 0.1f;
+		if (diff > saturation) {
+			return saturation;
+		} else if (diff < -saturation) {
+			return -saturation;
+		} else {
+			return diff;
+		}
+	}
 	void wall_attach() {
-		while (1) {
-			if (wd->wall().flont[0] && wd->wall().flont[1]) {
+		if (wd->wall().flont[0] && wd->wall().flont[1]) {
+			while (1) {
 				float trans = wd->wall_difference().flont[0] + wd->wall_difference().flont[1];
 				float rot = wd->wall_difference().flont[1] - wd->wall_difference().flont[0];
-				sc->set_target(trans * 1000, rot * 10);
-				if (abs(trans) < 0.1 && abs(rot) < 0.1) break;
+				sc->set_target(trans * 500, rot * 50);
+				if (abs(trans) < 0.1 && abs(rot) < 0.01) break;
 				Thread::wait(1);
-			} else {
-				break;
 			}
+			error = sc->position;
+			error.x = 0;
+			sc->position = error;
+			printf("Wall Attach error: (%07.3f, %07.3f, %07.3f)\n", error.x, error.y, error.theta);
 		}
-		error = sc->position;
-		error.x = 0;
-		error.theta = 0;
-		sc->position = error;
-		printf("Wall Attach error: (%07.3f, %07.3f, %07.3f)\n", error.x, error.y, error.theta);
 	}
 	void acceleration(float speed, float target_distance, float accel = 2000) {
 		timer.reset();
@@ -263,14 +273,14 @@ private:
 		while (1) {
 			wall_avoid();
 			float trans = v0 + timer.read() * accel;
-			sc->set_target(trans, -sc->position.y * 0.01);
+			sc->set_target(trans, fix_y());
 			Thread::wait(1);
 			if (sc->actual().trans > speed) break;
 			if (sc->position.x > target_distance) break;
 		}
 		while (1) {
 			wall_avoid();
-			sc->set_target(speed, -sc->position.y * 0.01);
+			sc->set_target(speed, fix_y());
 			Thread::wait(1);
 			if (sc->position.x > target_distance) break;
 		}
@@ -286,15 +296,13 @@ private:
 			float target_speed = sqrt(2 * accel * abs(extra));
 			target_speed = (target_speed > speed) ? speed : target_speed;
 			if (extra > 0) {
-				sc->set_target(target_speed, -sc->position.y * 0.01);
+				sc->set_target(target_speed, fix_y());
 			} else {
-				sc->set_target(-target_speed, -sc->position.y * 0.01);
+				sc->set_target(-target_speed, fix_y());
 			}
 			Thread::wait(1);
 			if (abs(sc->actual().trans) < 1) break;
 		}
-		printf("Position: (%07.3f, %07.3f, %07.3f)\n", sc->position.x, sc->position.y,
-				sc->position.theta);
 		error = sc->position - Position(target_distance, 0, 0);
 		sc->position = error;
 		printf("Deceleration: %07.3f, error: (%07.3f, %07.3f, %07.3f)\n", target_distance, error.x,
@@ -328,8 +336,8 @@ private:
 			Thread::wait(1);
 			if (abs(sc->actual().rot) < 0.1) break;
 		}
-		printf("Position: (%07.3f, %07.3f, %07.3f)\n", sc->position.x, sc->position.y,
-				sc->position.theta);
+//		printf("Position: (%07.3f, %07.3f, %07.3f)\n", sc->position.x, sc->position.y,
+//				sc->position.theta);
 		error = sc->position.rotate(target_angle) - Position(0, 0, 2 * target_angle);
 		sc->position = error;
 		printf("Turn: %07.3f, error: (%07.3f, %07.3f, %07.3f)\n", target_angle, error.x, error.y,
@@ -417,6 +425,7 @@ private:
 			_actions--;
 		}
 	}
-};
+}
+;
 
 #endif /* CONTROLLER_H_ */
