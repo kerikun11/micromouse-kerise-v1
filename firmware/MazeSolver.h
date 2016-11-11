@@ -139,9 +139,6 @@ private:
 					break;
 			}
 	}
-	void robotPositionInit() {
-		ma->set_action(MoveAction::START_INIT);
-	}
 	Direction getWallData() {
 		Direction wall;
 		if (dir == NORTH) {
@@ -206,7 +203,9 @@ private:
 	IndexVec getRobotPosion() {
 		return pos;
 	}
-	void task() {
+	void search_run() {
+		maze = maze_backup;
+		ma->enable();
 		ma->set_action(MoveAction::START_STEP);
 		while (1) {
 			while (ma->actions()) {
@@ -230,13 +229,14 @@ private:
 					&& agent.getState() == Agent::SEARCHING_REACHED_GOAL) {
 				printf("maze_backup\n");
 				maze_backup = maze;
+				bz->play(Buzzer::CONFIRM);
 			}
 			prevState = agent.getState();
 
 			Direction nextDir = agent.getNextDirection();		//< Agentの状態が探索中の場合は次に進むべき方向を取得する
 			printf("agent.getNextDirection() => %x\n", (int) nextDir);
 			if (nextDir == 0) {
-				bz->play(Buzzer::BUZZER_MUSIC_ERROR);
+				bz->play(Buzzer::ERROR);
 				while (1) {
 					Thread::wait(100);
 				}
@@ -244,33 +244,15 @@ private:
 			robotMove(nextDir);  //< robotMove関数はDirection型を受け取ってロボットをそっちに動かす関数
 		}
 		maze_backup = maze;
-
-		printf("robotPositionInit();\n");
-		robotPositionInit();	//< ロボットを停止させ、スタートする向きに戻す
-		bz->play(Buzzer::BUZZER_MUSIC_SELECT);
-
-		printf("maze.printWall();\n");
-		maze.printWall();
-
-		Thread::wait(3000);
-
-		//最短経路の計算 割と時間がかかる(数秒)
-		//引数は斜め走行をするかしないか
-		//trueだと斜め走行をする
-		printf("agent.calcRunSequence();\n");
-		agent.calcRunSequence(false);
-
-		/**********************************
-		 * 計測走行
-		 *********************************/
-		//コマンドリストみたいなやつを取り出す
+		ma->set_action(MoveAction::START_INIT);
+		ma->disable();
+		bz->play(Buzzer::COMPLETE);
+	}
+	void fast_run() {
 		printf("agent.getRunSequence();\n");
 		const OperationList &runSequence = agent.getRunSequence();
-
 		printf("runSequence.size() => %d\n", runSequence.size());
-
-		bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
-		//Operationを先頭から順番に実行していく
+		bz->play(Buzzer::CONFIRM);
 		for (size_t i = 0; i < runSequence.size(); i++) {
 			printf("runSequence[%d].n => %d, runSequence[%d].op => %d\n", i, runSequence[i].n, i,
 					runSequence[i].op);
@@ -286,43 +268,23 @@ private:
 		}
 		ma->set_action(MoveAction::FAST_STOP);
 
+		ma->enable();
 		while (ma->actions()) {
 			Thread::wait(1);
 		}
-		bz->play(Buzzer::BUZZER_MUSIC_COMPLETE);
+		ma->disable();
+		bz->play(Buzzer::COMPLETE);
+	}
+	void task() {
+		search_run();
+		printf("maze.printWall();\n");
+		maze.printWall();
+		Thread::wait(2000);
 
-//		printf("End.\n");
-//		Maze field;
-//		Maze mazeInRobot;
-//		field.loadFromArray(mazeData_66test);
-//
-//		Agent agent(mazeInRobot);
-//
-//		IndexVec cur(0, 0);
-//		while (1) {
-//			bool pos[MAZE_SIZE][MAZE_SIZE] = { false };
-//			pos[cur.y][cur.x] = true;
-//			mazeInRobot.printWall(pos);
-//
-//			agent.update(cur, field.getWall(cur));
-//			if (agent.getState() == Agent::FINISHED) break;
-//
-//			Direction dir = agent.getNextDirection();
-//			for (int i = 0; i < 4; i++) {
-//				if (dir[i]) cur += IndexVec::vecDir[i];
-//			}
-//			Thread::wait(100);
-//		}
-//
-//		agent.calcRunSequence(false);
-//		const OperationList &runSequence = agent.getRunSequence();
-//		printf("runSequence.size() => %d\n", runSequence.size());
-//
-//		bool route[MAZE_SIZE][MAZE_SIZE] = { false };
-//		for (auto &index : agent.getShortestPath()) {
-//			route[index.y][index.x] = true;
-//		}
-//		mazeInRobot.printWall(route);
+		printf("agent.calcRunSequence();\n");
+		agent.calcRunSequence(false);
+
+		fast_run();
 	}
 };
 
