@@ -95,6 +95,7 @@ public:
 	}
 	void disable() {
 		ctrlTicker.detach();
+		mt->free();
 	}
 	void set_target(float trans, float rot) {
 		target_p.trans = trans;

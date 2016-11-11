@@ -16,7 +16,7 @@
 
 class QuadratureDemodulator {
 private:
-	// (1<<sacle)‚ªsin, cos‚ğ®”‚Å•\Œ»‚·‚é‚Æ‚«‚Ìfull range‚Ì’l
+	// (1<<sacle)ãŒsin, cosã‚’æ•´æ•°ã§è¡¨ç¾ã™ã‚‹ã¨ãã®full rangeã®å€¤
 	const size_t sin_scale = 15;
 	const size_t N;
 	const size_t n;
@@ -25,15 +25,12 @@ private:
 	std::unique_ptr<int16_t[]> Ws;
 
 public:
-	// N‚ªn‚Ì®””{‚É‚È‚é•K—v‚ª‚ ‚é
+	// NãŒnã®æ•´æ•°å€ã«ãªã‚‹å¿…è¦ãŒã‚ã‚‹
 	QuadratureDemodulator(size_t __N, size_t _n) :
-			N(__N), n(_n), m(__N / _n), Wc(new int16_t[__N / _n]), Ws(
-					new int16_t[__N / _n]) {
+			N(__N), n(_n), m(__N / _n), Wc(new int16_t[__N / _n]), Ws(new int16_t[__N / _n]) {
 		for (size_t i = 0; i < m; i++) {
-			Wc[i] = (int16_t)(
-					std::cos(-2.0f * M_PI / m * i) * (float) (1 << sin_scale));
-			Ws[i] = (int16_t)(
-					std::sin(-2.0f * M_PI / m * i) * (float) (1 << sin_scale));
+			Wc[i] = (int16_t)(std::cos(-2.0f * M_PI / m * i) * (float) (1 << sin_scale));
+			Ws[i] = (int16_t)(std::sin(-2.0f * M_PI / m * i) * (float) (1 << sin_scale));
 		}
 	}
 	virtual ~QuadratureDemodulator() {
@@ -51,12 +48,12 @@ public:
 			Xim += Ws[i] * xsum;
 		}
 
-		// sin cos‚ğƒXƒP[ƒŠƒ“ƒO‚µ‚Ä‚¢‚½‚Ì‚ÅA‚»‚Ì•ª‚ğ–ß‚·
+		// sin cosã‚’ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°ã—ã¦ã„ãŸã®ã§ã€ãã®åˆ†ã‚’æˆ»ã™
 		Xre = Xre >> sin_scale;
 		Xim = Xre >> sin_scale;
 
-		// ƒmƒ‹ƒ€‚ğŒvZ
-		// int32_t‚Ì‚Ü‚Ü2æ‚·‚é‚ÆƒI[ƒo[ƒtƒ[‚·‚é‚Ì‚Åint64_t‚É
+		// ãƒãƒ«ãƒ ã‚’è¨ˆç®—
+		// int32_tã®ã¾ã¾2ä¹—ã™ã‚‹ã¨ã‚ªãƒ¼ãƒãƒ¼ãƒ•ãƒ­ãƒ¼ã™ã‚‹ã®ã§int64_tã«
 		const int64_t Xre_f = (int64_t) Xre;
 		const int64_t Xim_f = (int64_t) Xim;
 		const uint64_t X_square = Xre_f * Xre_f + Xim_f * Xim_f;

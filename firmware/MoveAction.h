@@ -73,7 +73,6 @@ public:
 	int actions() const {
 		return _actions;
 	}
-
 private:
 	Buzzer *bz;
 	Encoders *enc;
@@ -115,7 +114,7 @@ private:
 				float trans = wd->wall_difference().flont[0] + wd->wall_difference().flont[1];
 				float rot = wd->wall_difference().flont[1] - wd->wall_difference().flont[0];
 				sc->set_target(trans * 500, rot * 50);
-				if (abs(trans) < 0.1 && abs(rot) < 0.01) break;
+				if (fabs(trans) < 0.1 && fabs(rot) < 0.01) break;
 				Thread::wait(1);
 			}
 			error = sc->position;
@@ -151,7 +150,7 @@ private:
 		while (1) {
 			wall_avoid();
 			float extra = target_distance - sc->position.x;
-			float target_speed = sqrt(2 * accel * abs(extra));
+			float target_speed = sqrt(2 * accel * fabs(extra));
 			target_speed = (target_speed > speed) ? speed : target_speed;
 			if (extra > 0) {
 				sc->set_target(target_speed, fix_y());
@@ -159,7 +158,7 @@ private:
 				sc->set_target(-target_speed, fix_y());
 			}
 			Thread::wait(1);
-			if (abs(sc->actual().trans) < 1) break;
+			if (fabs(sc->actual().trans) < 1) break;
 		}
 		error = sc->position - Position(target_distance, 0, 0);
 		sc->position = error;
@@ -180,11 +179,11 @@ private:
 				sc->set_target(0, -timer.read() * accel);
 			}
 			Thread::wait(1);
-			if (abs(sc->actual().rot) > speed) break;
+			if (fabs(sc->actual().rot) > speed) break;
 		}
 		while (1) {
 			float extra = target_angle - sc->position.theta;
-			float target_speed = sqrt(2 * accel * abs(extra));
+			float target_speed = sqrt(2 * accel * fabs(extra));
 			target_speed = (target_speed > speed) ? speed : target_speed;
 			if (extra > 0) {
 				sc->set_target(0, target_speed);
@@ -192,7 +191,7 @@ private:
 				sc->set_target(0, -target_speed);
 			}
 			Thread::wait(1);
-			if (abs(sc->actual().rot) < 0.1) break;
+			if (fabs(sc->actual().rot) < 0.1) break;
 		}
 //		printf("Position: (%07.3f, %07.3f, %07.3f)\n", sc->position.x, sc->position.y,
 //				sc->position.theta);

@@ -1,12 +1,20 @@
+/*
+ * main.cpp
+ *
+ *  Created on: 2016/10/23
+ *      Author: kerikun11
+ */
+
 #include "mbed.h"
 #include "config.h"
 #include "Battery.h"
 #include "Buzzer.h"
 #include "Button.h"
-#include "Encoder.h"
 #include "Motor.h"
+#include "Encoder.h"
 #include "MPU6500.h"
 #include "Reflector.h"
+#include "WallDetector.h"
 #include "SpeedController.h"
 #include "MoveAction.h"
 #include "MazeSolver.h"
@@ -18,10 +26,8 @@ Buzzer *bz;
 Button *btn;
 
 Motor *mt;
-
 Encoders *enc;
 MPU6500 *mpu;
-
 Reflector *rfl;
 WallDetector *wd;
 
@@ -67,13 +73,12 @@ void serial_ctrl() {
 		printf("%c\n", (char) c);
 		switch (c) {
 			case 'g':
-				bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
+				bz->play(Buzzer::CONFIRM);
 				ma->enable();
 				break;
 			case 'f':
-				bz->play(Buzzer::BUZZER_MUSIC_CANCEL);
+				bz->play(Buzzer::CANCEL);
 				ma->disable();
-				mt->free();
 				break;
 			case 'w':
 				ma->set_action(MoveAction::GO_STRAIGHT);
@@ -94,7 +99,7 @@ void serial_ctrl() {
 				ma->set_action(MoveAction::START_STEP);
 				break;
 			case 'm':
-				bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
+				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();
 				ms->start();
 				break;
@@ -134,7 +139,7 @@ void emergencyTask() {
 		if (mpu->accelY() < -2) {
 			mt->emergency_stop();
 			ma->disable();
-			bz->play(Buzzer::BUZZER_MUSIC_EMERGENCY);
+			bz->play(Buzzer::EMERGENCY);
 		}
 	}
 }
@@ -164,13 +169,13 @@ int main() {
 	{
 		printf("\nHello World!\n");
 		if (!bat->check()) {
-			bz->play(Buzzer::BUZZER_MUSIC_LOW_BATTERY);
+			bz->play(Buzzer::LOW_BATTERY);
 			printf("Battery Low!\n");
 			while (1) {
 				Thread::wait(1000);
 			}
 		}
-		bz->play(Buzzer::BUZZER_MUSIC_BOOT);
+		bz->play(Buzzer::BOOT);
 		*led = bat->gage(16);
 		Thread::wait(500);
 		*led = 0;
@@ -185,23 +190,23 @@ int main() {
 	emergencyThread.start(emergencyTask);
 
 	while (true) {
-		Thread::wait(100);
+		Thread::wait(10);
 		if (btn->pressed) {
 			btn->flags = 0;
-			bz->play(Buzzer::BUZZER_MUSIC_CANCEL);
+			bz->play(Buzzer::CANCEL);
 			sc->disable();
 			mt->free();
 			mt->emergency_release();
 		}
 		if (btn->long_pressed_1) {
 			btn->flags = 0;
-			bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
+			bz->play(Buzzer::CONFIRM);
 			Thread::wait(2000);
 			rfl->enable();
 			while (rfl->side(1) < 1024) {
 				Thread::wait(100);
 			}
-			bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
+			bz->play(Buzzer::CONFIRM);
 			mpu->calibration();
 			ms->start();
 		}

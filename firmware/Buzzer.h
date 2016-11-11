@@ -18,17 +18,7 @@ public:
 		thread.start(this, &Buzzer::task);
 	}
 	enum BUZZER_MUSIC {
-		BUZZER_MUSIC_BOOT,
-		BUZZER_MUSIC_LOW_BATTERY,
-		BUZZER_MUSIC_CONFIRM,
-		BUZZER_MUSIC_CANCEL,
-		BUZZER_MUSIC_SELECT,
-		BUZZER_MUSIC_ERROR,
-		BUZZER_MUSIC_START,
-		BUZZER_MUSIC_EMERGENCY,
-		BUZZER_MUSIC_COMPLETE,
-		BUZZER_MUSIC_DOREMI,
-		BUZZER_MUSIC_FROG,
+		BOOT, LOW_BATTERY, CONFIRM, CANCEL, SELECT, ERROR, START, EMERGENCY, COMPLETE, DOREMI, FROG,
 	};
 	void play(enum BUZZER_MUSIC new_music) {
 		queue.put((enum BUZZER_MUSIC *) new_music);
@@ -72,7 +62,7 @@ private:
 			if (evt.status == osEventMessage) {
 				enum BUZZER_MUSIC music = (enum BUZZER_MUSIC) evt.value.v;
 				switch (music) {
-					case BUZZER_MUSIC_BOOT:
+					case BOOT:
 						playC(2);
 						Thread::wait(100);
 						playE(2);
@@ -82,7 +72,7 @@ private:
 						mute();
 						Thread::wait(100);
 						break;
-					case BUZZER_MUSIC_LOW_BATTERY:
+					case LOW_BATTERY:
 						playC(4);
 						Thread::wait(100);
 						mute();
@@ -92,7 +82,7 @@ private:
 						mute();
 						Thread::wait(100);
 						break;
-					case BUZZER_MUSIC_CONFIRM:
+					case CONFIRM:
 						playC(2);
 						Thread::wait(100);
 						playE(2);
@@ -100,7 +90,7 @@ private:
 						mute();
 						Thread::wait(100);
 						break;
-					case BUZZER_MUSIC_CANCEL:
+					case CANCEL:
 						playE(2);
 						Thread::wait(100);
 						playC(2);
@@ -108,14 +98,14 @@ private:
 						mute();
 						Thread::wait(100);
 						break;
-					case BUZZER_MUSIC_SELECT:
+					case SELECT:
 						playC(2);
 						Thread::wait(100);
 						mute();
 						Thread::wait(100);
 						break;
-					case BUZZER_MUSIC_ERROR:
-						for (int i = 0; i < 2; i++) {
+					case ERROR:
+						for (int i = 0; i < 4; i++) {
 							playC(3);
 							Thread::wait(100);
 							playE(3);
@@ -124,7 +114,7 @@ private:
 						mute();
 						Thread::wait(100);
 						break;
-					case BUZZER_MUSIC_START:
+					case START:
 						playC(2);
 						Thread::wait(200);
 						playE(2);
@@ -134,7 +124,7 @@ private:
 						mute();
 						Thread::wait(200);
 						break;
-					case BUZZER_MUSIC_EMERGENCY:
+					case EMERGENCY:
 //					for (int i = 0; i < 4; i++) {
 //						playC(4);
 //						Thread::wait(100);
@@ -163,7 +153,7 @@ private:
 						mute();
 						Thread::wait(100);
 						break;
-					case BUZZER_MUSIC_COMPLETE:
+					case COMPLETE:
 						playC(3);
 						Thread::wait(100);
 						playE(3);
@@ -174,7 +164,7 @@ private:
 						Thread::wait(100);
 						mute();
 						break;
-					case BUZZER_MUSIC_DOREMI:
+					case DOREMI:
 						playC(2);
 						Thread::wait(400);
 						playD(2);
@@ -193,7 +183,7 @@ private:
 						Thread::wait(400);
 						mute();
 						break;
-					case BUZZER_MUSIC_FROG:
+					case FROG:
 						const int tempo = 100;
 						playC(2);
 						Thread::wait(4 * tempo);
