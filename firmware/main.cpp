@@ -7,7 +7,8 @@
 #include "Motor.h"
 #include "MPU6500.h"
 #include "Reflector.h"
-#include "Controller.h"
+#include "SpeedController.h"
+#include "MoveAction.h"
 #include "MazeSolver.h"
 
 /* define each pointer */
@@ -67,13 +68,11 @@ void serial_ctrl() {
 		switch (c) {
 			case 'g':
 				bz->play(Buzzer::BUZZER_MUSIC_CONFIRM);
-				sc->enable();
 				ma->enable();
 				break;
 			case 'f':
 				bz->play(Buzzer::BUZZER_MUSIC_CANCEL);
 				ma->disable();
-				sc->disable();
 				mt->free();
 				break;
 			case 'w':
@@ -99,17 +98,14 @@ void serial_ctrl() {
 				mpu->calibration();
 				ms->start();
 				break;
-			case 'u':
-				mpu->calibration();
-				break;
 			case 'p':
 				printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(), rfl->sr());
 				printf("%s %s "
 						"%s %s\n", wd->wall().side[0] ? "X" : ".", wd->wall().flont[0] ? "X" : ".",
 						wd->wall().flont[1] ? "X" : ".", wd->wall().side[1] ? "X" : ".");
 				printf("x: %07.3f\ty: %07.3f\ttheta: %07.3f\ttrans: %07.3f\tomega: %07.3f\n",
-						sc->position.x, sc->position.y, sc->position.theta / M_PI * 180,
-						sc->actual().trans, sc->actual().rot);
+						sc->position.x, sc->position.y, sc->position.theta, sc->actual().trans,
+						sc->actual().rot);
 				printf("Gyro: %7.4f\tAngle: %07.4f\n", mpu->gyroZ(), mpu->angleZ());
 				printf("L: %ld\tR: %ld\n", enc->left(), enc->right());
 				break;
@@ -139,10 +135,6 @@ void emergencyTask() {
 			mt->emergency_stop();
 			ma->disable();
 			bz->play(Buzzer::BUZZER_MUSIC_EMERGENCY);
-//			bz->play(Buzzer::BUZZER_MUSIC_FROG);
-			while (1) {
-				Thread::wait(1000);
-			}
 		}
 	}
 }
@@ -180,6 +172,8 @@ int main() {
 		}
 		bz->play(Buzzer::BUZZER_MUSIC_BOOT);
 		*led = bat->gage(16);
+		Thread::wait(500);
+		*led = 0;
 	}
 
 	/* for debug */
@@ -197,6 +191,7 @@ int main() {
 			bz->play(Buzzer::BUZZER_MUSIC_CANCEL);
 			sc->disable();
 			mt->free();
+			mt->emergency_release();
 		}
 		if (btn->long_pressed_1) {
 			btn->flags = 0;

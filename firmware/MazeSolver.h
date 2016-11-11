@@ -10,7 +10,7 @@
 
 #include "mbed.h"
 #include "config.h"
-#include "Controller.h"
+#include "SpeedController.h"
 #include "MazeSolver.h"
 #include "MazeSolver/Agent.h"
 #include "MazeSolver/mazeData.h"
