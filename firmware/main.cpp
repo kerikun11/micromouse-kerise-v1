@@ -189,26 +189,44 @@ int main() {
 	Thread emergencyThread(PRIORITY_EMERGENCY_STOP);
 	emergencyThread.start(emergencyTask);
 
+	MazeSolver::ACTION act = MazeSolver::ALL;
 	while (true) {
 		Thread::wait(10);
-		if (btn->pressed) {
-			btn->flags = 0;
-			bz->play(Buzzer::CANCEL);
-			sc->disable();
-			mt->free();
-			mt->emergency_release();
-		}
-		if (btn->long_pressed_1) {
-			btn->flags = 0;
-			bz->play(Buzzer::CONFIRM);
-			Thread::wait(2000);
-			rfl->enable();
-			while (rfl->side(1) < 1024) {
-				Thread::wait(100);
+		if (ms->isRunning()) {
+			if (btn->pressed) {
+				btn->flags = 0;
+				bz->play(Buzzer::CANCEL);
+				sc->disable();
+				mt->free();
+				mt->emergency_release();
 			}
-			bz->play(Buzzer::CONFIRM);
-			mpu->calibration();
-			ms->start();
+		} else {
+			int cnt = enc->position() / 10;
+			cnt %= 3;
+			act = (enum MazeSolver::ACTION) cnt;
+			switch (act) {
+				case MazeSolver::ALL:
+					*led = 15;
+					break;
+				case MazeSolver::SEARCH_RUN:
+					*led = 9;
+					break;
+				case MazeSolver::FAST_RUN:
+					*led = 6;
+					break;
+			}
+			if (btn->pressed) {
+				btn->flags = 0;
+				bz->play(Buzzer::CONFIRM);
+				Thread::wait(2000);
+				rfl->enable();
+				while (rfl->side(1) < 1024) {
+					Thread::wait(100);
+				}
+				bz->play(Buzzer::CONFIRM);
+				mpu->calibration();
+				ms->start(act);
+			}
 		}
 	}
 }

@@ -23,9 +23,27 @@ public:
 		dir = NORTH;
 		pos = IndexVec(0, 0);
 	}
-	void start() {
-		ma->enable();
-		thread.start(this, &MazeSolver::task);
+	enum ACTION {
+		ALL, SEARCH_RUN, FAST_RUN,
+	};
+	void start(enum ACTION act = ALL) {
+		switch (act) {
+			case ALL:
+				thread.start(this, &MazeSolver::all);
+				break;
+			case SEARCH_RUN:
+				thread.start(this, &MazeSolver::search_run);
+				break;
+			case FAST_RUN:
+				thread.start(this, &MazeSolver::fast_run);
+				break;
+		}
+	}
+	void terminate() {
+		thread.terminate();
+	}
+	bool isRunning() {
+		return thread.get_state() == Thread::Running;
 	}
 private:
 	Buzzer *bz;
@@ -247,6 +265,12 @@ private:
 		ma->set_action(MoveAction::START_INIT);
 		ma->disable();
 		bz->play(Buzzer::COMPLETE);
+
+		printf("maze.printWall();\n");
+		maze.printWall();
+
+		printf("agent.calcRunSequence();\n");
+		agent.calcRunSequence(false);
 	}
 	void fast_run() {
 		printf("agent.getRunSequence();\n");
@@ -275,15 +299,9 @@ private:
 		ma->disable();
 		bz->play(Buzzer::COMPLETE);
 	}
-	void task() {
+	void all() {
 		search_run();
-		printf("maze.printWall();\n");
-		maze.printWall();
 		Thread::wait(2000);
-
-		printf("agent.calcRunSequence();\n");
-		agent.calcRunSequence(false);
-
 		fast_run();
 	}
 };
