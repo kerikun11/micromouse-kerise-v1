@@ -101,7 +101,7 @@ void serial_ctrl() {
 			case 'm':
 				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();
-				ms->start(MazeSolver::ALL);
+				ms->start();
 				break;
 			case 'p':
 				printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(), rfl->sr());
@@ -136,9 +136,9 @@ void serial_ctrl() {
 void emergencyTask() {
 	while (1) {
 		Thread::wait(1);
-		if (mpu->accelY() < -2) {
+		if (mpu->accelY() < -3) {
 			mt->emergency_stop();
-			ma->disable();
+			ms->terminate();
 			bz->play(Buzzer::EMERGENCY);
 			while (mt->isEmergency()) {
 				*led = 0x0A;
@@ -197,7 +197,8 @@ int main() {
 
 	while (true) {
 		Thread::wait(10);
-		if (mt->isEmergency()) {
+		while (mt->isEmergency()) {
+			Thread::wait(10);
 			if (btn->pressed) {
 				btn->flags = 0;
 				bz->play(Buzzer::BOOT);
@@ -205,31 +206,47 @@ int main() {
 				*led = 0;
 				printf("Release Emergency\n");
 			}
-			continue;
 		}
-		uint8_t cnt = enc->position() / 5;
-		cnt %= 3;
-		MazeSolver::ACTION act = (enum MazeSolver::ACTION) cnt;
-		switch (act) {
-			case MazeSolver::ALL:
-				*led = 15;
-				break;
-			case MazeSolver::SEARCH_RUN:
-				*led = 9;
-				break;
-			case MazeSolver::FAST_RUN:
-				*led = 6;
-				break;
+		while (ma->actions()) {
+			Thread::wait(10);
+			if (btn->pressed) {
+				btn->flags = 0;
+				bz->play(Buzzer::CANCEL);
+				ms->terminate();
+			}
 		}
 		if (btn->pressed) {
 			btn->flags = 0;
-			bz->play(Buzzer::CANCEL);
-			ms->terminate();
-		}
-		if (btn->long_pressing_1) {
-			btn->flags = 0;
 			bz->play(Buzzer::CONFIRM);
-			ms->start(act);
+			while (1) {
+				Thread::wait(10);
+				int cnt = enc->position() / 2;
+				cnt &= 0x7;
+				*led = cnt;
+				ma->set_params(500 + 100 * cnt, 2000 + 200 * cnt);
+				if (btn->pressed) {
+					btn->flags = 0;
+					bz->play(Buzzer::CONFIRM);
+					break;
+				}
+			}
+			rfl->enable();
+			while (1) {
+				Thread::wait(10);
+				if (rfl->side(1) > 1023) {
+					bz->play(Buzzer::CONFIRM);
+					Thread::wait(1000);
+					mpu->calibration();
+					ms->start();
+					break;
+				}
+				if (btn->pressed) {
+					btn->flags = 0;
+					bz->play(Buzzer::CANCEL);
+					rfl->disable();
+					break;
+				}
+			}
 		}
 	}
 }

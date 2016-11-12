@@ -24,27 +24,8 @@ public:
 		dir = NORTH;
 		pos = IndexVec(0, 0);
 	}
-	enum ACTION {
-		ALL, SEARCH_RUN, FAST_RUN,
-	};
-	void start(enum ACTION act) {
-		rfl->enable();
-		while (rfl->side(1) < 1024) {
-			Thread::wait(100);
-		}
-		bz->play(Buzzer::CONFIRM);
-		mpu->calibration();
-		switch (act) {
-			case ALL:
-				thread.start(this, &MazeSolver::all);
-				break;
-			case SEARCH_RUN:
-				thread.start(this, &MazeSolver::search_run);
-				break;
-			case FAST_RUN:
-				thread.start(this, &MazeSolver::fast_run);
-				break;
-		}
+	void start() {
+		thread.start(this, &MazeSolver::task);
 	}
 	void terminate() {
 		thread.terminate();
@@ -145,19 +126,19 @@ private:
 					ma->set_action(MoveAction::FAST_GO_STRAIGHT);
 					break;
 				case Operation::FORWARD_DIAG:
-//					ma->set_action(MoveAction::FAST_GO_DIAGONAL);
+					ma->set_action(MoveAction::FAST_GO_DIAGONAL);
 					break;
 				case Operation::TURN_LEFT90:
 					ma->set_action(MoveAction::FAST_TURN_LEFT_90);
 					break;
 				case Operation::TURN_LEFT45:
-//					ma->set_action(MoveAction::FAST_TURN_LEFT_45);
+					ma->set_action(MoveAction::FAST_TURN_LEFT_45);
 					break;
 				case Operation::TURN_RIGHT90:
 					ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
 					break;
 				case Operation::TURN_RIGHT45:
-//					ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
+					ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
 					break;
 				case Operation::STOP:
 					ma->set_action(MoveAction::FAST_STOP);
@@ -229,6 +210,9 @@ private:
 		return pos;
 	}
 	void search_run() {
+		if (agent.getState() == Agent::FINISHED) return;
+		dir = NORTH;
+		pos = IndexVec(0, 0);
 		maze = maze_backup;
 		ma->enable();
 		ma->set_action(MoveAction::START_STEP);
@@ -309,7 +293,7 @@ private:
 		ma->disable();
 		bz->play(Buzzer::COMPLETE);
 	}
-	void all() {
+	void task() {
 		search_run();
 		Thread::wait(2000);
 		fast_run();

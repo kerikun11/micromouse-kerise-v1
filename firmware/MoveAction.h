@@ -17,8 +17,7 @@ public:
 			SpeedController *sc) :
 			bz(bz), enc(enc), mpu(mpu), rfl(rfl), wd(wd), sc(sc), thread(PRIORITY_MOVE_ACTION) {
 		_actions = 0;
-		fast_speed = 1000;
-		fast_accel = 3000;
+		set_params();
 	}
 	enum ACTION {
 		START_STEP,
@@ -43,11 +42,9 @@ public:
 				"fast_turn_right_90", "fast_stop" };
 		return name[action];
 	}
-	void enable(float fast_speed = 1000, float fast_accel = 3000) {
+	void enable() {
 		error.reset();
 		sc->position = error;
-		this->fast_speed = fast_speed;
-		this->fast_accel = fast_accel;
 		rfl->enable();
 		sc->enable();
 		thread.start(this, &MoveAction::task);
@@ -67,6 +64,10 @@ public:
 	void set_action(enum ACTION action) {
 		_actions++;
 		queue.put((enum ACTION*) action);
+	}
+	void set_params(float fast_speed = 1000, float fast_accel = 3000) {
+		this->fast_speed = fast_speed;
+		this->fast_accel = fast_accel;
 	}
 	int actions() const {
 		return _actions;
@@ -111,12 +112,12 @@ private:
 			while (1) {
 				float trans = wd->wall_difference().flont[0] + wd->wall_difference().flont[1];
 				float rot = wd->wall_difference().flont[1] - wd->wall_difference().flont[0];
-				sc->set_target(trans * 500, rot * 100);
+				sc->set_target(trans * 100, rot * 50);
 				if (fabs(trans) < 0.5 && fabs(rot) < 0.1) break;
 				Thread::wait(1);
 			}
 			error = sc->position;
-			error.x = 0;
+//			error.x = 0;
 			sc->position = error;
 			printf("Wall Attach error: (%07.3f, %07.3f, %07.3f)\n", error.x, error.y, error.theta);
 		}
@@ -214,10 +215,10 @@ private:
 					sc->set_target(0, 0);
 					break;
 				case START_INIT:
-					straight(200, 30);
+					straight(100, 30);
 					turn(1.2 * M_PI, M_PI);
 					sc->position.reset();
-					sc->set_target(-200, 0);
+					sc->set_target(-100, 0);
 					Thread::wait(1000);
 					sc->position.reset();
 					sc->set_target(0, 0);
