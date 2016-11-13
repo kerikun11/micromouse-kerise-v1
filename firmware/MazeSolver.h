@@ -120,31 +120,142 @@ private:
 		}
 	}
 	void robotMove(const Operation &op) {
-		for (int i = 0; i < op.n; i++)
+		if (dir == NORTH) {
 			switch (op.op) {
 				case Operation::FORWARD:
 					ma->set_action(MoveAction::FAST_GO_STRAIGHT);
+					pos.y++;
 					break;
 				case Operation::FORWARD_DIAG:
-					ma->set_action(MoveAction::FAST_GO_DIAGONAL);
+//					ma->set_action(MoveAction::FAST_GO_DIAGONAL);
 					break;
 				case Operation::TURN_LEFT90:
 					ma->set_action(MoveAction::FAST_TURN_LEFT_90);
+					pos.x--;
 					break;
 				case Operation::TURN_LEFT45:
-					ma->set_action(MoveAction::FAST_TURN_LEFT_45);
+//					ma->set_action(MoveAction::FAST_TURN_LEFT_45);
 					break;
 				case Operation::TURN_RIGHT90:
 					ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+					pos.x++;
 					break;
 				case Operation::TURN_RIGHT45:
-					ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
+//					ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
 					break;
 				case Operation::STOP:
 					ma->set_action(MoveAction::FAST_STOP);
 					break;
 			}
+		} else if (dir == EAST) {
+			switch (op.op) {
+				case Operation::FORWARD:
+					ma->set_action(MoveAction::FAST_GO_STRAIGHT);
+					pos.x++;
+					break;
+				case Operation::FORWARD_DIAG:
+//					ma->set_action(MoveAction::FAST_GO_DIAGONAL);
+					break;
+				case Operation::TURN_LEFT90:
+					ma->set_action(MoveAction::FAST_TURN_LEFT_90);
+					pos.y++;
+					break;
+				case Operation::TURN_LEFT45:
+//					ma->set_action(MoveAction::FAST_TURN_LEFT_45);
+					break;
+				case Operation::TURN_RIGHT90:
+					ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+					pos.y--;
+					break;
+				case Operation::TURN_RIGHT45:
+//					ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
+					break;
+				case Operation::STOP:
+					ma->set_action(MoveAction::FAST_STOP);
+					break;
+			}
+		} else if (dir == SOUTH) {
+			switch (op.op) {
+				case Operation::FORWARD:
+					ma->set_action(MoveAction::FAST_GO_STRAIGHT);
+					pos.y--;
+					break;
+				case Operation::FORWARD_DIAG:
+//					ma->set_action(MoveAction::FAST_GO_DIAGONAL);
+					break;
+				case Operation::TURN_LEFT90:
+					ma->set_action(MoveAction::FAST_TURN_LEFT_90);
+					pos.x++;
+					break;
+				case Operation::TURN_LEFT45:
+//					ma->set_action(MoveAction::FAST_TURN_LEFT_45);
+					break;
+				case Operation::TURN_RIGHT90:
+					ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+					pos.x--;
+					break;
+				case Operation::TURN_RIGHT45:
+//					ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
+					break;
+				case Operation::STOP:
+					ma->set_action(MoveAction::FAST_STOP);
+					break;
+			}
+		} else if (dir == WEST) {
+			switch (op.op) {
+				case Operation::FORWARD:
+					ma->set_action(MoveAction::FAST_GO_STRAIGHT);
+					pos.x--;
+					break;
+				case Operation::FORWARD_DIAG:
+//					ma->set_action(MoveAction::FAST_GO_DIAGONAL);
+					break;
+				case Operation::TURN_LEFT90:
+					ma->set_action(MoveAction::FAST_TURN_LEFT_90);
+					pos.y--;
+					break;
+				case Operation::TURN_LEFT45:
+//					ma->set_action(MoveAction::FAST_TURN_LEFT_45);
+					break;
+				case Operation::TURN_RIGHT90:
+					ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+					pos.y++;
+					break;
+				case Operation::TURN_RIGHT45:
+//					ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
+					break;
+				case Operation::STOP:
+					ma->set_action(MoveAction::FAST_STOP);
+					break;
+			}
+		}
 	}
+//	void robotMove(const Operation &op) {
+//		for (int i = 0; i < op.n; i++)
+//			switch (op.op) {
+//				case Operation::FORWARD:
+//					ma->set_action(MoveAction::FAST_GO_STRAIGHT);
+//					break;
+//				case Operation::FORWARD_DIAG:
+//					ma->set_action(MoveAction::FAST_GO_DIAGONAL);
+//					break;
+//				case Operation::TURN_LEFT90:
+//					ma->set_action(MoveAction::FAST_TURN_LEFT_90);
+//					break;
+//				case Operation::TURN_LEFT45:
+//					ma->set_action(MoveAction::FAST_TURN_LEFT_45);
+//					break;
+//				case Operation::TURN_RIGHT90:
+//					ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+//					break;
+//				case Operation::TURN_RIGHT45:
+//					ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
+//					break;
+//				case Operation::STOP:
+//					ma->set_action(MoveAction::FAST_STOP);
+//					break;
+//			}
+//	}
 	Direction getWallData() {
 		Direction wall;
 		if (dir == NORTH) {
@@ -210,7 +321,6 @@ private:
 		return pos;
 	}
 	void search_run() {
-		if (agent.getState() == Agent::FINISHED) return;
 		dir = NORTH;
 		pos = IndexVec(0, 0);
 		maze = maze_backup;
@@ -260,6 +370,8 @@ private:
 		ma->disable();
 		bz->play(Buzzer::COMPLETE);
 
+		if (agent.getState() == Agent::FINISHED) return;
+
 		printf("maze.printWall();\n");
 		maze.printWall();
 
@@ -271,16 +383,24 @@ private:
 		const OperationList &runSequence = agent.getRunSequence();
 		printf("runSequence.size() => %d\n", runSequence.size());
 		bz->play(Buzzer::CONFIRM);
+
+		dir = NORTH;
+		pos = IndexVec(0, 0);
+
 		for (size_t i = 0; i < runSequence.size(); i++) {
 			printf("runSequence[%d].n => %d, runSequence[%d].op => %d\n", i, runSequence[i].n, i,
 					runSequence[i].op);
+			const Operation& op = runSequence[i];
 			if (i == 0) {
 				ma->set_action(MoveAction::FAST_START_STEP);
-				for (int j = 0; j < runSequence[i].n - 1; j++) {
-					ma->set_action(MoveAction::FAST_GO_STRAIGHT);
+				pos.y++;
+				for (int j = 0; j < op.n - 1; j++) {
+					robotMove(op);
 				}
 			} else {
-				robotMove(runSequence[i]); //robotMode関数はOperation型を受け取ってそれを実行する関数
+				for (int i = 0; i < op.n; i++) {
+					robotMove(op);
+				}
 			}
 			Thread::wait(1);
 		}
@@ -294,9 +414,13 @@ private:
 		bz->play(Buzzer::COMPLETE);
 	}
 	void task() {
-		search_run();
-		Thread::wait(2000);
-		fast_run();
+		while (1) {
+			search_run();
+			Thread::wait(2000);
+			fast_run();
+			Thread::wait(2000);
+			ma->set_params(100);
+		}
 	}
 };
 

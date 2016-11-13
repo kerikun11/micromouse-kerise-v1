@@ -17,7 +17,7 @@ public:
 			SpeedController *sc) :
 			bz(bz), enc(enc), mpu(mpu), rfl(rfl), wd(wd), sc(sc), thread(PRIORITY_MOVE_ACTION) {
 		_actions = 0;
-		set_params();
+		set_params(1000, 3000);
 	}
 	enum ACTION {
 		START_STEP,
@@ -65,9 +65,13 @@ public:
 		_actions++;
 		queue.put((enum ACTION*) action);
 	}
-	void set_params(float fast_speed = 1000, float fast_accel = 3000) {
+	void set_params(float fast_speed, float fast_accel) {
 		this->fast_speed = fast_speed;
 		this->fast_accel = fast_accel;
+	}
+	void set_params(float add) {
+		this->fast_speed += add;
+		this->fast_accel += add * 2;
 	}
 	int actions() const {
 		return _actions;
@@ -290,7 +294,8 @@ private:
 					acceleration(fast_speed, 90, fast_accel);
 					break;
 				case FAST_STOP:
-					deceleration(fast_speed, 120, fast_accel);
+					deceleration(fast_speed, 90, fast_accel);
+					wall_attach();
 					sc->set_target(0, 0);
 					break;
 			}
