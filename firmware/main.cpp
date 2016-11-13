@@ -56,11 +56,10 @@ void debug_info() {
 //		printf("Acc Y: %lf\n", mpu->accelY());
 
 //		for (int i = 0; i < 2; i++) {
-//			printf("P:%09.2f\tI:%09.2f\tD:%09.2f\t", sc->actual_p.wheel[i],
-//					sc->actual_i.wheel[i], sc->actual_d.wheel[i]);
+//			printf("P:%09.2f\tI:%09.2f\tD:%09.2f\t", sc->actual_p.wheel[i], sc->actual_i.wheel[i],
+//					sc->actual_d.wheel[i]);
 //		}
-//		printf("L:%09.2f\tR:%09.2f\t", sc->target_p.wheel[0],
-//				sc->target_p.wheel[1]);
+//		printf("L:%09.2f\tR:%09.2f\t", sc->target_p.wheel[0], sc->target_p.wheel[1]);
 //		printf("\n");
 	}
 }
@@ -235,7 +234,7 @@ int main() {
 				Thread::wait(10);
 				if (rfl->side(1) > 1023) {
 					bz->play(Buzzer::CONFIRM);
-					Thread::wait(1000);
+					Thread::wait(100);
 					mpu->calibration();
 					ms->start();
 					break;
@@ -243,6 +242,7 @@ int main() {
 				if (btn->pressed) {
 					btn->flags = 0;
 					bz->play(Buzzer::CANCEL);
+					ms->terminate();
 					rfl->disable();
 					break;
 				}
