@@ -51,7 +51,7 @@ class Reflector {
 public:
 	Reflector(PinName led_sl_fr_pin, PinName led_sr_fl_pin) :
 			led_sl_fr(led_sl_fr_pin), led_sr_fl(led_sr_fl_pin),
-					updateThread(PRIORITY_IR_RECEIVER_UPDATE) {
+					updateThread(PRIORITY_REFLECTOR_UPDATE, STACK_SIZE_REFLECTOR_UPDATE) {
 		led_sl_fr.period_us(IR_LED_PERIOD_US);
 		led_sr_fl.period_us(IR_LED_PERIOD_US);
 		adcInitialize();
@@ -64,6 +64,7 @@ public:
 		IR_RECEIVER_SAMPLING_PERIOD_US);
 
 		updateThread.start(this, &Reflector::updateTask);
+		printf("0x%08X: Reflector\n", (unsigned int) updateThread.gettid());
 		updateTicker.attach_us(this, &Reflector::updateIsr,
 		IR_RECEIVER_UPDATE_PERIOD_US);
 	}

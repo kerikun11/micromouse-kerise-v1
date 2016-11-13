@@ -10,7 +10,7 @@
 
 /* Thread Priorities */
 
-#define PRIORITY_IR_RECEIVER_UPDATE	osPriorityHigh
+#define PRIORITY_REFLECTOR_UPDATE	osPriorityHigh
 #define PRIORITY_MPU6500_UPDATE		osPriorityHigh
 
 #define PRIORITY_WALL_UPDATE		osPriorityAboveNormal
@@ -27,6 +27,21 @@
 #define PRIORITY_DEBUG_INFO			osPriorityLow
 
 #define PRIORITY_SERIAL_CTRL		osPriorityIdle
+
+/* thread stack size */
+
+#define BUZZER_STACK_SIZE			512
+#define STACK_SIZE_ENCODER			256
+#define STACK_SIZE_MAZE_SOLVER		4096
+#define STACK_SIZE_MOVE_ACTION		2048
+#define STACK_SIZE_MPU6500_UPDATE	512
+#define STACK_SIZE_REFLECTOR_UPDATE	512
+#define STACK_SIZE_SPEED_CONTROLLER	1024
+#define STACK_SIZE_WALL_UPDATE		512
+
+#define STACK_SIZE_DEBUG_INFO		512
+#define STACK_SIZE_SERIAL_CTRL		512
+#define STACK_SIZE_EMERGENCY		512
 
 /* Hardware Parameter */
 

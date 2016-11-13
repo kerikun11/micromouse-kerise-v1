@@ -77,8 +77,10 @@ public:
 class SpeedController {
 public:
 	SpeedController(Motor *mt, Encoders *enc, MPU6500 *mpu) :
-			mt(mt), enc(enc), mpu(mpu), ctrlThread(PRIORITY_SPEED_CONTROLLER) {
+			mt(mt), enc(enc), mpu(mpu),
+					ctrlThread(PRIORITY_SPEED_CONTROLLER, STACK_SIZE_SPEED_CONTROLLER) {
 		ctrlThread.start(this, &SpeedController::ctrlTask);
+		printf("0x%08X: Speed Controller\n", (unsigned int) ctrlThread.gettid());
 		for (int i = 0; i < 2; i++) {
 			target_p.wheel[i] = 0;
 			for (int j = 0; j < 3; j++) {

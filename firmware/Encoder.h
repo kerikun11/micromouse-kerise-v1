@@ -22,9 +22,10 @@
 class Encoder {
 public:
 	Encoder(TIM_TypeDef *TIMx) :
-			updateThread(PRIORITY_ENCODER_UPDATE) {
+			updateThread(PRIORITY_ENCODER_UPDATE, STACK_SIZE_ENCODER) {
 		EncoderInit(TIMx, 0xffff, TIM_ENCODERMODE_TI12);
 		updateThread.start(this, &Encoder::updateTask);
+		printf("0x%08X: Encoder\n", (unsigned int) updateThread.gettid());
 		prev_count = 0;
 		overflow_count = 0;
 	}
@@ -33,8 +34,7 @@ public:
 		return overflow_count * 65536 + getRawCount();
 	}
 	double position() {
-		return value() * WHEEL_DIAMETER_MM * M_PI * WHEEL_GEER_RATIO
-				/ ENCODER_PULSES;
+		return value() * WHEEL_DIAMETER_MM * M_PI * WHEEL_GEER_RATIO / ENCODER_PULSES;
 	}
 private:
 	TIM_Encoder_InitTypeDef encoder;
@@ -48,10 +48,8 @@ private:
 	}
 	void update() {
 		int16_t now_count = getRawCount();
-		if (now_count > prev_count + 20000)
-			overflow_count--;
-		if (now_count < prev_count - 20000)
-			overflow_count++;
+		if (now_count > prev_count + 20000) overflow_count--;
+		if (now_count < prev_count - 20000) overflow_count++;
 		prev_count = now_count;
 	}
 	void updateTask() {
@@ -146,24 +144,24 @@ public:
 	}
 	int32_t value(uint8_t ch) {
 		switch (ch) {
-		case 0:
-			return left();
-		case 1:
-			return right();
-		default:
-			return 0;
+			case 0:
+				return left();
+			case 1:
+				return right();
+			default:
+				return 0;
 		}
 	}
 	double position(uint8_t ch = 2) {
 		switch (ch) {
-		case 0:
-			return -encoderL.position();
-		case 1:
-			return encoderR.position();
-		case 2:
-			return (encoderR.position() - encoderL.position()) / 2;
-		default:
-			return 0;
+			case 0:
+				return -encoderL.position();
+			case 1:
+				return encoderR.position();
+			case 2:
+				return (encoderR.position() - encoderL.position()) / 2;
+			default:
+				return 0;
 		}
 	}
 private:

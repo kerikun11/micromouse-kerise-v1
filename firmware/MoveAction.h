@@ -15,7 +15,8 @@ class MoveAction {
 public:
 	MoveAction(Buzzer *bz, Encoders *enc, MPU6500 *mpu, Reflector *rfl, WallDetector *wd,
 			SpeedController *sc) :
-			bz(bz), enc(enc), mpu(mpu), rfl(rfl), wd(wd), sc(sc), thread(PRIORITY_MOVE_ACTION) {
+			bz(bz), enc(enc), mpu(mpu), rfl(rfl), wd(wd), sc(sc),
+					thread(PRIORITY_MOVE_ACTION, STACK_SIZE_MOVE_ACTION) {
 		_actions = 0;
 		set_params(1000, 3000);
 	}
@@ -48,6 +49,7 @@ public:
 		rfl->enable();
 		sc->enable();
 		thread.start(this, &MoveAction::task);
+		printf("0x%08X: Move Action\n", (unsigned int) thread.gettid());
 	}
 	void disable() {
 		thread.terminate();

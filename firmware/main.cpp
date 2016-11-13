@@ -187,12 +187,15 @@ int main() {
 	}
 
 	/* for debug */
-	Thread debugInfoThread(PRIORITY_DEBUG_INFO);
+	Thread debugInfoThread(PRIORITY_DEBUG_INFO, STACK_SIZE_DEBUG_INFO);
 	debugInfoThread.start(debug_info);
-	Thread serialCtrlThread(PRIORITY_SERIAL_CTRL);
+	printf("0x%08X: debug info\n", (unsigned int) debugInfoThread.gettid());
+	Thread serialCtrlThread(PRIORITY_SERIAL_CTRL, STACK_SIZE_SERIAL_CTRL);
 	serialCtrlThread.start(serial_ctrl);
-	Thread emergencyThread(PRIORITY_EMERGENCY_STOP);
+	printf("0x%08X: Serial Ctrl\n", (unsigned int) serialCtrlThread.gettid());
+	Thread emergencyThread(PRIORITY_EMERGENCY_STOP, STACK_SIZE_EMERGENCY);
 	emergencyThread.start(emergencyTask);
+	printf("0x%08X: Emergency\n", (unsigned int) emergencyThread.gettid());
 
 	while (true) {
 		Thread::wait(10);

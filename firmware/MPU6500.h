@@ -21,9 +21,11 @@
 class MPU6500: private SPI {
 public:
 	MPU6500(PinName mosi_pin, PinName miso_pin, PinName sclk_pin, PinName cs_pin) :
-			SPI(mosi_pin, miso_pin, sclk_pin), cs(cs_pin, 1), updateThread(PRIORITY_MPU6500_UPDATE) {
+			SPI(mosi_pin, miso_pin, sclk_pin), cs(cs_pin, 1),
+					updateThread(PRIORITY_MPU6500_UPDATE, STACK_SIZE_MPU6500_UPDATE) {
 		setup();
 		updateThread.start(this, &MPU6500::updateTask);
+		printf("0x%08X: MPU6500\n", (unsigned int) updateThread.gettid());
 		updateTicker.attach_us(this, &MPU6500::updateIsr,
 		MPU6500_UPDATE_PERIOD_US);
 		_accelY = 0;

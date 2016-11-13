@@ -17,7 +17,7 @@
 class WallDetector {
 public:
 	WallDetector(Reflector *rfl) :
-			_rfl(rfl), updateThread(PRIORITY_WALL_UPDATE) {
+			_rfl(rfl), updateThread(PRIORITY_WALL_UPDATE, STACK_SIZE_WALL_UPDATE) {
 
 		_wall_ref.side[0] = 300;
 		_wall_ref.side[1] = 300;
@@ -30,6 +30,7 @@ public:
 		_wall_distance.flont[1] = 560;
 
 		updateThread.start(this, &WallDetector::updateTask);
+		printf("0x%08X: Wall Detector\n", (unsigned int) updateThread.gettid());
 		updateTicker.attach_us(this, &WallDetector::updateIsr,
 		WALL_UPDATE_PERIOD_US);
 	}

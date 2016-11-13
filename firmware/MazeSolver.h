@@ -20,12 +20,13 @@ class MazeSolver {
 public:
 	MazeSolver(Buzzer *bz, MPU6500 *mpu, Reflector *rfl, MoveAction *ma, WallDetector *wd) :
 			bz(bz), mpu(mpu), rfl(rfl), ma(ma), wd(wd), agent(maze),
-					thread(PRIORITY_MAZE_SOLVER, 4096) {
+					thread(PRIORITY_MAZE_SOLVER, STACK_SIZE_MAZE_SOLVER) {
 		dir = NORTH;
 		pos = IndexVec(0, 0);
 	}
 	void start() {
 		thread.start(this, &MazeSolver::task);
+		printf("0x%08X: Maze Solver\n", (unsigned int) thread.gettid());
 	}
 	void terminate() {
 		thread.terminate();
