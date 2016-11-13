@@ -14,7 +14,7 @@
 class Buzzer {
 public:
 	Buzzer(PinName pin) :
-			out(pin), thread(PRIORITY_BUZZER, BUZZER_STACK_SIZE) {
+			out(pin), thread(PRIORITY_BUZZER, STACK_SIZE_BUZZER) {
 		thread.start(this, &Buzzer::task);
 		printf("0x%08X: Buzzer\n", (unsigned int) thread.gettid());
 	}

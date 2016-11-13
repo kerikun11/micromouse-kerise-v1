@@ -136,7 +136,7 @@ private:
 						* 1000000/ SPEED_CONTROLLER_PERIOD_US;
 				actual_i.wheel[i] += (actual_p.wheel[i] - target_p.wheel[i])
 						* SPEED_CONTROLLER_PERIOD_US / 1000000;
-				const float int_saturation = 100.0f;
+				const float int_saturation = 1000.0f;
 				if (actual_i.wheel[i] > int_saturation) actual_i.wheel[i] = int_saturation;
 				if (actual_i.wheel[i] < -int_saturation) actual_i.wheel[i] = -int_saturation;
 				actual_d.wheel[i] = (wheel_position[0][i] - 2 * wheel_position[1][i]
@@ -145,9 +145,9 @@ private:
 			actual_p.wheel2pole();
 			actual_p.rot = mpu->gyroZ() * M_PI / 180.0f;
 			actual_p.pole2wheel();
-			const float Kp = 1.0f;
-			const float Ki = 0.1f;
-			const float Kd = 0.2f;
+			const float Kp = 2.00f;
+			const float Ki = 0.01f;
+			const float Kd = 0.01f;
 			float pwm_value[2];
 			for (int i = 0; i < 2; i++) {
 				pwm_value[i] = Kp * (target_p.wheel[i] - actual_p.wheel[i])

@@ -460,7 +460,7 @@ private:
 		while (1) {
 			fast_run();
 			Thread::wait(2000);
-			ma->set_params(100);
+			ma->set_params(200);
 		}
 	}
 };

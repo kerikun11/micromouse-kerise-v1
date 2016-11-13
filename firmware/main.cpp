@@ -135,7 +135,7 @@ void serial_ctrl() {
 void emergencyTask() {
 	while (1) {
 		Thread::wait(1);
-		if (mpu->accelY() < -3) {
+		if (mpu->accelY() < -4) {
 			mt->emergency_stop();
 			ms->terminate();
 			bz->play(Buzzer::EMERGENCY);
@@ -225,7 +225,7 @@ int main() {
 				int cnt = enc->position() / 2;
 				cnt &= 0x7;
 				*led = cnt;
-				ma->set_params(500 + 100 * cnt, 2000 + 200 * cnt);
+				ma->set_params(500 + 100 * cnt, 3000 + 200 * cnt);
 				if (btn->pressed) {
 					btn->flags = 0;
 					bz->play(Buzzer::CONFIRM);

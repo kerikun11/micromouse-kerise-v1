@@ -18,7 +18,7 @@ public:
 			bz(bz), enc(enc), mpu(mpu), rfl(rfl), wd(wd), sc(sc),
 					thread(PRIORITY_MOVE_ACTION, STACK_SIZE_MOVE_ACTION) {
 		_actions = 0;
-		set_params(1000, 3000);
+		set_params(1000, 4000);
 	}
 	enum ACTION {
 		START_STEP,
@@ -132,12 +132,12 @@ private:
 //					sc->position.theta);
 			error = sc->position;
 			error.x = 0;
-			error.theta = 0;
+//			error.theta = 0;
 			sc->position = error;
 			printf("Wall Attach:\t(%05.1f, %05.1f, %04.2f)\n", error.x, error.y, error.theta);
 		}
 	}
-	void acceleration(float speed, float target_distance, float accel = 3000) {
+	void acceleration(float speed, float target_distance, float accel = 4000) {
 		timer.reset();
 		timer.start();
 		float v0 = sc->actual().trans;
@@ -162,7 +162,7 @@ private:
 		printf("Accel %04.0f:\t(%05.1f, %05.1f, %04.2f)\n", target_distance, error.x, error.y,
 				error.theta);
 	}
-	void deceleration(float speed, float target_distance, float accel = 2000) {
+	void deceleration(float speed, float target_distance, float accel = 4000) {
 		while (1) {
 			wall_avoid();
 			float extra = target_distance - sc->position.x;
@@ -228,11 +228,11 @@ private:
 			enum ACTION action = (enum ACTION) evt.value.v;
 			printf("Action: %s\n", action_string(action));
 			start_wall = wd->wall();
-			const float rot_speed = 1.5f * M_PI;
-			const float rot_accel = 8.0f * M_PI;
+			const float rot_speed = 2.0f * M_PI;
+			const float rot_accel = 16.0f * M_PI;
 			const float rot_speed_fast = 3.0f * M_PI;
 			const float rot_accel_fast = 16.0f * M_PI;
-			const float trans_speed = 700;
+			const float trans_speed = 500;
 			switch (action) {
 				case START_STEP:
 					straight(200, 90 - 24 - 6);
@@ -242,7 +242,6 @@ private:
 					turn(rot_speed, M_PI / 2, rot_accel);
 					wall_attach();
 					turn(rot_speed, M_PI / 2, rot_accel);
-					straight(100, 30);
 					sc->position.reset();
 					sc->set_target(-10, 0);
 					Thread::wait(100);
