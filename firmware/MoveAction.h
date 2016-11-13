@@ -100,8 +100,8 @@ private:
 //			sc->position.y += wd->wall_difference().side[1] * 0.01;
 //		}
 	}
-	float fix_y(float gain = 0.1f) {
-		float diff = -sc->position.y;
+	float fix_y() {
+		float diff = -sc->position.y * 100;
 		const float saturation = 0.1f;
 		if (diff > saturation) {
 			return saturation;
@@ -116,25 +116,26 @@ private:
 			while (1) {
 				float trans = wd->wall_difference().flont[0] + wd->wall_difference().flont[1];
 				float rot = wd->wall_difference().flont[1] - wd->wall_difference().flont[0];
-				const float trans_saturation = 0.2f;
-				const float rot_saturation = 0.2f;
+				const float trans_saturation = 0.25f;
+				const float rot_saturation = 0.25f;
 				if (trans > trans_saturation) trans = trans_saturation;
 				if (trans < -trans_saturation) trans = -trans_saturation;
 				if (rot > rot_saturation) rot = rot_saturation;
 				if (rot < -rot_saturation) rot = -rot_saturation;
-				sc->set_target(trans * 1000, rot * 50);
-				if (fabs(trans) < 0.1f && fabs(rot) < 0.1f) break;
+				sc->set_target(trans * 500, rot * 20);
+				if (fabs(trans) < 0.1f && fabs(rot) < 0.05f) break;
 				Thread::wait(1);
 			}
 //			printf("Position:\t(%05.1f, %05.1f, %05.2f)\n", sc->position.x, sc->position.y,
 //					sc->position.theta);
 			error = sc->position;
 			error.x = 0;
+			error.theta = 0;
 			sc->position = error;
 			printf("Wall Attach:\t(%05.1f, %05.1f, %04.2f)\n", error.x, error.y, error.theta);
 		}
 	}
-	void acceleration(float speed, float target_distance, float accel = 2000) {
+	void acceleration(float speed, float target_distance, float accel = 3000) {
 		timer.reset();
 		timer.start();
 		float v0 = sc->actual().trans;
@@ -229,42 +230,45 @@ private:
 			const float rot_accel = 8.0f * M_PI;
 			const float rot_speed_fast = 3.0f * M_PI;
 			const float rot_accel_fast = 16.0f * M_PI;
+			const float trans_speed = 700;
 			switch (action) {
 				case START_STEP:
-					straight(200, 90 - 24);
+					straight(200, 90 - 24 - 6);
 					sc->set_target(0, 0);
 					break;
 				case START_INIT:
+					turn(rot_speed, M_PI / 2, rot_accel);
+					wall_attach();
+					turn(rot_speed, M_PI / 2, rot_accel);
 					straight(100, 30);
-					turn(rot_speed, M_PI, rot_accel);
 					sc->position.reset();
 					sc->set_target(-10, 0);
 					Thread::wait(100);
-					sc->set_target(-100, 0);
+					sc->set_target(-200, 0);
 					Thread::wait(1000);
 					sc->position.reset();
 					sc->set_target(0, 0);
 					break;
 				case GO_STRAIGHT:
-					straight(500, 180);
+					straight(trans_speed, 180);
 					wall_attach();
 					sc->set_target(0, 0);
 					break;
 				case TURN_LEFT_90:
 					turn(rot_speed, M_PI / 2, rot_accel);
-					straight(500, 180);
+					straight(trans_speed, 180);
 					wall_attach();
 					sc->set_target(0, 0);
 					break;
 				case TURN_RIGHT_90:
 					turn(rot_speed, -M_PI / 2, rot_accel);
-					straight(500, 180);
+					straight(trans_speed, 180);
 					wall_attach();
 					sc->set_target(0, 0);
 					break;
 				case RETURN:
 					turn(rot_speed, M_PI, rot_accel);
-					straight(500, 180);
+					straight(trans_speed, 180);
 					wall_attach();
 					sc->set_target(0, 0);
 					break;

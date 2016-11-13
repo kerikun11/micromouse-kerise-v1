@@ -219,7 +219,7 @@ int main() {
 			bz->play(Buzzer::CONFIRM);
 			while (1) {
 				Thread::wait(10);
-				int cnt = enc->position();
+				int cnt = enc->position() / 2;
 				cnt &= 0x7;
 				*led = cnt;
 				ma->set_params(500 + 100 * cnt, 2000 + 200 * cnt);
@@ -232,9 +232,9 @@ int main() {
 			rfl->enable();
 			while (1) {
 				Thread::wait(10);
-				if (rfl->side(1) > 1023) {
+				if (rfl->flont(0) > 300) {
 					bz->play(Buzzer::CONFIRM);
-					Thread::wait(100);
+					Thread::wait(1000);
 					mpu->calibration();
 					ms->start();
 					break;

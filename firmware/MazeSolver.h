@@ -132,6 +132,7 @@ private:
 				case Operation::TURN_LEFT90:
 					ma->set_action(MoveAction::FAST_TURN_LEFT_90);
 					pos.x--;
+					dir = WEST;
 					break;
 				case Operation::TURN_LEFT45:
 //					ma->set_action(MoveAction::FAST_TURN_LEFT_45);
@@ -139,6 +140,7 @@ private:
 				case Operation::TURN_RIGHT90:
 					ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
 					pos.x++;
+					dir = EAST;
 					break;
 				case Operation::TURN_RIGHT45:
 //					ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
@@ -159,6 +161,7 @@ private:
 				case Operation::TURN_LEFT90:
 					ma->set_action(MoveAction::FAST_TURN_LEFT_90);
 					pos.y++;
+					dir = NORTH;
 					break;
 				case Operation::TURN_LEFT45:
 //					ma->set_action(MoveAction::FAST_TURN_LEFT_45);
@@ -166,6 +169,7 @@ private:
 				case Operation::TURN_RIGHT90:
 					ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
 					pos.y--;
+					dir = SOUTH;
 					break;
 				case Operation::TURN_RIGHT45:
 //					ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
@@ -186,6 +190,7 @@ private:
 				case Operation::TURN_LEFT90:
 					ma->set_action(MoveAction::FAST_TURN_LEFT_90);
 					pos.x++;
+					dir = EAST;
 					break;
 				case Operation::TURN_LEFT45:
 //					ma->set_action(MoveAction::FAST_TURN_LEFT_45);
@@ -193,6 +198,7 @@ private:
 				case Operation::TURN_RIGHT90:
 					ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
 					pos.x--;
+					dir = WEST;
 					break;
 				case Operation::TURN_RIGHT45:
 //					ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
@@ -213,6 +219,7 @@ private:
 				case Operation::TURN_LEFT90:
 					ma->set_action(MoveAction::FAST_TURN_LEFT_90);
 					pos.y--;
+					dir = SOUTH;
 					break;
 				case Operation::TURN_LEFT45:
 //					ma->set_action(MoveAction::FAST_TURN_LEFT_45);
@@ -220,6 +227,7 @@ private:
 				case Operation::TURN_RIGHT90:
 					ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
 					pos.y++;
+					dir = NORTH;
 					break;
 				case Operation::TURN_RIGHT45:
 //					ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
@@ -333,7 +341,7 @@ private:
 
 			Direction wallData = getWallData();		//< センサから取得した壁情報を入れる
 			IndexVec robotPos = getRobotPosion();	//< ロボットの座標を取得
-			printf("Position:\t(%d, %d)\tWall:\t%X", (int) robotPos.x, (int) robotPos.y,
+			printf("Position:\t(%d, %d)\tWall:\t%X\n", (int) robotPos.x, (int) robotPos.y,
 					(int) wallData);
 
 			agent.update(robotPos, wallData);		//< 壁情報を更新 次に進むべき方向を計算
@@ -367,8 +375,6 @@ private:
 		}
 		ma->disable();
 		bz->play(Buzzer::COMPLETE);
-
-		if (agent.getState() == Agent::FINISHED) return;
 
 		maze.printWall();
 		Thread::wait(10);
@@ -407,13 +413,50 @@ private:
 		while (ma->actions()) {
 			Thread::wait(1);
 		}
+
+		Direction wallData = getWallData();		//< センサから取得した壁情報を入れる
+		IndexVec robotPos = getRobotPosion();	//< ロボットの座標を取得
+		printf("Position:\t(%d, %d)\tWall:\t%X\n", (int) robotPos.x, (int) robotPos.y,
+				(int) wallData);
+		agent.update(robotPos, wallData);		//< 壁情報を更新 次に進むべき方向を計算
+
+		agent.forceGotoStart();
+
+		while (1) {
+			while (ma->actions()) {
+				Thread::wait(1);
+			}
+
+			Direction wallData = getWallData();		//< センサから取得した壁情報を入れる
+			IndexVec robotPos = getRobotPosion();	//< ロボットの座標を取得
+			printf("Position:\t(%d, %d)\tWall:\t%X\n", (int) robotPos.x, (int) robotPos.y,
+					(int) wallData);
+			agent.update(robotPos, wallData);		//< 壁情報を更新 次に進むべき方向を計算
+
+			if (agent.getState() == Agent::FINISHED) break;	//Agentの状態を確認 FINISHEDになったら計測走行にうつる
+
+			Direction nextDir = agent.getNextDirection();		//< Agentの状態が探索中の場合は次に進むべき方向を取得する
+			printf("agent.getNextDirection() => %X\n", (int) nextDir);
+			if (nextDir == 0) {
+				bz->play(Buzzer::ERROR);
+				while (1) {
+					Thread::wait(100);
+				}
+			}
+			robotMove(nextDir);  //< robotMove関数はDirection型を受け取ってロボットをそっちに動かす関数
+		}
+		ma->set_action(MoveAction::START_INIT);
+		while (ma->actions()) {
+			Thread::wait(1);
+		}
+
 		ma->disable();
 		bz->play(Buzzer::COMPLETE);
 	}
 	void task() {
+		search_run();
+		Thread::wait(2000);
 		while (1) {
-			search_run();
-			Thread::wait(2000);
 			fast_run();
 			Thread::wait(2000);
 			ma->set_params(100);
