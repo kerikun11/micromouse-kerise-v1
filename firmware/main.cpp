@@ -219,7 +219,7 @@ int main() {
 			bz->play(Buzzer::CONFIRM);
 			while (1) {
 				Thread::wait(10);
-				int cnt = enc->position() / 2;
+				int cnt = enc->position();
 				cnt &= 0x7;
 				*led = cnt;
 				ma->set_params(500 + 100 * cnt, 2000 + 200 * cnt);

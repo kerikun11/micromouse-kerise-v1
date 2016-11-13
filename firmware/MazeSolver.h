@@ -331,13 +331,11 @@ private:
 				Thread::wait(1);
 			}
 
-			printf("getWallData() => %x\n", (int) getWallData());
 			Direction wallData = getWallData();		//< センサから取得した壁情報を入れる
-			printf("getRobotPosition() => (%d,%d)\n", (int) getRobotPosion().x,
-					(int) getRobotPosion().y);
 			IndexVec robotPos = getRobotPosion();	//< ロボットの座標を取得
+			printf("Position:\t(%d, %d)\tWall:\t%X", (int) robotPos.x, (int) robotPos.y,
+					(int) wallData);
 
-			printf("agent.update();\n");
 			agent.update(robotPos, wallData);		//< 壁情報を更新 次に進むべき方向を計算
 			printf("agent.getState() => %d\n", agent.getState());
 			if (agent.getState() == Agent::FINISHED) break;	//Agentの状態を確認 FINISHEDになったら計測走行にうつる
@@ -353,7 +351,7 @@ private:
 			prevState = agent.getState();
 
 			Direction nextDir = agent.getNextDirection();		//< Agentの状態が探索中の場合は次に進むべき方向を取得する
-			printf("agent.getNextDirection() => %x\n", (int) nextDir);
+			printf("agent.getNextDirection() => %X\n", (int) nextDir);
 			if (nextDir == 0) {
 				bz->play(Buzzer::ERROR);
 				while (1) {
@@ -372,14 +370,13 @@ private:
 
 		if (agent.getState() == Agent::FINISHED) return;
 
-		printf("maze.printWall();\n");
 		maze.printWall();
+		Thread::wait(10);
 
 		printf("agent.calcRunSequence();\n");
 		agent.calcRunSequence(false);
 	}
 	void fast_run() {
-		printf("agent.getRunSequence();\n");
 		const OperationList &runSequence = agent.getRunSequence();
 		printf("runSequence.size() => %d\n", runSequence.size());
 		bz->play(Buzzer::CONFIRM);

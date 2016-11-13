@@ -105,7 +105,7 @@ private:
 						Thread::wait(100);
 						break;
 					case ERROR:
-						for (int i = 0; i < 4; i++) {
+						for (int i = 0; i < 6; i++) {
 							playC(3);
 							Thread::wait(100);
 							playE(3);
