@@ -11,7 +11,7 @@
 #include "mbed.h"
 #include "config.h"
 
-#define SPEED_CONTROLLER_PERIOD_US	500
+#define SPEED_CONTROLLER_PERIOD_US	1000
 
 class Position {
 public:
@@ -145,9 +145,9 @@ private:
 			actual_p.wheel2pole();
 			actual_p.rot = mpu->gyroZ() * M_PI / 180.0f;
 			actual_p.pole2wheel();
-			const float Kp = 2.00f;
-			const float Ki = 0.01f;
-			const float Kd = 0.01f;
+			const float Kp = 2.000f;
+			const float Ki = 0.010f;
+			const float Kd = 0.005f;
 			float pwm_value[2];
 			for (int i = 0; i < 2; i++) {
 				pwm_value[i] = Kp * (target_p.wheel[i] - actual_p.wheel[i])

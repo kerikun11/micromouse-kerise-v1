@@ -69,11 +69,13 @@ public:
 	}
 	void set_params(float fast_speed, float fast_accel) {
 		this->fast_speed = fast_speed;
-		this->fast_accel = fast_accel;
+//		this->fast_accel = fast_accel;
+		this->fast_accel = 4000;
 	}
 	void set_params(float add) {
 		this->fast_speed += add;
-		this->fast_accel += add * 2;
+//		this->fast_accel += add * 2;
+		this->fast_accel = 4000;
 	}
 	int actions() const {
 		return _actions;
@@ -231,7 +233,7 @@ private:
 			const float rot_speed = 2.0f * M_PI;
 			const float rot_accel = 16.0f * M_PI;
 			const float rot_speed_fast = 3.0f * M_PI;
-			const float rot_accel_fast = 16.0f * M_PI;
+			const float rot_accel_fast = 24.0f * M_PI;
 			const float trans_speed = 500;
 			switch (action) {
 				case START_STEP:

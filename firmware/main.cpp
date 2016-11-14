@@ -77,7 +77,7 @@ void serial_ctrl() {
 				break;
 			case 'f':
 				bz->play(Buzzer::CANCEL);
-				ma->disable();
+				ms->terminate();
 				break;
 			case 'w':
 				ma->set_action(MoveAction::GO_STRAIGHT);
