@@ -42,10 +42,12 @@
 #define IR_RECEIVER_SAMPLING_PERIOD_US	20
 #define IR_RECEIVER_UPDATE_PERIOD_US	1000
 
-#define REFLECTOR_GAIN_SIDE			1.34f
-#define REFLECTOR_GAIN_FLONT			1.24f
-//#define REFLECTOR_GAIN_SIDE				0.97f
-//#define REFLECTOR_GAIN_FLONT			0.64f
+//#define REFLECTOR_GAIN_SIDE				1.34f	// Home
+//#define REFLECTOR_GAIN_FLONT			1.24f	// Home
+//#define REFLECTOR_GAIN_SIDE				0.97f	// Mice
+//#define REFLECTOR_GAIN_FLONT			0.64f	// Mice
+#define REFLECTOR_GAIN_SIDE				0.957f	// Rogy
+#define REFLECTOR_GAIN_FLONT			0.900f	// Rogy
 
 class Reflector {
 public:

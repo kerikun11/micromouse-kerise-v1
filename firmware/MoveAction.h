@@ -106,7 +106,7 @@ private:
 //		}
 	}
 	float fix_y() {
-		float diff = -sc->position.y * 100;
+		float diff = -sc->position.y * 200;
 		const float saturation = 0.1f;
 		if (diff > saturation) {
 			return saturation;
@@ -127,7 +127,7 @@ private:
 				if (trans < -trans_saturation) trans = -trans_saturation;
 				if (rot > rot_saturation) rot = rot_saturation;
 				if (rot < -rot_saturation) rot = -rot_saturation;
-				sc->set_target(trans * 500, rot * 20);
+				sc->set_target(trans * 1000, rot * 20);
 				if (fabs(trans) < 0.1f && fabs(rot) < 0.05f) break;
 				Thread::wait(1);
 			}
