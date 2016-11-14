@@ -47,7 +47,7 @@
 //#define REFLECTOR_GAIN_SIDE				0.97f	// Mice
 //#define REFLECTOR_GAIN_FLONT			0.64f	// Mice
 #define REFLECTOR_GAIN_SIDE				0.957f	// Rogy
-#define REFLECTOR_GAIN_FLONT			0.900f	// Rogy
+#define REFLECTOR_GAIN_FLONT			0.780f	// Rogy
 
 class Reflector {
 public:

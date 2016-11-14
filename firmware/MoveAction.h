@@ -106,7 +106,7 @@ private:
 //		}
 	}
 	float fix_y() {
-		float diff = -sc->position.y * 200;
+		float diff = -sc->position.y * 500;
 		const float saturation = 0.1f;
 		if (diff > saturation) {
 			return saturation;
@@ -121,13 +121,13 @@ private:
 			while (1) {
 				float trans = wd->wall_difference().flont[0] + wd->wall_difference().flont[1];
 				float rot = wd->wall_difference().flont[1] - wd->wall_difference().flont[0];
-				const float trans_saturation = 0.25f;
-				const float rot_saturation = 0.25f;
+				const float trans_saturation = 0.2f;
+				const float rot_saturation = 0.2f;
 				if (trans > trans_saturation) trans = trans_saturation;
 				if (trans < -trans_saturation) trans = -trans_saturation;
 				if (rot > rot_saturation) rot = rot_saturation;
 				if (rot < -rot_saturation) rot = -rot_saturation;
-				sc->set_target(trans * 1000, rot * 20);
+				sc->set_target(trans * 1000, rot * 10);
 				if (fabs(trans) < 0.1f && fabs(rot) < 0.05f) break;
 				Thread::wait(1);
 			}
@@ -179,6 +179,7 @@ private:
 			Thread::wait(1);
 			if (fabs(sc->actual().trans) < 1) break;
 		}
+		sc->set_target(0, 0);
 //		printf("Position:\t(%05.1f, %05.1f, %05.2f)\n", sc->position.x, sc->position.y,
 //				sc->position.theta);
 		error = sc->position - Position(target_distance, 0, 0);
@@ -212,7 +213,7 @@ private:
 				sc->set_target(0, -target_speed);
 			}
 			Thread::wait(1);
-			if (fabs(sc->actual().rot) < 0.1) break;
+			if (fabs(sc->actual().rot) < 0.05) break;
 		}
 //		printf("Position:\t(%05.1f, %05.1f, %05.2f)\n", sc->position.x, sc->position.y,
 //				sc->position.theta);

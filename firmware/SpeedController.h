@@ -145,9 +145,9 @@ private:
 			actual_p.wheel2pole();
 			actual_p.rot = mpu->gyroZ() * M_PI / 180.0f;
 			actual_p.pole2wheel();
-			const float Kp = 2.0000f;
+			const float Kp = 1.8000f;
 			const float Ki = 0.0010f;
-			const float Kd = 0.0005f;
+			const float Kd = 0.0001f;
 			float pwm_value[2];
 			for (int i = 0; i < 2; i++) {
 				pwm_value[i] = Kp * (target_p.wheel[i] - actual_p.wheel[i])
