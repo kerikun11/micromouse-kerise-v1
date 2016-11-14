@@ -242,6 +242,7 @@ private:
 		return pos;
 	}
 	void search_run() {
+		if (agent.getState() == Agent::FINISHED || agent.getState() == Agent::BACK_TO_START) return;//Agentの状態を確認 FINISHEDになったら計測走行にうつる
 		dir = NORTH;
 		pos = IndexVec(0, 0);
 		maze = maze_backup;
