@@ -57,6 +57,7 @@ private:
 				dir = EAST;
 			} else if (nextDir == SOUTH) {
 				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::GO_STRAIGHT);
 				pos.y--;
 				dir = SOUTH;
 			} else if (nextDir == WEST) {
@@ -79,12 +80,14 @@ private:
 				dir = SOUTH;
 			} else if (nextDir == WEST) {
 				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::GO_STRAIGHT);
 				pos.x--;
 				dir = WEST;
 			}
 		} else if (dir == SOUTH) {
 			if (nextDir == NORTH) {
 				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::GO_STRAIGHT);
 				pos.y++;
 				dir = NORTH;
 			} else if (nextDir == EAST) {
@@ -107,6 +110,7 @@ private:
 				dir = NORTH;
 			} else if (nextDir == EAST) {
 				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::GO_STRAIGHT);
 				pos.x++;
 				dir = EAST;
 			} else if (nextDir == SOUTH) {
@@ -410,42 +414,30 @@ private:
 		}
 		ma->set_action(MoveAction::FAST_STOP);
 
+		// start drive
 		ma->enable();
 		while (ma->actions()) {
 			Thread::wait(1);
 		}
+		// end drive
 
-		Direction wallData = getWallData();		//< センサから取得した壁情報を入れる
-		IndexVec robotPos = getRobotPosion();	//< ロボットの座標を取得
-		printf("Position:\t(%d, %d)\tWall:\t%X\n", (int) robotPos.x, (int) robotPos.y,
-				(int) wallData);
-		agent.update(robotPos, wallData);		//< 壁情報を更新 次に進むべき方向を計算
-
-		agent.forceGotoStart();
-
-		while (1) {
-			while (ma->actions()) {
-				Thread::wait(1);
+		// back to start
+		printf("Back to Start\n");
+//		ma->set_action(MoveAction::START_INIT);
+		ma->set_action(MoveAction::FAST_GO_HALF);
+		pos.y++;
+		for (size_t i = 0; i < runSequence.size(); i++) {
+			printf("runSequence[%d].n => %d, runSequence[%d].op => %d\n",
+					runSequence.size() - i - 1, runSequence[runSequence.size() - 1 - i].n,
+					runSequence.size() - 1 - i, runSequence[runSequence.size() - 1 - i].op);
+			const Operation& op = runSequence[runSequence.size() - 1 - i];
+			for (int i = 0; i < op.n; i++) {
+				robotMove(op);
 			}
-
-			Direction wallData = getWallData();		//< センサから取得した壁情報を入れる
-			IndexVec robotPos = getRobotPosion();	//< ロボットの座標を取得
-			printf("Position:\t(%d, %d)\tWall:\t%X\n", (int) robotPos.x, (int) robotPos.y,
-					(int) wallData);
-			agent.update(robotPos, wallData);		//< 壁情報を更新 次に進むべき方向を計算
-
-			if (agent.getState() == Agent::FINISHED) break;	//Agentの状態を確認 FINISHEDになったら計測走行にうつる
-
-			Direction nextDir = agent.getNextDirection();		//< Agentの状態が探索中の場合は次に進むべき方向を取得する
-			printf("agent.getNextDirection() => %X\n", (int) nextDir);
-			if (nextDir == 0) {
-				bz->play(Buzzer::ERROR);
-				while (1) {
-					Thread::wait(100);
-				}
-			}
-			robotMove(nextDir);  //< robotMove関数はDirection型を受け取ってロボットをそっちに動かす関数
+			Thread::wait(1);
 		}
+		ma->set_action(MoveAction::FAST_STOP);
+
 		ma->set_action(MoveAction::START_INIT);
 		while (ma->actions()) {
 			Thread::wait(1);
@@ -459,7 +451,7 @@ private:
 		Thread::wait(2000);
 		while (1) {
 			fast_run();
-			Thread::wait(2000);
+			Thread::wait(1000);
 			ma->set_params(200);
 		}
 	}

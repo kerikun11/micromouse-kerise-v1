@@ -30,6 +30,7 @@ public:
 		FAST_START_STEP,
 		FAST_GO_STRAIGHT,
 		FAST_GO_DIAGONAL,
+		FAST_GO_HALF,
 		FAST_TURN_LEFT_45,
 		FAST_TURN_LEFT_90,
 		FAST_TURN_RIGHT_45,
@@ -39,8 +40,8 @@ public:
 	const char* action_string(enum ACTION action) {
 		static const char name[][32] = { "start_step", "start_init", "go_straight", "turn_left_90",
 				"turn_right_90", "return", "fast_start_step", "fast_go_straight",
-				"fast_go_diagonal", "fast_turn_left_45", "fast_turn_left_90", "fast_turn_right_45",
-				"fast_turn_right_90", "fast_stop" };
+				"fast_go_diagonal", "fast_go_half", "fast_turn_left_45", "fast_turn_left_90",
+				"fast_turn_right_45", "fast_turn_right_90", "fast_stop" };
 		return name[action];
 	}
 	void enable() {
@@ -270,19 +271,24 @@ private:
 					sc->set_target(0, 0);
 					break;
 				case RETURN:
-					turn(rot_speed, M_PI, rot_accel);
-					straight(trans_speed, 180);
+					turn(rot_speed, M_PI / 2, rot_accel);
 					wall_attach();
+					turn(rot_speed, M_PI / 2, rot_accel);
+//					straight(trans_speed, 180);
+//					wall_attach();
 					sc->set_target(0, 0);
 					break;
 				case FAST_START_STEP:
-					acceleration(fast_speed, 180 - 24, fast_accel);
+					acceleration(fast_speed, 180 - 24 - 6, fast_accel);
 					break;
 				case FAST_GO_STRAIGHT:
 					acceleration(fast_speed, 180, fast_accel);
 					break;
 				case FAST_GO_DIAGONAL:
-					acceleration(fast_speed, 180 * 1.4142, fast_accel);
+					acceleration(fast_speed, 90 * 1.4142, fast_accel);
+					break;
+				case FAST_GO_HALF:
+					acceleration(fast_speed, 90, fast_accel);
 					break;
 				case FAST_TURN_LEFT_45:
 					break;
