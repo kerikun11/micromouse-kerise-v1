@@ -71,12 +71,12 @@ public:
 	void set_params(float fast_speed, float fast_accel) {
 		this->fast_speed = fast_speed;
 //		this->fast_accel = fast_accel;
-		this->fast_accel = 4000;
+		this->fast_accel = 6000;
 	}
 	void set_params(float add) {
 		this->fast_speed += add;
 //		this->fast_accel += add * 2;
-		this->fast_accel = 4000;
+		this->fast_accel = 6000;
 	}
 	int actions() const {
 		return _actions;
@@ -117,30 +117,30 @@ private:
 		}
 	}
 	void wall_attach() {
+		//		printf("Position:\t(%05.1f, %05.1f, %05.2f)\n", sc->position.x, sc->position.y,
+		//				sc->position.theta);
 		if (wd->wall().flont[0] && wd->wall().flont[1]) {
 			while (1) {
 				float trans = wd->wall_difference().flont[0] + wd->wall_difference().flont[1];
 				float rot = wd->wall_difference().flont[1] - wd->wall_difference().flont[0];
-				const float trans_saturation = 0.2f;
-				const float rot_saturation = 0.2f;
+				const float trans_saturation = 0.4f;
+				const float rot_saturation = 0.4f;
 				if (trans > trans_saturation) trans = trans_saturation;
 				if (trans < -trans_saturation) trans = -trans_saturation;
 				if (rot > rot_saturation) rot = rot_saturation;
 				if (rot < -rot_saturation) rot = -rot_saturation;
-				sc->set_target(trans * 1000, rot * 10);
-				if (fabs(trans) < 0.1f && fabs(rot) < 0.05f) break;
+				sc->set_target(trans * 500, rot * 10);
+				if (fabs(trans) < 0.1 && fabs(rot) < 0.1f) break;
 				Thread::wait(1);
 			}
-//			printf("Position:\t(%05.1f, %05.1f, %05.2f)\n", sc->position.x, sc->position.y,
-//					sc->position.theta);
 			error = sc->position;
 			error.x = 0;
 //			error.theta = 0;
-			sc->position = error;
-			printf("Wall Attach:\t(%05.1f, %05.1f, %04.2f)\n", error.x, error.y, error.theta);
+//			sc->position = error;
+//			printf("Wall Attach:\t(%05.1f, %05.1f, %04.2f)\n", error.x, error.y, error.theta);
 		}
 	}
-	void acceleration(float speed, float target_distance, float accel = 4000) {
+	void acceleration(float speed, float target_distance, float accel = 6000) {
 		timer.reset();
 		timer.start();
 		float v0 = sc->actual().trans;
@@ -158,14 +158,12 @@ private:
 			Thread::wait(1);
 			if (sc->position.x > target_distance) break;
 		}
-//		printf("Position:\t(%05.1f, %05.1f, %05.2f)\n", sc->position.x, sc->position.y,
-//				sc->position.theta);
 		error = sc->position - Position(target_distance, 0, 0);
 		sc->position = error;
-		printf("Accel %04.0f:\t(%05.1f, %05.1f, %04.2f)\n", target_distance, error.x, error.y,
-				error.theta);
+//		printf("Accel %04.0f:\t(%05.1f, %05.1f, %04.2f)\n", target_distance, error.x, error.y,
+//				error.theta);
 	}
-	void deceleration(float speed, float target_distance, float accel = 4000) {
+	void deceleration(float speed, float target_distance, float accel = 3000) {
 		while (1) {
 			wall_avoid();
 			float extra = target_distance - sc->position.x;
@@ -180,12 +178,10 @@ private:
 			if (fabs(sc->actual().trans) < 1) break;
 		}
 		sc->set_target(0, 0);
-//		printf("Position:\t(%05.1f, %05.1f, %05.2f)\n", sc->position.x, sc->position.y,
-//				sc->position.theta);
 		error = sc->position - Position(target_distance, 0, 0);
 		sc->position = error;
-		printf("Decel %04.0f:\t(%05.1f, %05.1f, %04.2f)\n", target_distance, error.x, error.y,
-				error.theta);
+//		printf("Decel %04.0f:\t(%05.1f, %05.1f, %04.2f)\n", target_distance, error.x, error.y,
+//				error.theta);
 	}
 	void straight(float speed, float target_distance) {
 		acceleration(speed, target_distance / 2);
@@ -213,14 +209,12 @@ private:
 				sc->set_target(0, -target_speed);
 			}
 			Thread::wait(1);
-			if (fabs(sc->actual().rot) < 0.05) break;
+			if (fabs(sc->actual().rot) < 0.5) break;
 		}
-//		printf("Position:\t(%05.1f, %05.1f, %05.2f)\n", sc->position.x, sc->position.y,
-//				sc->position.theta);
-		error = sc->position.rotate(target_angle) - Position(0, 0, 2 * target_angle);
+		error = sc->position.rotate(-target_angle);
 		sc->position = error;
-		printf("Turn %04.2f:\t(%05.1f, %05.1f, %05.2f)\n", target_angle, error.x, error.y,
-				error.theta);
+//		printf("Turn %04.2f:\t(%05.1f, %05.1f, %05.2f)\n", target_angle, error.x, error.y,
+//				error.theta);
 	}
 	void task() {
 		while (1) {
@@ -232,11 +226,11 @@ private:
 			enum ACTION action = (enum ACTION) evt.value.v;
 			printf("Action: %s\n", action_string(action));
 			start_wall = wd->wall();
-			const float rot_speed = 2.0f * M_PI;
-			const float rot_accel = 16.0f * M_PI;
-			const float rot_speed_fast = 3.0f * M_PI;
-			const float rot_accel_fast = 24.0f * M_PI;
-			const float trans_speed = 500;
+			const float rot_speed = 3.0f * M_PI;
+			const float rot_accel = 24.0f * M_PI;
+			const float rot_speed_fast = 4.0f * M_PI;
+			const float rot_accel_fast = 32.0f * M_PI;
+			const float trans_speed = 700;
 			switch (action) {
 				case START_STEP:
 					straight(200, 90 - 24 - 6);
