@@ -106,8 +106,8 @@ private:
 //		}
 	}
 	float fix_y() {
-		float diff = -sc->position.y * 500;
-		const float saturation = 0.1f;
+		float diff = -sc->position.y * 100;
+		const float saturation = 0.15f;
 		if (diff > saturation) {
 			return saturation;
 		} else if (diff < -saturation) {
@@ -133,10 +133,11 @@ private:
 				if (fabs(trans) < 0.1 && fabs(rot) < 0.1f) break;
 				Thread::wait(1);
 			}
+			sc->set_target(0, 0);
 			error = sc->position;
 			error.x = 0;
 //			error.theta = 0;
-//			sc->position = error;
+			sc->position = error;
 //			printf("Wall Attach:\t(%05.1f, %05.1f, %04.2f)\n", error.x, error.y, error.theta);
 		}
 	}

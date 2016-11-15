@@ -362,10 +362,10 @@ private:
 	}
 	void task() {
 		search_run();
-		Thread::wait(2000);
+		Thread::wait(1500);
 		while (1) {
 			fast_run();
-			Thread::wait(1000);
+			Thread::wait(1500);
 			ma->set_params(200);
 		}
 	}

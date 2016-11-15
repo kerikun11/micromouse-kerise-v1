@@ -135,7 +135,7 @@ void serial_ctrl() {
 void emergencyTask() {
 	while (1) {
 		Thread::wait(1);
-		if (mpu->accelY() < -12) {
+		if (mpu->accelY() < -15) {
 			mt->emergency_stop();
 			ms->terminate();
 			bz->play(Buzzer::EMERGENCY);
@@ -221,7 +221,7 @@ int main() {
 			btn->flags = 0;
 			bz->play(Buzzer::CONFIRM);
 			while (1) {
-				Thread::wait(10);
+				Thread::wait(100);
 				int cnt = enc->position() / 2;
 				cnt &= 0x7;
 				*led = cnt;
@@ -237,7 +237,7 @@ int main() {
 				Thread::wait(10);
 				if (rfl->flont(0) > 300) {
 					bz->play(Buzzer::CONFIRM);
-					Thread::wait(1000);
+					Thread::wait(500);
 					mpu->calibration();
 					ms->start();
 					break;
