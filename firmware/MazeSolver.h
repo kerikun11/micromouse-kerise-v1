@@ -246,8 +246,8 @@ private:
 		dir = NORTH;
 		pos = IndexVec(0, 0);
 		maze = maze_backup;
-		ma->enable();
 		ma->set_action(MoveAction::START_STEP);
+		ma->enable();
 		while (1) {
 			while (ma->actions()) {
 				Thread::wait(1);
@@ -365,8 +365,8 @@ private:
 		Thread::wait(1500);
 		while (1) {
 			fast_run();
-			Thread::wait(1500);
-			ma->set_params(200);
+			Thread::wait(2000);
+			ma->set_params_relative(200);
 		}
 	}
 };

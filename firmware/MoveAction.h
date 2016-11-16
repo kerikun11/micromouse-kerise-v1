@@ -18,7 +18,7 @@ public:
 			bz(bz), enc(enc), mpu(mpu), rfl(rfl), wd(wd), sc(sc),
 					thread(PRIORITY_MOVE_ACTION, STACK_SIZE_MOVE_ACTION) {
 		_actions = 0;
-		set_params(1000, 4000);
+		set_params(1000);
 	}
 	enum ACTION {
 		START_STEP,
@@ -45,8 +45,6 @@ public:
 		return name[action];
 	}
 	void enable() {
-		error.reset();
-		sc->position = error;
 		rfl->enable();
 		sc->enable();
 		thread.start(this, &MoveAction::task);
@@ -68,15 +66,11 @@ public:
 		_actions++;
 		queue.put((enum ACTION*) action);
 	}
-	void set_params(float fast_speed, float fast_accel) {
+	void set_params(float fast_speed) {
 		this->fast_speed = fast_speed;
-//		this->fast_accel = fast_accel;
-		this->fast_accel = 6000;
 	}
-	void set_params(float add) {
+	void set_params_relative(float add) {
 		this->fast_speed += add;
-//		this->fast_accel += add * 2;
-		this->fast_accel = 6000;
 	}
 	int actions() const {
 		return _actions;
@@ -117,8 +111,8 @@ private:
 		}
 	}
 	void wall_attach() {
-		//		printf("Position:\t(%05.1f, %05.1f, %05.2f)\n", sc->position.x, sc->position.y,
-		//				sc->position.theta);
+//		printf("Position:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
+//				sc->position.theta);
 		if (wd->wall().flont[0] && wd->wall().flont[1]) {
 			while (1) {
 				float trans = wd->wall_difference().flont[0] + wd->wall_difference().flont[1];
@@ -188,7 +182,7 @@ private:
 		acceleration(speed, target_distance / 2);
 		deceleration(speed, target_distance / 2);
 	}
-	void turn(float speed, float target_angle, float accel = 8 * M_PI) {
+	void turn(float speed, float target_angle, float accel = 32 * M_PI) {
 		timer.reset();
 		timer.start();
 		while (1) {
@@ -228,19 +222,21 @@ private:
 			printf("Action: %s\n", action_string(action));
 			start_wall = wd->wall();
 			const float rot_speed = 3.0f * M_PI;
-			const float rot_accel = 24.0f * M_PI;
 			const float rot_speed_fast = 4.0f * M_PI;
-			const float rot_accel_fast = 32.0f * M_PI;
 			const float trans_speed = 700;
 			switch (action) {
 				case START_STEP:
+					error.reset();
+					sc->position = error;
+					printf("Position:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
+							sc->position.theta);
 					straight(200, 90 - 24 - 6);
 					sc->set_target(0, 0);
 					break;
 				case START_INIT:
-					turn(rot_speed, M_PI / 2, rot_accel);
+					turn(rot_speed, M_PI / 2);
 					wall_attach();
-					turn(rot_speed, M_PI / 2, rot_accel);
+					turn(rot_speed, M_PI / 2);
 					sc->position.reset();
 					sc->set_target(-10, 0);
 					Thread::wait(100);
@@ -255,55 +251,57 @@ private:
 					sc->set_target(0, 0);
 					break;
 				case TURN_LEFT_90:
-					turn(rot_speed, M_PI / 2, rot_accel);
+					turn(rot_speed, M_PI / 2);
 					straight(trans_speed, 180);
 					wall_attach();
 					sc->set_target(0, 0);
 					break;
 				case TURN_RIGHT_90:
-					turn(rot_speed, -M_PI / 2, rot_accel);
+					turn(rot_speed, -M_PI / 2);
 					straight(trans_speed, 180);
 					wall_attach();
 					sc->set_target(0, 0);
 					break;
 				case RETURN:
-					turn(rot_speed, M_PI / 2, rot_accel);
+					turn(rot_speed, M_PI / 2);
 					wall_attach();
-					turn(rot_speed, M_PI / 2, rot_accel);
-//					straight(trans_speed, 180);
-//					wall_attach();
+					turn(rot_speed, M_PI / 2);
 					sc->set_target(0, 0);
 					break;
 				case FAST_START_STEP:
-					acceleration(fast_speed, 180 - 24 - 6, fast_accel);
+					error.reset();
+					sc->position = error;
+					printf("Position:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
+							sc->position.theta);
+					acceleration(fast_speed, 180 - 24 - 6);
 					break;
 				case FAST_GO_STRAIGHT:
-					acceleration(fast_speed, 180, fast_accel);
+					acceleration(fast_speed, 180);
 					break;
 				case FAST_GO_DIAGONAL:
-					acceleration(fast_speed, 90 * 1.4142, fast_accel);
+					acceleration(fast_speed, 90 * 1.4142);
 					break;
 				case FAST_GO_HALF:
-					acceleration(fast_speed, 90, fast_accel);
+					acceleration(fast_speed, 90);
 					break;
 				case FAST_TURN_LEFT_45:
 					break;
 				case FAST_TURN_LEFT_90:
-					deceleration(fast_speed, 90, fast_accel);
+					deceleration(fast_speed, 90);
 					wall_attach();
-					turn(rot_speed_fast, M_PI / 2, rot_accel_fast);
-					acceleration(fast_speed, 90, fast_accel);
+					turn(rot_speed_fast, M_PI / 2);
+					acceleration(fast_speed, 90);
 					break;
 				case FAST_TURN_RIGHT_45:
 					break;
 				case FAST_TURN_RIGHT_90:
-					deceleration(fast_speed, 90, fast_accel);
+					deceleration(fast_speed, 90);
 					wall_attach();
-					turn(rot_speed_fast, -M_PI / 2, rot_accel_fast);
-					acceleration(fast_speed, 90, fast_accel);
+					turn(rot_speed_fast, -M_PI / 2);
+					acceleration(fast_speed, 90);
 					break;
 				case FAST_STOP:
-					deceleration(fast_speed, 90, fast_accel);
+					deceleration(fast_speed, 90);
 					wall_attach();
 					sc->set_target(0, 0);
 					break;
