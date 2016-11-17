@@ -44,7 +44,7 @@ public:
 	}
 	void calibration() {
 		double sum = 0;
-		const int ave_count = 100;
+		const int ave_count = 500;
 		for (int i = 0; i < ave_count; i++) {
 			sum += gyroZ();
 			Thread::wait(1);

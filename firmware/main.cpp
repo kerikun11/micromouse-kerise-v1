@@ -73,6 +73,8 @@ void serial_ctrl() {
 		switch (c) {
 			case 'g':
 				bz->play(Buzzer::CONFIRM);
+				mpu->calibration();
+				wd->calibration();
 				ma->enable();
 				break;
 			case 'f':
@@ -100,18 +102,21 @@ void serial_ctrl() {
 			case 'm':
 				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();
+				wd->calibration();
 				ms->start();
 				break;
 			case 'p':
-				printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(), rfl->sr());
-				printf("%s %s "
-						"%s %s\n", wd->wall().side[0] ? "X" : ".", wd->wall().flont[0] ? "X" : ".",
-						wd->wall().flont[1] ? "X" : ".", wd->wall().side[1] ? "X" : ".");
-				printf("x: %07.3f\ty: %07.3f\ttheta: %07.3f\ttrans: %07.3f\tomega: %07.3f\n",
-						sc->position.x, sc->position.y, sc->position.theta, sc->actual().trans,
-						sc->actual().rot);
-				printf("Gyro: %7.4f\tAngle: %07.4f\n", mpu->gyroZ(), mpu->angleZ());
-				printf("L: %ld\tR: %ld\n", enc->left(), enc->right());
+				printf("%05u\t%05u\t%05u\t%05u\n", rfl->sl(), rfl->fl(), rfl->fr(), rfl->sr());
+				printf("%06.3f\t%06.3f\t%06.3f\t%06.3f\n", wd->wall_difference().side[0],
+						wd->wall_difference().flont[0], wd->wall_difference().flont[1],
+						wd->wall_difference().side[1]);
+				printf("%s %s %s %s\n", wd->wall().side[0] ? "X" : ".",
+						wd->wall().flont[0] ? "X" : ".", wd->wall().flont[1] ? "X" : ".",
+						wd->wall().side[1] ? "X" : ".");
+				printf("Position:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
+						sc->position.theta);
+//				printf("Gyro: %7.4f\tAngle: %07.4f\n", mpu->gyroZ(), mpu->angleZ());
+//				printf("L: %ld\tR: %ld\n", enc->left(), enc->right());
 				break;
 			case 'z':
 				ma->set_action(MoveAction::FAST_START_STEP);
@@ -241,8 +246,7 @@ int main() {
 				Thread::wait(10);
 				if (rfl->flont(0) > 300) {
 					bz->play(Buzzer::CONFIRM);
-					Thread::wait(500);
-					mpu->calibration();
+					Thread::wait(200);
 					ms->start();
 					break;
 				}

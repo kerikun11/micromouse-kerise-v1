@@ -42,12 +42,12 @@
 #define IR_RECEIVER_SAMPLING_PERIOD_US	20
 #define IR_RECEIVER_UPDATE_PERIOD_US	1000
 
-//#define REFLECTOR_GAIN_SIDE				1.34f	// Home
-//#define REFLECTOR_GAIN_FLONT			1.24f	// Home
-//#define REFLECTOR_GAIN_SIDE				0.97f	// Mice
-//#define REFLECTOR_GAIN_FLONT			0.64f	// Mice
-#define REFLECTOR_GAIN_SIDE				0.957f	// Rogy
-#define REFLECTOR_GAIN_FLONT			0.780f	// Rogy
+////#define REFLECTOR_GAIN_SIDE				1.34f	// Home
+////#define REFLECTOR_GAIN_FLONT			1.24f	// Home
+////#define REFLECTOR_GAIN_SIDE				0.97f	// Mice
+////#define REFLECTOR_GAIN_FLONT			0.64f	// Mice
+//#define REFLECTOR_GAIN_SIDE				0.957f	// Rogy
+//#define REFLECTOR_GAIN_FLONT			0.780f	// Rogy
 
 class Reflector {
 public:
@@ -85,16 +85,16 @@ public:
 		else return fr();
 	}
 	int16_t sl() {
-		return distance[1] * REFLECTOR_GAIN_SIDE;
+		return distance[1];
 	}
 	int16_t fl() {
-		return distance[2] * REFLECTOR_GAIN_FLONT;
+		return distance[2];
 	}
 	int16_t fr() {
-		return distance[3] * REFLECTOR_GAIN_FLONT;
+		return distance[3];
 	}
 	int16_t sr() {
-		return distance[0] * REFLECTOR_GAIN_SIDE;
+		return distance[0];
 	}
 private:
 	PwmOut led_sl_fr, led_sr_fl;

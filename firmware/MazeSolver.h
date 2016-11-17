@@ -242,11 +242,13 @@ private:
 		return pos;
 	}
 	void search_run() {
-		if (agent.getState() == Agent::FINISHED || agent.getState() == Agent::BACK_TO_START) return;//Agentの状態を確認 FINISHEDになったら計測走行にうつる
+		if (agent.getState() == Agent::FINISHED || agent.getState() == Agent::BACK_TO_START) return; //Agentの状態を確認 FINISHEDになったら計測走行にうつる
 		dir = NORTH;
 		pos = IndexVec(0, 0);
 		maze = maze_backup;
 		ma->set_action(MoveAction::START_STEP);
+		mpu->calibration();
+		wd->calibration();
 		ma->enable();
 		while (1) {
 			while (ma->actions()) {
@@ -323,6 +325,8 @@ private:
 		ma->set_action(MoveAction::FAST_STOP);
 
 		// start drive
+		mpu->calibration();
+		wd->calibration();
 		ma->enable();
 		while (ma->actions()) {
 			Thread::wait(1);
@@ -362,10 +366,10 @@ private:
 	}
 	void task() {
 		search_run();
-		Thread::wait(1500);
+		Thread::wait(1000);
 		while (1) {
 			fast_run();
-			Thread::wait(2000);
+			Thread::wait(1000);
 			ma->set_params_relative(200);
 		}
 	}
