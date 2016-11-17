@@ -234,7 +234,7 @@ int main() {
 				int cnt = enc->position() / 2;
 				cnt &= 0x7;
 				*led = cnt;
-				ma->set_params(800 + 100 * cnt);
+				ma->set_params(600 + 100 * cnt);
 				if (btn->pressed) {
 					btn->flags = 0;
 					bz->play(Buzzer::CONFIRM);

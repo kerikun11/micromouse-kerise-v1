@@ -326,7 +326,7 @@ private:
 
 		// start drive
 		mpu->calibration();
-		wd->calibration();
+//		wd->calibration();
 		ma->enable();
 		while (ma->actions()) {
 			Thread::wait(1);
