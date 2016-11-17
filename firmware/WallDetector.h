@@ -13,6 +13,7 @@
 #include "Reflector.h"
 
 #define WALL_UPDATE_PERIOD_US		1000
+#define WALL_DETECTOR_FLONT_RATIO	0.56f
 
 class WallDetector {
 public:
@@ -52,7 +53,8 @@ public:
 			_wall_ref.side[i] = _wall_distance.side[i] / 3;
 		}
 		for (int i = 0; i < 2; i++) {
-			_wall_distance.flont[i] = (_wall_distance.side[0] + _wall_distance.side[1]) * 0.56;
+			_wall_distance.flont[i] = (_wall_distance.side[0] + _wall_distance.side[1])
+					* WALL_DETECTOR_FLONT_RATIO;
 			_wall_ref.flont[i] = _wall_distance.flont[i] / 3;
 		}
 	}

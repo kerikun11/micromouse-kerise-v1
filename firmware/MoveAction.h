@@ -90,15 +90,16 @@ private:
 	float fast_speed;
 
 	void wall_avoid() {
-//		if (wd->wall().side[0]) {
-//			sc->position.y -= wd->wall_difference().side[0] * 1.0 * sc->actual().rot;
-//		}
-//		if (wd->wall().side[1]) {
-//			sc->position.y += wd->wall_difference().side[1] * 1.0 * sc->actual().rot;
-//		}
+		if (wd->wall().side[0]) {
+			sc->position.y -= wd->wall_difference().side[0] * 0.00001 * sc->actual().trans;
+		}
+		if (wd->wall().side[1]) {
+			sc->position.y += wd->wall_difference().side[1] * 0.00001 * sc->actual().trans;
+		}
 	}
 	float fix_y() {
-		float rot = -sc->position.y * 100;
+//		float rot = -sc->position.y * 0.0001 * sc->actual().trans;
+		float rot = -sc->position.y * 0.01;
 		return rot;
 //		const float saturation = 1.0f;
 //		if (diff > saturation) {
@@ -121,7 +122,7 @@ private:
 				if (rot > rot_saturation) rot = rot_saturation;
 				if (rot < -rot_saturation) rot = -rot_saturation;
 				sc->set_target(trans * 500, rot * 10);
-				if (fabs(trans) < 0.1 && fabs(rot) < 0.1f) break;
+				if (fabs(trans) < 0.1f && fabs(rot) < 0.1f) break;
 				Thread::wait(1);
 			}
 			sc->set_target(0, 0);
@@ -159,12 +160,6 @@ private:
 			float extra = target_distance - sc->position.x;
 			float target_speed = sqrt(2 * accel * fabs(extra));
 			target_speed = (target_speed > speed) ? speed : target_speed;
-			if (wd->wall().flont[0] && wd->wall().flont[1]) {
-				float trans = wd->wall_difference().flont[0] + wd->wall_difference().flont[1];
-				const float trans_saturation = 0.4f;
-				if (trans > trans_saturation) trans = trans_saturation;
-				if (trans < -trans_saturation) trans = -trans_saturation;
-			}
 			if (extra > 0) {
 				sc->set_target(target_speed, fix_y());
 			} else {
@@ -173,7 +168,7 @@ private:
 			}
 			wall_avoid();
 			Thread::wait(1);
-			if (fabs(sc->actual().trans) < 1) break;
+			if (fabs(sc->actual().trans) < 2) break;
 		}
 		sc->set_target(0, 0);
 		error = sc->position - Position(target_distance, 0, 0);
