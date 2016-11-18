@@ -98,17 +98,8 @@ private:
 		}
 	}
 	float fix_y() {
-//		float rot = -sc->position.y * 0.0001 * sc->actual().trans;
 		float rot = -sc->position.y * 0.01;
 		return rot;
-//		const float saturation = 1.0f;
-//		if (diff > saturation) {
-//			return saturation;
-//		} else if (diff < -saturation) {
-//			return -saturation;
-//		} else {
-//			return diff;
-//		}
 	}
 	void wall_attach() {
 		if (wd->wall().flont[0] && wd->wall().flont[1]) {
@@ -121,7 +112,7 @@ private:
 				if (trans < -trans_saturation) trans = -trans_saturation;
 				if (rot > rot_saturation) rot = rot_saturation;
 				if (rot < -rot_saturation) rot = -rot_saturation;
-				sc->set_target(trans * 500, rot * 10);
+				sc->set_target(trans * 500, rot * 5);
 				if (fabs(trans) < 0.1f && fabs(rot) < 0.1f) break;
 				Thread::wait(1);
 			}
@@ -168,7 +159,7 @@ private:
 			}
 			wall_avoid();
 			Thread::wait(1);
-			if (fabs(sc->actual().trans) < 2) break;
+			if (fabs(sc->actual().trans) < 5) break;
 		}
 		sc->set_target(0, 0);
 		error = sc->position - Position(target_distance, 0, 0);
@@ -181,8 +172,8 @@ private:
 		deceleration(speed, target_distance / 2);
 	}
 	void turn(float speed, float target_angle) {
-		const float accel = 64 * M_PI;
-		const float decel = 48 * M_PI;
+		const float accel = 128 * M_PI;
+		const float decel = 64 * M_PI;
 		timer.reset();
 		timer.start();
 		while (1) {
@@ -222,9 +213,9 @@ private:
 			printf("Action: %s\n", action_string(action));
 			printf("Position:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
 					sc->position.theta);
-			const float rot_speed = 4.0f * M_PI;
-			const float rot_speed_fast = 6.0f * M_PI;
-			const float trans_speed = 600;
+			const float rot_speed = 6.0f * M_PI;
+			const float rot_speed_fast = 8.0f * M_PI;
+			const float trans_speed = 800;
 			switch (action) {
 				case START_STEP:
 					error.reset();
@@ -285,7 +276,7 @@ private:
 					break;
 				case FAST_TURN_LEFT_90:
 					deceleration(fast_speed, 90);
-//					wall_attach();
+					wall_attach();
 					turn(rot_speed_fast, M_PI / 2);
 					acceleration(fast_speed, 90);
 					break;
@@ -293,13 +284,13 @@ private:
 					break;
 				case FAST_TURN_RIGHT_90:
 					deceleration(fast_speed, 90);
-//					wall_attach();
+					wall_attach();
 					turn(rot_speed_fast, -M_PI / 2);
 					acceleration(fast_speed, 90);
 					break;
 				case FAST_STOP:
 					deceleration(fast_speed, 90);
-//					wall_attach();
+					wall_attach();
 					sc->set_target(0, 0);
 					break;
 			}
