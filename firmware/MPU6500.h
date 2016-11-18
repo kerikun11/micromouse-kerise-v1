@@ -51,6 +51,7 @@ public:
 		}
 		sum /= ave_count;
 		_offset_gyroZ += sum;
+		_angleZ = 0;
 	}
 private:
 	DigitalOut cs;

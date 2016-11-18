@@ -253,9 +253,15 @@ private:
 					sc->set_target(0, 0);
 					break;
 				case RETURN:
-					turn(rot_speed, M_PI / 2);
-					wall_attach();
-					turn(rot_speed, M_PI / 2);
+					if (mpu->angleZ() > 0) {
+						turn(rot_speed, -M_PI / 2);
+						wall_attach();
+						turn(rot_speed, -M_PI / 2);
+					} else {
+						turn(rot_speed, M_PI / 2);
+						wall_attach();
+						turn(rot_speed, M_PI / 2);
+					}
 					sc->set_target(0, 0);
 					break;
 				case FAST_START_STEP:
