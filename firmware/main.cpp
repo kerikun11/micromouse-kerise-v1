@@ -35,9 +35,12 @@ SpeedController *sc;
 MoveAction *ma;
 MazeSolver *ms;
 
+bool output = false;
+
 void debug_info() {
 	while (1) {
-		Thread::wait(100);
+		Thread::wait(3);
+		if (output) printf("%d,%d\n", (int) sc->actual().wheel[0], (int) sc->target_p.wheel[0]);
 
 //		printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(), rfl->sr());
 //		printf("%s %s %s %s\n", wd->wall().side[0] ? "X" : ".", wd->wall().flont[0] ? "X" : ".",
@@ -71,6 +74,17 @@ void serial_ctrl() {
 		if (c == EOF) continue;
 		printf("%c\n", (char) c);
 		switch (c) {
+			case 'a':
+				bz->play(Buzzer::CONFIRM);
+				sc->enable();
+				output = true;
+				sc->set_target(2000, 0);
+				Thread::wait(100);
+				sc->set_target(0, 0);
+				Thread::wait(100);
+				output = false;
+//				sc->disable();
+				break;
 			case 'g':
 				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();
@@ -206,6 +220,24 @@ int main() {
 	emergencyThread.start(emergencyTask);
 	printf("0x%08X: Emergency\n", (unsigned int) emergencyThread.gettid());
 
+//	Thread::wait(200);
+//	sc->enable();
+//	while (1) {
+//		output = true;
+//		sc->set_target(1000, 0);
+//		Thread::wait(100);
+//		sc->set_target(0, 0);
+//		Thread::wait(100);
+//		output = false;
+//		Thread::wait(1000);
+//		if (btn->pressed) {
+//			btn->flags = 0;
+//			bz->play(Buzzer::CANCEL);
+//			break;
+//		}
+//	}
+//	sc->disable();
+//
 	while (true) {
 		Thread::wait(10);
 		while (mt->isEmergency()) {

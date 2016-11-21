@@ -90,15 +90,15 @@ private:
 	float fast_speed;
 
 	void wall_avoid() {
-		if (wd->wall().side[0]) {
-			sc->position.y -= wd->wall_difference().side[0] * 0.00001 * sc->actual().trans;
-		}
-		if (wd->wall().side[1]) {
-			sc->position.y += wd->wall_difference().side[1] * 0.00001 * sc->actual().trans;
-		}
+//		if (wd->wall().side[0]) {
+//			sc->position.y -= wd->wall_difference().side[0] * 0.00001 * sc->actual().trans;
+//		}
+//		if (wd->wall().side[1]) {
+//			sc->position.y += wd->wall_difference().side[1] * 0.00001 * sc->actual().trans;
+//		}
 	}
 	float fix_y() {
-		float rot = -sc->position.y * 0.01;
+		float rot = -sc->position.y * 0.005;
 		return rot;
 	}
 	void wall_attach() {
@@ -123,7 +123,7 @@ private:
 //			printf("Wall Attach:\t(%05.1f, %05.1f, %04.2f)\n", error.x, error.y, error.theta);
 		}
 	}
-	void acceleration(float speed, float target_distance, float accel = 9000) {
+	void acceleration(float speed, float target_distance, float accel = 6000) {
 		timer.reset();
 		timer.start();
 		float v0 = sc->actual().trans;
@@ -172,8 +172,8 @@ private:
 		deceleration(speed, target_distance / 2);
 	}
 	void turn(float speed, float target_angle) {
-		const float accel = 128 * M_PI;
-		const float decel = 64 * M_PI;
+		const float accel = 64 * M_PI;
+		const float decel = 32 * M_PI;
 		timer.reset();
 		timer.start();
 		while (1) {
@@ -213,9 +213,9 @@ private:
 			printf("Action: %s\n", action_string(action));
 			printf("Position:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
 					sc->position.theta);
-			const float rot_speed = 6.0f * M_PI;
-			const float rot_speed_fast = 8.0f * M_PI;
-			const float trans_speed = 800;
+			const float rot_speed = 2.0f * M_PI;
+			const float rot_speed_fast = 4.0f * M_PI;
+			const float trans_speed = 600;
 			switch (action) {
 				case START_STEP:
 					error.reset();
