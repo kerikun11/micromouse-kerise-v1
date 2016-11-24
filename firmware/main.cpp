@@ -40,7 +40,7 @@ bool output = false;
 void debug_info() {
 	while (1) {
 		Thread::wait(3);
-		if (output) printf("%d,%d\n", (int) sc->actual().wheel[0], (int) sc->target_p.wheel[0]);
+		if (output) printf("%d,%d\n", (int) sc->actual().wheel[1], (int) sc->target_p.wheel[1]);
 
 //		printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(), rfl->sr());
 //		printf("%s %s %s %s\n", wd->wall().side[0] ? "X" : ".", wd->wall().flont[0] ? "X" : ".",
@@ -225,9 +225,9 @@ int main() {
 //	while (1) {
 //		output = true;
 //		sc->set_target(1000, 0);
-//		Thread::wait(100);
+//		Thread::wait(200);
 //		sc->set_target(0, 0);
-//		Thread::wait(100);
+//		Thread::wait(200);
 //		output = false;
 //		Thread::wait(1000);
 //		if (btn->pressed) {
@@ -237,7 +237,17 @@ int main() {
 //		}
 //	}
 //	sc->disable();
-//
+
+//	ma->enable();
+//	output = true;
+//	ma->set_action(MoveAction::TURN_LEFT_90);
+//	while (ma->actions()) {
+//		Thread::wait(10);
+//	}
+//	Thread::wait(100);
+//	output = false;
+//	Thread::wait(1000);
+
 	while (true) {
 		Thread::wait(10);
 		while (mt->isEmergency()) {

@@ -122,6 +122,7 @@ public:
 	WheelParameter actual_p;
 	WheelParameter actual_i;
 	WheelParameter actual_d;
+	float pwm_value[2];
 private:
 	Motor *mt;
 	Encoders *enc;
@@ -155,10 +156,9 @@ private:
 			actual_p.wheel2pole();
 			actual_p.rot = mpu->gyroZ() * M_PI / 180.0f;
 			actual_p.pole2wheel();
-			const float Kp = 2.00f;
-			const float Ki = 100.0f;
-			const float Kd = 2.00f;
-			float pwm_value[2];
+			const float Kp = 2.40f;
+			const float Ki = 200.0f;
+			const float Kd = 4.00f;
 			for (int i = 0; i < 2; i++) {
 				pwm_value[i] = Kp * (target_p.wheel[i] - actual_p.wheel[i])
 						+ Ki * (0 - actual_i.wheel[i]) + Kd * (0 - actual_d.wheel[i]);
