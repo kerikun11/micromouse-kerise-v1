@@ -91,6 +91,16 @@ void serial_ctrl() {
 				wd->calibration();
 				ma->enable();
 				break;
+			case 't':
+				ma->set_action(MoveAction::FAST_START_STEP);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_90);
+				ma->set_action(MoveAction::FAST_GO_HALF);
+				ma->set_action(MoveAction::FAST_STOP);
+				bz->play(Buzzer::CONFIRM);
+				mpu->calibration();
+				wd->calibration();
+				ma->enable();
+				break;
 			case 'f':
 				bz->play(Buzzer::CANCEL);
 				ms->terminate();
@@ -131,6 +141,9 @@ void serial_ctrl() {
 						sc->position.theta);
 //				printf("Gyro: %7.4f\tAngle: %07.4f\n", mpu->gyroZ(), mpu->angleZ());
 //				printf("L: %ld\tR: %ld\n", enc->left(), enc->right());
+				break;
+			case 'h':
+				ma->set_action(MoveAction::FAST_GO_HALF);
 				break;
 			case 'z':
 				ma->set_action(MoveAction::FAST_START_STEP);

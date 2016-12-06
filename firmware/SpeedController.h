@@ -33,6 +33,9 @@ public:
 		return Position(x * cos(angle) - y * sin(angle), x * sin(angle) + y * cos(angle),
 				theta + angle);
 	}
+	float norm() const {
+		return sqrt(x * x + y * y);
+	}
 	Position operator=(const Position &obj) {
 		x = obj.x;
 		y = obj.y;

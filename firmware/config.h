@@ -72,6 +72,23 @@
 #define IR_LED_SR_FL_PIN	PB_15
 
 /*
+ * TIM1		IR LED
+ * TIM2		mbed timer
+ * TIM3		Encoder L
+ * TIM4		Encoder R
+ * TIM5		*
+ * TIM6
+ * TIM7
+ * TIM8
+ * TIM9
+ * TIM10
+ * TIM11
+ * TIM12
+ * TIM13
+ * TIM14
+ */
+
+/*
  * PA0	Motor IN1 L		TIM2_CH1				HAL
  * PA1	Motor IN2 L		TIM2_CH2				HAL
  * PA2	Motor IN1 R		TIM2_CH3				HAL
