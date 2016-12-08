@@ -92,6 +92,8 @@ void serial_ctrl() {
 			case 'y':
 				ma->set_action(MoveAction::START_STEP);
 				ma->set_action(MoveAction::GO_STRAIGHT);
+				ma->set_action(MoveAction::GO_STRAIGHT);
+				ma->set_action(MoveAction::GO_STRAIGHT);
 				ma->set_action(MoveAction::STOP);
 				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();

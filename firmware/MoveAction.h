@@ -15,8 +15,8 @@
 #define WALL_AVOID_ENABLED		false
 #define WALL_ATTACH_ENABLED		false
 
-#define LOOK_AHEAD_COUNT		200
-#define TRAJECTORY_PROP_GAIN	1000000/MOVE_ACTION_PERIOD
+#define LOOK_AHEAD_COUNT		60
+#define TRAJECTORY_PROP_GAIN	200
 
 class Straight {
 public:
@@ -25,7 +25,7 @@ public:
 	Position getNextDir(const Position cur, const float dx) {
 		Position dir = (getNextPoint(cur) - cur).rotate(-cur.theta);
 		dir.x = dir.x * dx / interval;
-		dir.theta = atan(dir.y / dir.x);
+		dir.theta = atan(dir.y / (dir.x + 1));
 		dir /= LOOK_AHEAD_COUNT;
 		return dir;
 	}
@@ -466,13 +466,11 @@ private:
 			Position dir = cv90.getNextDir(sc->position, velocity * MOVE_ACTION_PERIOD / 1000000);
 			sc->set_target(dir.x * 1000, dir.theta * TRAJECTORY_PROP_GAIN);
 			if (cnt % 10 == 0) {
-				printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
+//				printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
 			}
 			cnt++;
 		}
 		sc->set_target(velocity, 0);
-		printf("Position2:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
-				sc->position.theta);
 		sc->position = (sc->position - Position(90, 90, 0)).rotate(-M_PI / 2);
 	}
 	void straight_x(const float distance, const float v0, const float v1, const float v2,
@@ -490,7 +488,7 @@ private:
 			Position dir = st.getNextDir(sc->position, velocity * MOVE_ACTION_PERIOD / 1000000);
 			sc->set_target(dir.x * 1000, dir.theta * TRAJECTORY_PROP_GAIN);
 			if (cnt % 10 == 0) {
-				printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
+//				printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
 			}
 			cnt++;
 			wall_avoid();
@@ -506,7 +504,7 @@ private:
 				Position dir = st.getNextDir(sc->position, velocity * MOVE_ACTION_PERIOD / 1000000);
 				sc->set_target(dir.x * 1000, dir.theta * TRAJECTORY_PROP_GAIN);
 				if (cnt % 10 == 0) {
-					printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
+//					printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
 				}
 				cnt++;
 			} else {
@@ -525,8 +523,8 @@ private:
 				continue;
 			}
 			enum ACTION action = (enum ACTION) evt.value.v;
-			printf("Action: %s\n", action_string(action));
-			printf("Position:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
+			printf("Action:\t%s\n", action_string(action));
+			printf("Start:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
 					sc->position.theta);
 			const float velocity = 600;
 			switch (action) {
@@ -537,7 +535,7 @@ private:
 				case START_INIT:
 					break;
 				case GO_STRAIGHT:
-					straight_x(3600, velocity, 2000, velocity);
+					straight_x(180, velocity, 1200, velocity);
 					break;
 				case TURN_LEFT_90:
 					curve_left(velocity);
@@ -571,6 +569,9 @@ private:
 					break;
 			}
 			_actions--;
+			printf("Error:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
+					sc->position.theta);
+			Thread::wait(10);
 		}
 	}
 };
