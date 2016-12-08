@@ -19,43 +19,69 @@ public:
 			x(x), y(y), theta(theta) {
 	}
 	float x, y, theta;
-	void reset() {
+
+	inline void reset() {
 		x = 0;
 		y = 0;
 		theta = 0;
 	}
-	void set(float x = 0, float y = 0, float theta = 0) {
+	inline void set(float x = 0, float y = 0, float theta = 0) {
 		this->x = x;
 		this->y = y;
 		this->theta = theta;
 	}
-	Position rotate(float angle) {
+	inline Position rotate(float angle) {
 		return Position(x * cos(angle) - y * sin(angle), x * sin(angle) + y * cos(angle),
 				theta + angle);
 	}
-	float norm() const {
+	inline float norm() const {
 		return sqrt(x * x + y * y);
 	}
-	Position operator=(const Position &obj) {
+	inline Position operator=(const Position &obj) {
 		x = obj.x;
 		y = obj.y;
 		theta = obj.theta;
 		return *this;
 	}
-	Position operator-(const Position &obj) const {
-		return Position(x - obj.x, y - obj.y, theta - obj.theta);
+	inline Position operator+() const {
+		return Position(x, y, theta);
 	}
-	Position operator+(const Position &obj) const {
+	inline Position operator+(const Position &obj) const {
 		return Position(x + obj.x, y + obj.y, theta + obj.theta);
 	}
-	Position operator/(const float &div) {
-		return Position(x / div, y / div, theta / div);
+	inline Position operator+=(const Position &obj) {
+		x += obj.x;
+		y += obj.y;
+		theta += obj.theta;
+		return *this;
 	}
-	Position operator-() const {
+	inline Position operator-() const {
 		return Position(-x, -y, -theta);
 	}
-	Position operator+() const {
-		return Position(x, y, theta);
+	inline Position operator-(const Position &obj) const {
+		return Position(x - obj.x, y - obj.y, theta - obj.theta);
+	}
+	inline Position operator-=(const Position &obj) {
+		x -= obj.x;
+		y -= obj.y;
+		theta -= obj.theta;
+		return *this;
+	}
+	inline Position operator/(const float &div) {
+		return Position(x / div, y / div, theta);
+	}
+	inline Position operator/=(const float &div) {
+		x /= div;
+		y /= div;
+		return *this;
+	}
+	inline Position operator*(const float &div) {
+		return Position(x * div, y * div, theta);
+	}
+	inline Position operator*=(const float &div) {
+		x *= div;
+		y *= div;
+		return *this;
 	}
 };
 

@@ -74,17 +74,6 @@ void serial_ctrl() {
 		if (c == EOF) continue;
 		printf("%c\n", (char) c);
 		switch (c) {
-			case 'a':
-				bz->play(Buzzer::CONFIRM);
-				sc->enable();
-				output = true;
-				sc->set_target(2000, 0);
-				Thread::wait(100);
-				sc->set_target(0, 0);
-				Thread::wait(100);
-				output = false;
-//				sc->disable();
-				break;
 			case 'g':
 				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();
@@ -92,10 +81,18 @@ void serial_ctrl() {
 				ma->enable();
 				break;
 			case 't':
-				ma->set_action(MoveAction::FAST_START_STEP);
-				ma->set_action(MoveAction::FAST_TURN_LEFT_90);
-				ma->set_action(MoveAction::FAST_GO_HALF);
-				ma->set_action(MoveAction::FAST_STOP);
+				ma->set_action(MoveAction::START_STEP);
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				ma->set_action(MoveAction::STOP);
+				bz->play(Buzzer::CONFIRM);
+				mpu->calibration();
+				wd->calibration();
+				ma->enable();
+				break;
+			case 'y':
+				ma->set_action(MoveAction::START_STEP);
+				ma->set_action(MoveAction::GO_STRAIGHT);
+				ma->set_action(MoveAction::STOP);
 				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();
 				wd->calibration();
@@ -104,24 +101,6 @@ void serial_ctrl() {
 			case 'f':
 				bz->play(Buzzer::CANCEL);
 				ms->terminate();
-				break;
-			case 'w':
-				ma->set_action(MoveAction::GO_STRAIGHT);
-				break;
-			case 'q':
-				ma->set_action(MoveAction::TURN_LEFT_90);
-				break;
-			case 'e':
-				ma->set_action(MoveAction::TURN_RIGHT_90);
-				break;
-			case 'r':
-				ma->set_action(MoveAction::RETURN);
-				break;
-			case 'i':
-				ma->set_action(MoveAction::START_INIT);
-				break;
-			case 's':
-				ma->set_action(MoveAction::START_STEP);
 				break;
 			case 'm':
 				bz->play(Buzzer::CONFIRM);
@@ -141,24 +120,6 @@ void serial_ctrl() {
 						sc->position.theta);
 //				printf("Gyro: %7.4f\tAngle: %07.4f\n", mpu->gyroZ(), mpu->angleZ());
 //				printf("L: %ld\tR: %ld\n", enc->left(), enc->right());
-				break;
-			case 'h':
-				ma->set_action(MoveAction::FAST_GO_HALF);
-				break;
-			case 'z':
-				ma->set_action(MoveAction::FAST_START_STEP);
-				break;
-			case 'x':
-				ma->set_action(MoveAction::FAST_TURN_LEFT_90);
-				break;
-			case 'c':
-				ma->set_action(MoveAction::FAST_GO_STRAIGHT);
-				break;
-			case 'v':
-				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
-				break;
-			case 'b':
-				ma->set_action(MoveAction::FAST_STOP);
 				break;
 		}
 	}
@@ -232,34 +193,6 @@ int main() {
 	Thread emergencyThread(PRIORITY_EMERGENCY_STOP, STACK_SIZE_EMERGENCY);
 	emergencyThread.start(emergencyTask);
 	printf("0x%08X: Emergency\n", (unsigned int) emergencyThread.gettid());
-
-//	Thread::wait(200);
-//	sc->enable();
-//	while (1) {
-//		output = true;
-//		sc->set_target(1000, 0);
-//		Thread::wait(200);
-//		sc->set_target(0, 0);
-//		Thread::wait(200);
-//		output = false;
-//		Thread::wait(1000);
-//		if (btn->pressed) {
-//			btn->flags = 0;
-//			bz->play(Buzzer::CANCEL);
-//			break;
-//		}
-//	}
-//	sc->disable();
-
-//	ma->enable();
-//	output = true;
-//	ma->set_action(MoveAction::TURN_LEFT_90);
-//	while (ma->actions()) {
-//		Thread::wait(10);
-//	}
-//	Thread::wait(100);
-//	output = false;
-//	Thread::wait(1000);
 
 	while (true) {
 		Thread::wait(10);
