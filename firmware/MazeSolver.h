@@ -57,7 +57,6 @@ private:
 				dir = EAST;
 			} else if (nextDir == SOUTH) {
 				ma->set_action(MoveAction::RETURN);
-				ma->set_action(MoveAction::GO_STRAIGHT);
 				pos.y--;
 				dir = SOUTH;
 			} else if (nextDir == WEST) {
@@ -80,14 +79,12 @@ private:
 				dir = SOUTH;
 			} else if (nextDir == WEST) {
 				ma->set_action(MoveAction::RETURN);
-				ma->set_action(MoveAction::GO_STRAIGHT);
 				pos.x--;
 				dir = WEST;
 			}
 		} else if (dir == SOUTH) {
 			if (nextDir == NORTH) {
 				ma->set_action(MoveAction::RETURN);
-				ma->set_action(MoveAction::GO_STRAIGHT);
 				pos.y++;
 				dir = NORTH;
 			} else if (nextDir == EAST) {
@@ -110,7 +107,6 @@ private:
 				dir = NORTH;
 			} else if (nextDir == EAST) {
 				ma->set_action(MoveAction::RETURN);
-				ma->set_action(MoveAction::GO_STRAIGHT);
 				pos.x++;
 				dir = EAST;
 			} else if (nextDir == SOUTH) {
@@ -323,10 +319,10 @@ private:
 			}
 			Thread::wait(1);
 		}
-		ma->set_action(MoveAction::FAST_STOP);
+//		ma->set_action(MoveAction::FAST_STOP);
 
 		// start drive
-		mpu->calibration();
+//		mpu->calibration();
 //		wd->calibration();
 		ma->enable();
 		while (ma->actions()) {
@@ -338,7 +334,6 @@ private:
 		// back to start
 		printf("Back to Start\n");
 		ma->set_action(MoveAction::RETURN);
-		ma->set_action(MoveAction::FAST_GO_HALF);
 		for (size_t i = 0; i < runSequence.size(); i++) {
 			printf("runSequence[%d].n => %d, runSequence[%d].op => %d\n",
 					runSequence.size() - i - 1, runSequence[runSequence.size() - 1 - i].n,
@@ -355,7 +350,7 @@ private:
 			}
 			Thread::wait(1);
 		}
-		ma->set_action(MoveAction::FAST_STOP);
+//		ma->set_action(MoveAction::FAST_STOP);
 
 		ma->set_action(MoveAction::START_INIT);
 		while (ma->actions()) {

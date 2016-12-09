@@ -405,8 +405,10 @@ private:
 					sc->set_target(0, 0);
 					break;
 				case FAST_START_STEP:
+					straight_x(180 - 24 - 6, 0, velocity, velocity);
 					break;
 				case FAST_GO_STRAIGHT:
+					straight_x(180, velocity, 1000, velocity);
 					break;
 				case FAST_GO_DIAGONAL:
 					break;
@@ -415,12 +417,17 @@ private:
 				case FAST_TURN_LEFT_45:
 					break;
 				case FAST_TURN_LEFT_90:
+					curve_left(velocity);
 					break;
 				case FAST_TURN_RIGHT_45:
 					break;
 				case FAST_TURN_RIGHT_90:
+					curve_right(velocity);
 					break;
 				case FAST_STOP:
+					straight_x(90, velocity, velocity, 0);
+					wall_attach();
+					sc->set_target(0, 0);
 					break;
 			}
 			_actions--;
