@@ -152,12 +152,6 @@ void serial_ctrl() {
 				ma->set_action(MoveAction::RETURN);
 				ma->set_action(MoveAction::TURN_LEFT_90);
 				ma->set_action(MoveAction::TURN_LEFT_90);
-				ma->set_action(MoveAction::RETURN);
-				ma->set_action(MoveAction::TURN_RIGHT_90);
-				ma->set_action(MoveAction::TURN_RIGHT_90);
-				ma->set_action(MoveAction::RETURN);
-				ma->set_action(MoveAction::TURN_LEFT_90);
-				ma->set_action(MoveAction::TURN_LEFT_90);
 				ma->set_action(MoveAction::START_INIT);
 				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();
@@ -191,7 +185,7 @@ void serial_ctrl() {
 void emergencyTask() {
 	while (1) {
 		Thread::wait(1);
-		if (mpu->accelY() < -5) {	// -15
+		if (mpu->accelY() < -10) {	// -15
 			mt->emergency_stop();
 			ms->terminate();
 			bz->play(Buzzer::EMERGENCY);

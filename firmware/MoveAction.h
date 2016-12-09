@@ -11,8 +11,8 @@
 #include "mbed.h"
 #include "config.h"
 
-#define MOVE_ACTION_PERIOD			1000
-#define WALL_ATTACH_ENABLED			true
+#define MOVE_ACTION_PERIOD			500
+#define WALL_ATTACH_ENABLED			false
 #define WALL_AVOID_ENABLED			false
 
 #define LOOK_AHEAD_UNIT				20
@@ -24,10 +24,10 @@ public:
 	Straight() {
 	}
 	Position getNextDir(const Position cur, const float velocity) {
-		int look_ahead = LOOK_AHEAD_UNIT;
+		int look_ahead = LOOK_AHEAD_UNIT * 20 * (1 + 5 * velocity / v_const);
 		Position dir = (getNextPoint(cur, look_ahead) - cur).rotate(-cur.theta);
 		dir.theta = atan(dir.y / (dir.x + interval)) * velocity / v_const;
-		dir *= velocity / LOOK_AHEAD_UNIT;
+		dir *= velocity / look_ahead;
 		return dir;
 	}
 private:
@@ -265,7 +265,7 @@ private:
 #endif
 	}
 	void turn(float target_angle, float speed) {
-		const float accel = 64 * M_PI;
+		const float accel = 32 * M_PI;
 		timer.reset();
 		timer.start();
 		while (1) {
@@ -369,8 +369,8 @@ private:
 			printf("Action:\t%s\tNumber:\t%d\n", action_string(operation->action), operation->num);
 			printf("Start:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
 					sc->position.theta);
-			const float velocity = 600;
-			const float omega = 2.0f * M_PI;
+			const float velocity = 400;
+			const float omega = 4.0f * M_PI;
 			switch (operation->action) {
 				case START_STEP:
 					sc->position.reset();
@@ -378,10 +378,17 @@ private:
 					break;
 				case START_INIT:
 					straight_x(90, velocity, velocity, 0);
-					wall_attach();
-					turn(M_PI / 2, omega);
-					wall_attach();
-					turn(M_PI / 2, omega);
+					if (mpu->angleZ() > 0) {
+						wall_attach();
+						turn(-M_PI / 2, omega);
+						wall_attach();
+						turn(-M_PI / 2, omega);
+					} else {
+						wall_attach();
+						turn(M_PI / 2, omega);
+						wall_attach();
+						turn(M_PI / 2, omega);
+					}
 					sc->set_target(-10, 0);
 					Thread::wait(100);
 					sc->set_target(-200, 0);
@@ -390,7 +397,7 @@ private:
 					sc->set_target(0, 0);
 					break;
 				case GO_STRAIGHT:
-					straight_x(180, velocity, 1000, velocity);
+					straight_x(1800, velocity, 2400, velocity);
 					break;
 				case TURN_LEFT_90:
 					curve_left(velocity);
@@ -400,10 +407,17 @@ private:
 					break;
 				case RETURN:
 					straight_x(90, velocity, velocity, 0);
-					wall_attach();
-					turn(M_PI / 2, omega);
-					wall_attach();
-					turn(M_PI / 2, omega);
+					if (mpu->angleZ() > 0) {
+						wall_attach();
+						turn(-M_PI / 2, omega);
+						wall_attach();
+						turn(-M_PI / 2, omega);
+					} else {
+						wall_attach();
+						turn(M_PI / 2, omega);
+						wall_attach();
+						turn(M_PI / 2, omega);
+					}
 					straight_x(90, 0, velocity, velocity);
 					break;
 				case STOP:

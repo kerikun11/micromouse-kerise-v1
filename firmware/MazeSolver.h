@@ -267,7 +267,7 @@ private:
 					&& agent.getState() == Agent::SEARCHING_REACHED_GOAL) {
 				printf("maze_backup\n");
 				maze_backup = maze;
-				bz->play(Buzzer::CONFIRM);
+				bz->play(Buzzer::COMPLETE);
 			}
 			prevState = agent.getState();
 
