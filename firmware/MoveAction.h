@@ -167,6 +167,10 @@ public:
 		FAST_TURN_RIGHT_90,
 		FAST_STOP,
 	};
+	struct Operation {
+		enum ACTION action;
+		int num;
+	};
 	const char* action_string(enum ACTION action) {
 		static const char name[][32] = { "start_step", "start_init", "go_straight", "turn_left_90",
 				"turn_right_90", "return", "stop", "fast_start_step", "fast_go_straight",
@@ -185,16 +189,19 @@ public:
 		sc->disable();
 		rfl->disable();
 		while (1) {
-			osEvent evt = queue.get(1);
-			if (evt.status != osEventMessage) {
+			osEvent evt = mail.get(1);
+			if (evt.status != osEventMail) {
 				break;
 			}
 		}
 		_actions = 0;
 	}
-	void set_action(enum ACTION action) {
-		_actions++;
-		queue.put((enum ACTION*) action);
+	void set_action(enum ACTION action, int num = 1) {
+		_actions += num;
+		struct Operation *operation = mail.alloc();
+		operation->action = action;
+		operation->num = num;
+		mail.put(operation);
 	}
 	void set_params(float fast_speed) {
 		this->fast_speed = fast_speed;
@@ -214,7 +221,7 @@ private:
 	SpeedController *sc;
 	Thread thread;
 	Ticker ticker;
-	Queue<enum ACTION, 128> queue;
+	Mail<struct Operation, 128> mail;
 	Timer timer;
 	int _actions;
 	float fast_speed;
@@ -353,18 +360,18 @@ private:
 	}
 	void task() {
 		while (1) {
-			osEvent evt = queue.get();
-			if (evt.status != osEventMessage) {
-				printf("Error!\n");
+			osEvent evt = mail.get();
+			if (evt.status != osEventMail) {
+				printf("Mail Error!\n");
 				continue;
 			}
-			enum ACTION action = (enum ACTION) evt.value.v;
-			printf("Action:\t%s\n", action_string(action));
+			struct Operation *operation = (struct Operation*) evt.value.p;
+			printf("Action:\t%s\tNumber:\t%d\n", action_string(operation->action), operation->num);
 			printf("Start:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
 					sc->position.theta);
 			const float velocity = 600;
 			const float omega = 2.0f * M_PI;
-			switch (action) {
+			switch (operation->action) {
 				case START_STEP:
 					sc->position.reset();
 					straight_x(180 - 24 - 6, 0, velocity, velocity);
@@ -430,7 +437,8 @@ private:
 					sc->set_target(0, 0);
 					break;
 			}
-			_actions--;
+			_actions -= operation->num;
+			mail.free(operation);
 			printf("Error:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
 					sc->position.theta);
 			Thread::wait(5);
