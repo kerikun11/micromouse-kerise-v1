@@ -80,6 +80,38 @@ void serial_ctrl() {
 				wd->calibration();
 				ma->enable();
 				break;
+			case 'f':
+				bz->play(Buzzer::CANCEL);
+				ms->terminate();
+				break;
+			case 'a':
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 's':
+				ma->set_action(MoveAction::START_STEP);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'd':
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'w':
+				ma->set_action(MoveAction::GO_STRAIGHT);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'x':
+				ma->set_action(MoveAction::START_INIT);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'b':
+				ma->set_action(MoveAction::STOP);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'r':
+				ma->set_action(MoveAction::RETURN);
+				bz->play(Buzzer::CONFIRM);
+				break;
 			case 't':
 				ma->set_action(MoveAction::START_STEP);
 				ma->set_action(MoveAction::TURN_LEFT_90);
@@ -92,17 +124,11 @@ void serial_ctrl() {
 			case 'y':
 				ma->set_action(MoveAction::START_STEP);
 				ma->set_action(MoveAction::GO_STRAIGHT);
-				ma->set_action(MoveAction::GO_STRAIGHT);
-				ma->set_action(MoveAction::GO_STRAIGHT);
 				ma->set_action(MoveAction::STOP);
 				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();
 				wd->calibration();
 				ma->enable();
-				break;
-			case 'f':
-				bz->play(Buzzer::CANCEL);
-				ms->terminate();
 				break;
 			case 'm':
 				bz->play(Buzzer::CONFIRM);

@@ -37,6 +37,9 @@ public:
 	inline float norm() const {
 		return sqrt(x * x + y * y);
 	}
+	inline Position mirror_x() const {
+		return Position(x, -y, -theta);
+	}
 	inline Position operator=(const Position &obj) {
 		x = obj.x;
 		y = obj.y;
