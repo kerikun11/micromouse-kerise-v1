@@ -12,8 +12,8 @@
 #include "config.h"
 
 #define MOVE_ACTION_PERIOD			1000
+#define WALL_ATTACH_ENABLED			true
 #define WALL_AVOID_ENABLED			false
-#define WALL_ATTACH_ENABLED			false
 
 #define LOOK_AHEAD_UNIT				20
 #define TRAJECTORY_PROP_GAIN		50
@@ -252,7 +252,8 @@ private:
 			}
 			sc->set_target(0, 0);
 			sc->position.x = 0;
-			printf("Wall Attach:\t(%05.1f, %05.1f, %04.2f)\n", error.x, error.y, error.theta);
+			printf("Attach:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
+					sc->position.theta);
 		}
 #endif
 	}
@@ -281,7 +282,7 @@ private:
 				sc->set_target(0, -target_speed);
 			}
 		}
-		sc->position.rotate(-target_angle);
+		sc->position = sc->position.rotate(-target_angle);
 	}
 	void curve_left(const float velocity) {
 		Curve90 cv90;
@@ -294,7 +295,7 @@ private:
 			integral += dir.theta * TRAJECTORY_INTEGRAL_GAIN * MOVE_ACTION_PERIOD / 1000000;
 			sc->set_target(dir.x, (dir.theta + integral) * TRAJECTORY_PROP_GAIN);
 			if (cnt % 10 == 0) {
-				printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
+//				printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
 			}
 			cnt++;
 		}
@@ -312,7 +313,7 @@ private:
 			integral += dir.theta * TRAJECTORY_INTEGRAL_GAIN * MOVE_ACTION_PERIOD / 1000000;
 			sc->set_target(dir.x, (dir.theta + integral) * TRAJECTORY_PROP_GAIN);
 			if (cnt % 10 == 0) {
-				printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
+//				printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
 			}
 			cnt++;
 		}
@@ -342,7 +343,7 @@ private:
 			integral += dir.theta * TRAJECTORY_INTEGRAL_GAIN * MOVE_ACTION_PERIOD / 1000000;
 			sc->set_target(dir.x, (dir.theta + integral) * TRAJECTORY_PROP_GAIN);
 			if (cnt % 10 == 0) {
-				printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
+//				printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
 			}
 			cnt++;
 			wall_avoid();
@@ -382,7 +383,7 @@ private:
 					sc->set_target(0, 0);
 					break;
 				case GO_STRAIGHT:
-					straight_x(360, velocity, 1000, velocity);
+					straight_x(180, velocity, 1000, velocity);
 					break;
 				case TURN_LEFT_90:
 					curve_left(velocity);

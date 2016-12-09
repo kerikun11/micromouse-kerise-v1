@@ -100,7 +100,7 @@ void serial_ctrl() {
 				ma->set_action(MoveAction::GO_STRAIGHT);
 				bz->play(Buzzer::CONFIRM);
 				break;
-			case 'x':
+			case 'i':
 				ma->set_action(MoveAction::START_INIT);
 				bz->play(Buzzer::CONFIRM);
 				break;
@@ -113,6 +113,7 @@ void serial_ctrl() {
 				bz->play(Buzzer::CONFIRM);
 				break;
 			case 't':
+				ms->terminate();
 				ma->set_action(MoveAction::START_STEP);
 				ma->set_action(MoveAction::TURN_LEFT_90);
 				ma->set_action(MoveAction::STOP);
@@ -122,6 +123,7 @@ void serial_ctrl() {
 				ma->enable();
 				break;
 			case 'y':
+				ms->terminate();
 				ma->set_action(MoveAction::START_STEP);
 				ma->set_action(MoveAction::GO_STRAIGHT);
 				ma->set_action(MoveAction::STOP);
@@ -130,7 +132,40 @@ void serial_ctrl() {
 				wd->calibration();
 				ma->enable();
 				break;
+			case 'u':
+				ms->terminate();
+				ma->set_action(MoveAction::START_STEP);
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				ma->set_action(MoveAction::START_INIT);
+				bz->play(Buzzer::CONFIRM);
+				mpu->calibration();
+				wd->calibration();
+				ma->enable();
+				break;
 			case 'm':
+				ms->terminate();
 				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();
 				wd->calibration();

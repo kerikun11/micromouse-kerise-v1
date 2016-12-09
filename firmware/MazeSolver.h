@@ -247,6 +247,7 @@ private:
 		pos = IndexVec(0, 0);
 		maze = maze_backup;
 		ma->set_action(MoveAction::START_STEP);
+		pos = IndexVec(0, 1);
 		mpu->calibration();
 		wd->calibration();
 		ma->enable();
