@@ -88,6 +88,14 @@ void serial_ctrl() {
 				ma->set_action(MoveAction::TURN_LEFT_90);
 				bz->play(Buzzer::CONFIRM);
 				break;
+			case 'q':
+				ma->set_action(MoveAction::FAST_TURN_LEFT_45);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'z':
+				ma->set_action(MoveAction::FAST_TURN_LEFT_135);
+				bz->play(Buzzer::CONFIRM);
+				break;
 			case 's':
 				ma->set_action(MoveAction::START_STEP);
 				bz->play(Buzzer::CONFIRM);
