@@ -1,5 +1,5 @@
 clear;
-%%{
+%{
 % curve135
 gain = 1;
 v_const = 1000 * gain;
@@ -9,18 +9,18 @@ pos_start = [0; 0];
 pos_end = [0; 180];
 omega_start = 0;
 omega_end = 0;
-theta_start = pi/4;
-theta_end = pi/4*4;
+theta_start = 0;
+theta_end = pi/4*3;
 dt = 0.001;
 %}
 %{
-% curve90
+% curve135R
 gain = 1;
 v_const = 1000 * gain;
-omega_dot = (48 * gain * gain) * 4;
-omega_max = (2 * gain) * pi * 2.4;
+omega_dot = (48 * gain * gain) * 5;
+omega_max = (2 * gain) * pi * 3;
 pos_start = [0; 0];
-pos_end = [90; 90];
+pos_end = [180*sqrt(2)/2; 180*sqrt(2)/2];
 omega_start = 0;
 omega_end = 0;
 theta_start = 0;
@@ -28,31 +28,31 @@ theta_end = pi/4*3;
 dt = 0.001;
 %}
 %{
-% curve60
+% curve90
 gain = 1;
 v_const = 1000 * gain;
-omega_dot = (300 * gain * gain) * pi;
-omega_max = (24 * gain) * pi;
+omega_dot = (48 * gain * gain) * pi * 4;
+omega_max = (2 * gain) * pi * 2.4;
 pos_start = [0; 0];
 pos_end = [90; 90];
 omega_start = 0;
 omega_end = 0;
 theta_start = 0;
-theta_end = pi/3;
+theta_end = pi/2;
 dt = 0.001;
 %}
 %{
-% curve30
+% curve60R
 gain = 1;
 v_const = 1000 * gain;
 omega_dot = (300 * gain * gain) * pi;
 omega_max = (24 * gain) * pi;
 pos_start = [0; 0];
-pos_end = [90; 90];
+pos_end = [90*cos(-pi/6)-90*sin(-pi/6); 90*sin(-pi/6)+90*cos(-pi/6)];
 omega_start = 0;
 omega_end = 0;
-theta_start = pi/6;
-theta_end = pi/2;
+theta_start = 0;
+theta_end = pi/3;
 dt = 0.001;
 %}
 %{
@@ -63,6 +63,20 @@ omega_dot = (48 * gain * gain) * 2;
 omega_max = (2 * gain) * pi * 1;
 pos_start = [0; 0];
 pos_end = [270; 90];
+omega_start = 0;
+omega_end = 0;
+theta_start = 0;
+theta_end = pi/4;
+dt = 0.001;
+%}
+%{
+% curve45R
+gain = 1;
+v_const = 1000 * gain;
+omega_dot = (48 * gain * gain) * 2;
+omega_max = (2 * gain) * pi * 1;
+pos_start = [0; 0];
+pos_end = [90*sqrt(2)/2*4; 90*sqrt(2)/2*2];
 omega_start = 0;
 omega_end = 0;
 theta_start = 0;

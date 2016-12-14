@@ -156,11 +156,6 @@ public:
 		return actual_p;
 	}
 	Position position;
-	WheelParameter target_p;
-	WheelParameter actual_p;
-	WheelParameter actual_i;
-	WheelParameter actual_d;
-	float pwm_value[2];
 private:
 	Motor *mt;
 	Encoders *enc;
@@ -168,6 +163,11 @@ private:
 	Thread ctrlThread;
 	Ticker ctrlTicker;
 	float wheel_position[3][2];
+	WheelParameter target_p;
+	WheelParameter actual_p;
+	WheelParameter actual_i;
+	WheelParameter actual_d;
+	float pwm_value[2];
 
 	void ctrlIsr() {
 		ctrlThread.signal_set(0x01);

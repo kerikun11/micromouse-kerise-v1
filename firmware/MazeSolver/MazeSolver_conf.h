@@ -10,13 +10,13 @@
 //迷路のゴール座標
 //ゴールとしたい座標を並べる
 //4個でなくてもよい
-#define MAZE_GOAL_LIST {IndexVec(1,0)}
+#define MAZE_GOAL_LIST {IndexVec(4,0)}
 
 /****************************************
  * 探索アルゴリズムに関するパラメータ
  ****************************************/
 //一旦ゴールに到達したあとのk最短経路を計算するときのk
-#define SEARCH_DEPTH1 2
+#define SEARCH_DEPTH1 1
 
 //探索が終了し、最終的な走行ルートを計算するときのk
 #define SEARCH_DEPTH2 20

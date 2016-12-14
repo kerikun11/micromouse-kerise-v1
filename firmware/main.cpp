@@ -35,12 +35,9 @@ SpeedController *sc;
 MoveAction *ma;
 MazeSolver *ms;
 
-bool output = false;
-
 void debug_info() {
 	while (1) {
 		Thread::wait(3);
-		if (output) printf("%d,%d\n", (int) sc->actual().wheel[1], (int) sc->target_p.wheel[1]);
 
 //		printf("%05u\t%05u\t%05u\t%05u\t", rfl->sl(), rfl->fl(), rfl->fr(), rfl->sr());
 //		printf("%s %s %s %s\n", wd->wall().side[0] ? "X" : ".", wd->wall().flont[0] ? "X" : ".",
@@ -84,6 +81,14 @@ void serial_ctrl() {
 				bz->play(Buzzer::CANCEL);
 				ms->terminate();
 				break;
+			case 'b':
+				ma->set_action(MoveAction::FAST_STOP);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'r':
+				ma->set_action(MoveAction::RETURN);
+				bz->play(Buzzer::CONFIRM);
+				break;
 			case 's':
 				ma->set_action(MoveAction::FAST_START_STEP);
 				bz->play(Buzzer::CONFIRM);
@@ -96,8 +101,40 @@ void serial_ctrl() {
 				ma->set_action(MoveAction::FAST_GO_STRAIGHT);
 				bz->play(Buzzer::CONFIRM);
 				break;
-			case 'x':
+			case '2':
 				ma->set_action(MoveAction::FAST_GO_DIAGONAL);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case '1':
+				ma->set_action(MoveAction::FAST_TURN_LEFT_45);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case '!':
+				ma->set_action(MoveAction::FAST_TURN_LEFT_45R);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case '3':
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case '#':
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_45R);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'q':
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'e':
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'Q':
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60R);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'E':
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60R);
 				bz->play(Buzzer::CONFIRM);
 				break;
 			case 'a':
@@ -108,28 +145,20 @@ void serial_ctrl() {
 				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
 				bz->play(Buzzer::CONFIRM);
 				break;
-			case 'q':
-				ma->set_action(MoveAction::FAST_TURN_LEFT_45);
-				bz->play(Buzzer::CONFIRM);
-				break;
-			case 'e':
-				ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
-				bz->play(Buzzer::CONFIRM);
-				break;
 			case 'z':
 				ma->set_action(MoveAction::FAST_TURN_LEFT_135);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'Z':
+				ma->set_action(MoveAction::FAST_TURN_LEFT_135R);
 				bz->play(Buzzer::CONFIRM);
 				break;
 			case 'c':
 				ma->set_action(MoveAction::FAST_TURN_RIGHT_135);
 				bz->play(Buzzer::CONFIRM);
 				break;
-			case 'b':
-				ma->set_action(MoveAction::FAST_STOP);
-				bz->play(Buzzer::CONFIRM);
-				break;
-			case 'r':
-				ma->set_action(MoveAction::RETURN);
+			case 'C':
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_135R);
 				bz->play(Buzzer::CONFIRM);
 				break;
 			case 't':
@@ -144,9 +173,35 @@ void serial_ctrl() {
 				break;
 			case 'y':
 				ms->terminate();
-				ma->set_action(MoveAction::START_STEP);
-				ma->set_action(MoveAction::GO_STRAIGHT);
-				ma->set_action(MoveAction::STOP);
+				ma->set_action(MoveAction::FAST_START_STEP);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60R);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60R);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60R);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60R);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60R);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60R);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60R);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60R);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60R);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60R);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60R);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60R);
+				ma->set_action(MoveAction::START_INIT);
 				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();
 				wd->calibration();
@@ -173,6 +228,31 @@ void serial_ctrl() {
 				ma->set_action(MoveAction::TURN_LEFT_90);
 				ma->set_action(MoveAction::TURN_LEFT_90);
 				ma->set_action(MoveAction::START_INIT);
+				bz->play(Buzzer::CONFIRM);
+				mpu->calibration();
+				wd->calibration();
+				ma->enable();
+				break;
+			case 'o':
+				ms->terminate();
+				ma->set_action(MoveAction::START_STEP);
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, 3);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, 3);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, 3);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, 3);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, 3);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, 3);
+				ma->set_action(MoveAction::FAST_STOP);
 				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();
 				wd->calibration();

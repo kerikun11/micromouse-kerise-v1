@@ -239,11 +239,16 @@ private:
 	}
 	void search_run() {
 		if (agent.getState() == Agent::FINISHED || agent.getState() == Agent::BACK_TO_START) return; //Agentの状態を確認 FINISHEDになったら計測走行にうつる
+		maze = maze_backup;
 		dir = NORTH;
 		pos = IndexVec(0, 0);
-		maze = maze_backup;
+		Direction wallData = 0xfe;		//< センサから取得した壁情報を入れる
+		IndexVec robotPos = pos;	//< ロボットの座標を取得
+		agent.update(robotPos, wallData);		//< 壁情報を更新 次に進むべき方向を計算
+
 		ma->set_action(MoveAction::START_STEP);
 		pos = IndexVec(0, 1);
+
 		mpu->calibration();
 		wd->calibration();
 		ma->enable();
@@ -263,18 +268,23 @@ private:
 
 			//ゴールにたどり着いた瞬間に一度だけmazeのバックアップをとる
 			//Mazeクラスはoperator=が定義してあるからa = bでコピーできる
-			if (prevState == Agent::SEARCHING_NOT_GOAL
+			if (prevState != Agent::SEARCHING_REACHED_GOAL
 					&& agent.getState() == Agent::SEARCHING_REACHED_GOAL) {
 				printf("maze_backup\n");
 				maze_backup = maze;
+				bz->play(Buzzer::CONFIRM);
+			}
+			if (prevState != Agent::BACK_TO_START
+					&& agent.getState() == Agent::BACK_TO_START) {
 				bz->play(Buzzer::COMPLETE);
 			}
 			prevState = agent.getState();
 
-			Direction nextDir = agent.getNextDirection();		//< Agentの状態が探索中の場合は次に進むべき方向を取得する
+			Direction nextDir = agent.getNextDirection();	//< Agentの状態が探索中の場合は次に進むべき方向を取得する
 			printf("agent.getNextDirection() => %X\n", (int) nextDir);
 			if (nextDir == 0) {
 				bz->play(Buzzer::ERROR);
+				ma->set_action(MoveAction::STOP);
 				while (1) {
 					Thread::wait(100);
 				}
@@ -369,6 +379,7 @@ private:
 			ma->set_params_relative(200);
 		}
 	}
-};
+}
+;
 
 #endif /* MAZESOLVER_H_ */
