@@ -31,14 +31,20 @@ public:
 		this->theta = theta;
 	}
 	inline Position rotate(float angle) {
-		return Position(x * cos(angle) - y * sin(angle), x * sin(angle) + y * cos(angle),
-				theta + angle);
+		float _x = x;
+		float _y = y;
+		x = _x * cos(angle) - _y * sin(angle);
+		y = _x * sin(angle) + _y * cos(angle);
+		theta = theta + angle;
+		return *this;
 	}
-	inline float norm() const {
+	inline float getNorm() const {
 		return sqrt(x * x + y * y);
 	}
-	inline Position mirror_x() const {
-		return Position(x, -y, -theta);
+	inline Position mirror_x() {
+		y = -y;
+		theta = -theta;
+		return *this;
 	}
 	inline Position operator=(const Position &obj) {
 		x = obj.x;

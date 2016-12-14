@@ -84,36 +84,48 @@ void serial_ctrl() {
 				bz->play(Buzzer::CANCEL);
 				ms->terminate();
 				break;
-			case 'a':
-				ma->set_action(MoveAction::TURN_LEFT_90);
-				bz->play(Buzzer::CONFIRM);
-				break;
-			case 'q':
-				ma->set_action(MoveAction::FAST_TURN_LEFT_45);
-				bz->play(Buzzer::CONFIRM);
-				break;
-			case 'z':
-				ma->set_action(MoveAction::FAST_TURN_LEFT_135);
-				bz->play(Buzzer::CONFIRM);
-				break;
 			case 's':
-				ma->set_action(MoveAction::START_STEP);
-				bz->play(Buzzer::CONFIRM);
-				break;
-			case 'd':
-				ma->set_action(MoveAction::TURN_RIGHT_90);
-				bz->play(Buzzer::CONFIRM);
-				break;
-			case 'w':
-				ma->set_action(MoveAction::GO_STRAIGHT);
+				ma->set_action(MoveAction::FAST_START_STEP);
 				bz->play(Buzzer::CONFIRM);
 				break;
 			case 'i':
 				ma->set_action(MoveAction::START_INIT);
 				bz->play(Buzzer::CONFIRM);
 				break;
+			case 'w':
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'x':
+				ma->set_action(MoveAction::FAST_GO_DIAGONAL);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'a':
+				ma->set_action(MoveAction::FAST_TURN_LEFT_90);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'd':
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'q':
+				ma->set_action(MoveAction::FAST_TURN_LEFT_45);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'e':
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'z':
+				ma->set_action(MoveAction::FAST_TURN_LEFT_135);
+				bz->play(Buzzer::CONFIRM);
+				break;
+			case 'c':
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_135);
+				bz->play(Buzzer::CONFIRM);
+				break;
 			case 'b':
-				ma->set_action(MoveAction::STOP);
+				ma->set_action(MoveAction::FAST_STOP);
 				bz->play(Buzzer::CONFIRM);
 				break;
 			case 'r':

@@ -19,62 +19,78 @@
 #define TRAJECTORY_PROP_GAIN		50
 #define TRAJECTORY_INTEGRAL_GAIN	0
 
-class Straight {
+class Trajectory {
 public:
-	Straight() {
+	Trajectory(bool mirror = false) :
+			mirror(mirror) {
+		reset();
 	}
-	Position getNextDir(const Position cur, const float velocity) {
-		int look_ahead = LOOK_AHEAD_UNIT * 20 * (1 + 5 * velocity / v_const);
-		Position dir = (getNextPoint(cur, look_ahead) - cur).rotate(-cur.theta);
-		dir.theta = atan(dir.y / (dir.x + interval)) * velocity / v_const;
-		dir *= velocity / look_ahead;
-		return dir;
+	virtual ~Trajectory() {
 	}
-private:
-	const float interval = 1.0f;
-	const float v_const = 1000.0f;
-	Position getNextPoint(const Position& pos, int look_ahead) {
-		return Position(pos.x + interval * (1 + look_ahead), 0, 0);
-	}
-};
-
-class Curve90 {
-public:
-	Curve90() {
+	void reset() {
 		last_index = 0;
 	}
-	Position getNextDir(const Position cur, const float velocity) {
+	Position getNextDir(const Position &cur, const float velocity) {
 		int look_ahead = LOOK_AHEAD_UNIT;
+//		int look_ahead = LOOK_AHEAD_UNIT * 20 * (1 + 5 * velocity / v_const);
 		Position dir = (getNextPoint(cur, look_ahead) - cur).rotate(-cur.theta);
 		dir.theta = atan(dir.y / (dir.x + interval));
 		dir *= velocity / LOOK_AHEAD_UNIT;
 		return dir;
 	}
-private:
-	const int length = 152;
+	float getPortion() const {
+		return (float) last_index / getSize();
+	}
+	void shift(Position &cur) {
+		Position moved = getPosition(getSize() - 1);
+		cur = (cur - moved).rotate(-moved.theta);
+		cur.theta += moved.theta;
+	}
+protected:
+	bool mirror;
+	int last_index;
 	const float interval = 1.0f;
 	const float v_const = 1000.0f;
-	int last_index;
+	virtual int size() const {
+		return 180;
+	}
+	virtual Position position(int index) const {
+		return Position(index * interval, 0, 0);
+	}
+	int getSize() const {
+		return size();
+	}
+	Position getPosition(const int index) {
+		if (mirror) {
+			return position(index).mirror_x();
+		} else {
+			return position(index);
+		}
+	}
 	Position getNextPoint(const Position& pos, int look_ahead) {
-		for (int i = last_index; i < length * 100; i++) {
-//			Position diff = get(i) - pos;
-//			if (diff.x > 0 && diff.y > 0) {
-//				last_index = i;
-//				return get(last_index + LOOK_AHEAD_COUNT);
-//			}
-			Position target = get_position(i);
+		for (int i = last_index; i < 180 * 32; i++) {
+			Position target = getPosition(i);
 			Position dir = (target - pos).rotate(-target.theta);
 			if (dir.x > 0) {
 				last_index = i;
-				return get_position(last_index + 1 + look_ahead);
+				return getPosition(last_index + 1 + look_ahead);
 			}
 		}
 		return Position(0, 0, 0);
 	}
-	Position get_position(int index) {
-		if (index > length - 1) {
-			return Position(90, 90.0 + interval * (index - length + 1), M_PI / 2);
-		}
+}
+;
+
+class Curve90: public Trajectory {
+public:
+	Curve90(bool mirror = false) :
+			Trajectory(mirror) {
+	}
+private:
+	virtual int size() const {
+		return 152;
+	}
+	virtual Position position(int index) const {
 		static const float data[][3] = { { 0, 0, 0 }, { 1, 0, 0 }, { 2, 0, 0 }, { 3, 0, 0 }, { 4, 0,
 				0 }, { 5, 0, 0 }, { 6, 0, 0 }, { 7, 0, 0 }, { 8, 0, 0 }, { 9.8969, 0, 0 }, { 10.897,
 				0, 0 }, { 11.897, 0, 0 }, { 12.897, 0.00060392, 0.00060392 }, { 13.897, 0.0024157,
@@ -135,48 +151,153 @@ private:
 						84.071, 1.5708 }, { 90, 85.071, 1.5708 }, { 90, 86.071, 1.5708 }, { 90,
 						87.071, 1.5708 }, { 90, 88.071, 1.5708 }, { 90, 89.071, 1.5708 }, { 90, 90,
 						1.5708 }, };
-		return Position(data[index][0], data[index][1], data[index][2]);
+		if (index < 0) {
+			return Position(0, 0 + interval * index, 0);
+		} else if (index > getSize() - 1) {
+			Position end(data[getSize() - 1][0], data[getSize() - 1][1], data[getSize() - 1][2]);
+			return end
+					+ Position((index - getSize() + 1) * interval * cos(end.theta),
+							(index - getSize() + 1) * interval * sin(end.theta), 0);
+		} else {
+			return Position(data[index][0], data[index][1], data[index][2]);
+		}
 	}
 };
 
-class Curve135 {
+class Curve45: public Trajectory {
 public:
-	Curve135() {
-		last_index = 0;
-	}
-	Position getNextDir(const Position cur, const float velocity) {
-		int look_ahead = LOOK_AHEAD_UNIT;
-		Position dir = (getNextPoint(cur, look_ahead) - cur).rotate(-cur.theta);
-		dir.theta = atan(dir.y / (dir.x + interval));
-		dir *= velocity / LOOK_AHEAD_UNIT;
-		return dir;
+	Curve45(bool mirror = false) :
+			Trajectory(mirror) {
 	}
 private:
-	const int length = 283;
-	const float interval = 1.0f;
-	const float v_const = 1000.0f;
-	int last_index;
-	Position getNextPoint(const Position& pos, int look_ahead) {
-		for (int i = last_index; i < length * 100; i++) {
-//			Position diff = get(i) - pos;
-//			if (diff.x > 0 && diff.y > 0) {
-//				last_index = i;
-//				return get(last_index + LOOK_AHEAD_COUNT);
-//			}
-			Position target = get_position(i);
-			Position dir = (target - pos).rotate(-target.theta);
-			if (dir.x > 0) {
-				last_index = i;
-				return get_position(last_index + 1 + look_ahead);
-			}
-		}
-		return Position(0, 0, 0);
+	virtual int size() const {
+		return 300;
 	}
-	Position get_position(int index) {
-		if (index > length - 1) {
-			return Position(90 - interval * (index - length + 1) * 1.41421356 / 2,
-					90.0 + interval * (index - length + 1) * 1.41421356 / 2, M_PI * 3 / 4);
+	virtual Position position(int index) const {
+		static const float data[][3] = { { 0, 0, 0 }, { 1, 0, 0 }, { 2, 0, 0 }, { 3, 0, 0 }, { 4, 0,
+				0 }, { 5, 0, 0 }, { 6, 0, 0 }, { 7, 0, 0 }, { 8, 0, 0 }, { 9, 0, 0 }, { 10, 0, 0 },
+				{ 11, 0, 0 }, { 12, 0, 0 }, { 13, 0, 0 }, { 14, 0, 0 }, { 15, 0, 0 }, { 16, 0, 0 },
+				{ 17, 0, 0 }, { 18, 0, 0 }, { 19, 0, 0 }, { 20, 0, 0 }, { 21, 0, 0 }, { 22, 0, 0 },
+				{ 23, 0, 0 }, { 24, 0, 0 }, { 25, 0, 0 }, { 26, 0, 0 }, { 27, 0, 0 }, { 28, 0, 0 },
+				{ 29, 0, 0 }, { 30, 0, 0 }, { 31, 0, 0 }, { 32, 0, 0 }, { 33, 0, 0 }, { 34, 0, 0 },
+				{ 35, 0, 0 }, { 36, 0, 0 }, { 37, 0, 0 }, { 38, 0, 0 }, { 39, 0, 0 }, { 40, 0, 0 },
+				{ 41, 0, 0 }, { 42, 0, 0 }, { 43, 0, 0 }, { 44, 0, 0 }, { 45, 0, 0 }, { 46, 0, 0 },
+				{ 47, 0, 0 }, { 48, 0, 0 }, { 49, 0, 0 }, { 50, 0, 0 }, { 51, 0, 0 }, { 52, 0, 0 },
+				{ 53, 0, 0 }, { 54, 0, 0 }, { 55, 0, 0 }, { 56, 0, 0 }, { 57, 0, 0 }, { 58, 0, 0 },
+				{ 59, 0, 0 }, { 60, 0, 0 }, { 61, 0, 0 }, { 62, 0, 0 }, { 63, 0, 0 }, { 64, 0, 0 },
+				{ 65, 0, 0 }, { 66, 0, 0 }, { 67, 0, 0 }, { 68, 0, 0 }, { 69, 0, 0 }, { 70, 0, 0 },
+				{ 71, 0, 0 }, { 72, 0, 0 }, { 73, 0, 0 }, { 74, 0, 0 }, { 75, 0, 0 }, { 76, 0, 0 },
+				{ 77, 0, 0 }, { 78, 0, 0 }, { 79, 0, 0 }, { 80.69, 0, 0 }, { 81.69, 0, 0 }, { 82.69,
+						0, 0 }, { 83.69, 9.6963e-05, 9.6963e-05 },
+				{ 84.69, 0.00038785, 0.00029089 }, { 85.69, 0.00096963, 0.00058178 }, { 86.69,
+						0.0019393, 0.00096963 }, { 87.69, 0.0033937, 0.0014544 }, { 88.69,
+						0.0054299, 0.0020362 }, { 89.69, 0.0081449, 0.002715 }, { 90.69, 0.011636,
+						0.0034907 }, { 91.69, 0.015999, 0.0043633 }, { 92.69, 0.021332, 0.005333 },
+				{ 93.69, 0.027731, 0.0063995 }, { 94.69, 0.035294, 0.0075631 }, { 95.69, 0.044118,
+						0.0088236 }, { 96.69, 0.054299, 0.010181 }, { 97.69, 0.065934, 0.011636 }, {
+						98.69, 0.07912, 0.013187 }, { 99.69, 0.093955, 0.014835 }, { 100.69,
+						0.11054, 0.016581 }, { 101.69, 0.12896, 0.018423 }, { 102.69, 0.14932,
+						0.020362 }, { 103.69, 0.17171, 0.022398 }, { 104.69, 0.19624, 0.024532 }, {
+						105.69, 0.223, 0.026762 }, { 106.69, 0.25209, 0.029089 }, { 107.69, 0.28359,
+						0.031513 }, { 108.69, 0.31762, 0.034034 }, { 109.69, 0.35427, 0.036652 }, {
+						110.69, 0.39362, 0.039367 }, { 111.68, 0.43579, 0.042179 }, { 112.68,
+						0.48086, 0.045088 }, { 113.68, 0.52894, 0.048094 }, { 114.68, 0.58011,
+						0.051196 }, { 115.68, 0.63448, 0.054396 }, { 116.68, 0.69214, 0.057693 }, {
+						117.68, 0.75319, 0.061087 }, { 118.67, 0.81772, 0.064577 }, { 119.67,
+						0.88583, 0.068165 }, { 120.67, 0.95762, 0.071849 }, { 121.67, 1.0332,
+						0.075631 }, { 122.66, 1.1126, 0.079509 }, { 123.66, 1.196, 0.083485 }, {
+						124.66, 1.2834, 0.087557 }, { 125.65, 1.375, 0.091727 }, { 126.65, 1.4709,
+						0.095993 }, { 127.64, 1.5711, 0.10036 }, { 128.64, 1.6757, 0.10482 }, {
+						129.63, 1.7849, 0.10937 }, { 130.62, 1.8986, 0.11403 }, { 131.62, 2.0171,
+						0.11878 }, { 132.61, 2.1404, 0.12363 }, { 133.6, 2.2687, 0.12857 }, {
+						134.59, 2.4019, 0.13361 }, { 135.58, 2.5402, 0.13875 }, { 136.57, 2.6837,
+						0.14399 }, { 137.56, 2.8325, 0.14932 }, { 138.55, 2.9866, 0.15475 }, {
+						139.54, 3.1462, 0.16028 }, { 140.52, 3.3113, 0.1659 }, { 141.51, 3.4821,
+						0.17162 }, { 142.49, 3.6586, 0.17744 }, { 143.48, 3.841, 0.18336 }, {
+						144.46, 4.0292, 0.18937 }, { 145.44, 4.2234, 0.19548 }, { 146.42, 4.4237,
+						0.20168 }, { 147.4, 4.6303, 0.20805 }, { 148.37, 4.8431, 0.21441 }, {
+						149.35, 5.062, 0.22078 }, { 150.32, 5.2872, 0.22714 }, { 151.3, 5.5186,
+						0.23351 }, { 152.27, 5.7562, 0.23987 }, { 153.24, 6, 0.24623 }, { 154.21,
+						6.2499, 0.2526 }, { 155.17, 6.506, 0.25896 }, { 156.14, 6.7682, 0.26533 }, {
+						157.1, 7.0366, 0.27169 }, { 158.06, 7.311, 0.27806 }, { 159.02, 7.5916,
+						0.28442 }, { 159.98, 7.8783, 0.29079 }, { 160.94, 8.1711, 0.29715 }, {
+						161.89, 8.47, 0.30352 }, { 162.84, 8.775, 0.30988 }, { 163.79, 9.086,
+						0.31624 }, { 164.74, 9.403, 0.32261 }, { 165.69, 9.7261, 0.32897 }, {
+						166.63, 10.055, 0.33534 }, { 167.57, 10.39, 0.3417 }, { 168.51, 10.731,
+						0.34807 }, { 169.45, 11.078, 0.35443 }, { 170.39, 11.431, 0.3608 }, {
+						171.32, 11.79, 0.36716 }, { 172.25, 12.155, 0.37353 }, { 173.18, 12.526,
+						0.37989 }, { 174.11, 12.903, 0.38626 }, { 175.03, 13.285, 0.39262 }, {
+						175.95, 13.674, 0.39898 }, { 176.87, 14.068, 0.40535 }, { 177.79, 14.468,
+						0.41171 }, { 178.7, 14.874, 0.41808 }, { 179.61, 15.286, 0.42444 }, {
+						180.52, 15.704, 0.43081 }, { 181.43, 16.127, 0.43717 }, { 182.33, 16.556,
+						0.44354 }, { 183.23, 16.991, 0.4499 }, { 184.13, 17.432, 0.45627 }, {
+						185.02, 17.878, 0.46263 }, { 185.92, 18.33, 0.46899 }, { 186.81, 18.788,
+						0.47536 }, { 187.69, 19.251, 0.48172 }, { 188.58, 19.72, 0.48809 }, {
+						189.46, 20.195, 0.49445 }, { 190.33, 20.675, 0.50082 }, { 191.21, 21.16,
+						0.50718 }, { 192.08, 21.652, 0.51355 }, { 192.95, 22.149, 0.51991 }, {
+						193.81, 22.651, 0.52628 }, { 194.67, 23.159, 0.53264 }, { 195.53, 23.672,
+						0.539 }, { 196.38, 24.191, 0.54537 }, { 197.24, 24.715, 0.55173 }, { 198.08,
+						25.244, 0.5581 }, { 198.93, 25.779, 0.56446 }, { 199.77, 26.32, 0.57083 }, {
+						200.61, 26.865, 0.57719 }, { 201.44, 27.416, 0.58356 }, { 202.27, 27.973,
+						0.58992 }, { 203.1, 28.534, 0.59603 }, { 203.93, 29.1, 0.60204 }, { 204.75,
+						29.672, 0.60796 }, { 205.56, 30.248, 0.61377 }, { 206.38, 30.828, 0.61949 },
+				{ 207.19, 31.413, 0.62512 }, { 208, 32.003, 0.63065 }, { 208.8, 32.597, 0.63608 }, {
+						209.6, 33.195, 0.64141 }, { 210.4, 33.798, 0.64664 }, { 211.2, 34.404,
+						0.65178 }, { 211.99, 35.015, 0.65683 }, { 212.78, 35.63, 0.66177 }, {
+						213.56, 36.248, 0.66662 }, { 214.35, 36.87, 0.67137 }, { 215.13, 37.496,
+						0.67602 }, { 215.9, 38.125, 0.68058 }, { 216.68, 38.758, 0.68504 }, {
+						217.45, 39.394, 0.68941 }, { 218.22, 40.033, 0.69367 }, { 218.98, 40.676,
+						0.69784 }, { 219.75, 41.321, 0.70191 }, { 220.51, 41.97, 0.70589 }, {
+						221.27, 42.622, 0.70977 }, { 222.02, 43.276, 0.71355 }, { 222.78, 43.934,
+						0.71723 }, { 223.53, 44.594, 0.72082 }, { 224.28, 45.256, 0.72431 }, {
+						225.02, 45.921, 0.72771 }, { 225.77, 46.589, 0.731 }, { 226.51, 47.259,
+						0.7342 }, { 227.25, 47.931, 0.7373 }, { 227.99, 48.606, 0.74031 }, { 228.73,
+						49.282, 0.74322 }, { 229.46, 49.961, 0.74603 }, { 230.19, 50.642, 0.74875 },
+				{ 230.92, 51.324, 0.75136 }, { 231.65, 52.009, 0.75389 },
+				{ 232.38, 52.695, 0.75631 }, { 233.11, 53.383, 0.75864 },
+				{ 233.83, 54.073, 0.76087 }, { 234.55, 54.764, 0.763 }, { 235.27, 55.456, 0.76504 },
+				{ 235.99, 56.15, 0.76698 }, { 236.71, 56.846, 0.76882 },
+				{ 237.43, 57.542, 0.77056 }, { 238.15, 58.24, 0.77221 },
+				{ 238.86, 58.939, 0.77376 }, { 239.58, 59.639, 0.77522 },
+				{ 240.29, 60.339, 0.77657 }, { 241, 61.041, 0.77784 }, { 241.71, 61.744, 0.779 }, {
+						242.42, 62.447, 0.78007 }, { 243.13, 63.151, 0.78103 }, { 243.84, 63.856,
+						0.78191 }, { 244.55, 64.561, 0.78268 }, { 245.26, 65.266, 0.78336 }, {
+						245.97, 65.973, 0.78394 }, { 246.68, 66.679, 0.78443 }, { 247.39, 67.386,
+						0.78482 }, { 248.09, 68.093, 0.78511 }, { 248.8, 68.8, 0.7853 }, { 249.51,
+						69.507, 0.7854 }, { 250.21, 70.214, 0.7854 }, { 250.21, 70.214, 0.7854 }, {
+						250.92, 70.921, 0.7854 }, { 251.63, 71.628, 0.7854 }, { 252.34, 72.335,
+						0.7854 }, { 253.04, 73.042, 0.7854 }, { 253.75, 73.749, 0.7854 }, { 254.46,
+						74.456, 0.7854 }, { 255.16, 75.164, 0.7854 }, { 255.87, 75.871, 0.7854 }, {
+						256.58, 76.578, 0.7854 }, { 257.28, 77.285, 0.7854 }, { 257.99, 77.992,
+						0.7854 }, { 258.7, 78.699, 0.7854 }, { 259.41, 79.406, 0.7854 }, { 260.11,
+						80.113, 0.7854 }, { 260.82, 80.82, 0.7854 }, { 261.53, 81.528, 0.7854 }, {
+						262.23, 82.235, 0.7854 }, { 262.94, 82.942, 0.7854 }, { 263.65, 83.649,
+						0.7854 }, { 264.36, 84.356, 0.7854 }, { 265.06, 85.063, 0.7854 }, { 265.77,
+						85.77, 0.7854 }, { 266.48, 86.477, 0.7854 }, { 267.18, 87.184, 0.7854 }, {
+						267.89, 87.892, 0.7854 }, { 268.6, 88.599, 0.7854 }, { 270, 90, 0.7854 }, };
+		if (index < 0) {
+			return Position(0, 0 + interval * index, 0);
+		} else if (index > getSize() - 1) {
+			Position end(data[getSize() - 1][0], data[getSize() - 1][1], data[getSize() - 1][2]);
+			return end
+					+ Position((index - getSize() + 1) * interval * cos(end.theta),
+							(index - getSize() + 1) * interval * sin(end.theta), 0);
+		} else {
+			return Position(data[index][0], data[index][1], data[index][2]);
 		}
+	}
+};
+
+class Curve135: public Trajectory {
+public:
+	Curve135(bool mirror = false) :
+			Trajectory(mirror) {
+	}
+private:
+	virtual int size() const {
+		return 284;
+	}
+	virtual Position position(int index) const {
 		static const float data[][3] = { { 0, 0, 0 }, { 1.5056, 0, 0 }, { 2.5056, 0, 0 }, { 3.5056,
 				0, 0 }, { 4.5056, 0.0002404, 0.0002404 }, { 5.5056, 0.00096161, 0.00072121 }, {
 				6.5056, 0.002404, 0.0014424 }, { 7.5056, 0.0048081, 0.002404 }, { 8.5056, 0.0084141,
@@ -284,153 +405,17 @@ private:
 						2.3562 }, { 6.4138, 173.59, 2.3562 }, { 5.7067, 174.29, 2.3562 }, { 4.9995,
 						175, 2.3562 }, { 4.2924, 175.71, 2.3562 }, { 3.5853, 176.41, 2.3562 }, {
 						2.8782, 177.12, 2.3562 }, { 2.1711, 177.83, 2.3562 }, { 1.464, 178.54,
-						2.3562 }, { 0.75691, 179.24, 2.3562 }, };
-		return Position(data[index][0], data[index][1], data[index][2]);
-	}
-};
-
-class Curve45 {
-public:
-	Curve45() {
-		last_index = 0;
-	}
-	Position getNextDir(const Position cur, const float velocity) {
-		int look_ahead = LOOK_AHEAD_UNIT;
-		Position dir = (getNextPoint(cur, look_ahead) - cur).rotate(-cur.theta);
-		dir.theta = atan(dir.y / (dir.x + interval));
-		dir *= velocity / LOOK_AHEAD_UNIT;
-		return dir;
-	}
-private:
-	const int length = 299;
-	const float interval = 1.0f;
-	const float v_const = 1000.0f;
-	int last_index;
-	Position getNextPoint(const Position& pos, int look_ahead) {
-		for (int i = last_index; i < length * 100; i++) {
-//			Position diff = get(i) - pos;
-//			if (diff.x > 0 && diff.y > 0) {
-//				last_index = i;
-//				return get(last_index + LOOK_AHEAD_COUNT);
-//			}
-			Position target = get_position(i);
-			Position dir = (target - pos).rotate(-target.theta);
-			if (dir.x > 0) {
-				last_index = i;
-				return get_position(last_index + 1 + look_ahead);
-			}
+						2.3562 }, { 0.75691, 179.24, 2.3562 }, { 0, 180, 2.3562 }, };
+		if (index < 0) {
+			return Position(0, 0 + interval * index, 0);
+		} else if (index > getSize() - 1) {
+			Position end(data[getSize() - 1][0], data[getSize() - 1][1], data[getSize() - 1][2]);
+			return end
+					+ Position((index - getSize() + 1) * interval * cos(end.theta),
+							(index - getSize() + 1) * interval * sin(end.theta), 0);
+		} else {
+			return Position(data[index][0], data[index][1], data[index][2]);
 		}
-		return Position(0, 0, 0);
-	}
-	Position get_position(int index) {
-		if (index > length - 1) {
-			return Position(270 + interval * (index - length + 1) * 1.41421356 / 2,
-					90.0 + interval * (index - length + 1) * 1.41421356 / 2, M_PI / 4);
-		}
-		static const float data[][3] = { { 0, 0, 0 }, { 1, 0, 0 }, { 2, 0, 0 }, { 3, 0, 0 }, { 4, 0,
-				0 }, { 5, 0, 0 }, { 6, 0, 0 }, { 7, 0, 0 }, { 8, 0, 0 }, { 9, 0, 0 }, { 10, 0, 0 },
-				{ 11, 0, 0 }, { 12, 0, 0 }, { 13, 0, 0 }, { 14, 0, 0 }, { 15, 0, 0 }, { 16, 0, 0 },
-				{ 17, 0, 0 }, { 18, 0, 0 }, { 19, 0, 0 }, { 20, 0, 0 }, { 21, 0, 0 }, { 22, 0, 0 },
-				{ 23, 0, 0 }, { 24, 0, 0 }, { 25, 0, 0 }, { 26, 0, 0 }, { 27, 0, 0 }, { 28, 0, 0 },
-				{ 29, 0, 0 }, { 30, 0, 0 }, { 31, 0, 0 }, { 32, 0, 0 }, { 33, 0, 0 }, { 34, 0, 0 },
-				{ 35, 0, 0 }, { 36, 0, 0 }, { 37, 0, 0 }, { 38, 0, 0 }, { 39, 0, 0 }, { 40, 0, 0 },
-				{ 41, 0, 0 }, { 42, 0, 0 }, { 43, 0, 0 }, { 44, 0, 0 }, { 45, 0, 0 }, { 46, 0, 0 },
-				{ 47, 0, 0 }, { 48, 0, 0 }, { 49, 0, 0 }, { 50, 0, 0 }, { 51, 0, 0 }, { 52, 0, 0 },
-				{ 53, 0, 0 }, { 54, 0, 0 }, { 55, 0, 0 }, { 56, 0, 0 }, { 57, 0, 0 }, { 58, 0, 0 },
-				{ 59, 0, 0 }, { 60, 0, 0 }, { 61, 0, 0 }, { 62, 0, 0 }, { 63, 0, 0 }, { 64, 0, 0 },
-				{ 65, 0, 0 }, { 66, 0, 0 }, { 67, 0, 0 }, { 68, 0, 0 }, { 69, 0, 0 }, { 70, 0, 0 },
-				{ 71, 0, 0 }, { 72, 0, 0 }, { 73, 0, 0 }, { 74, 0, 0 }, { 75, 0, 0 }, { 76, 0, 0 },
-				{ 77, 0, 0 }, { 78, 0, 0 }, { 79, 0, 0 }, { 80.69, 0, 0 }, { 81.69, 0, 0 }, { 82.69,
-						0, 0 }, { 83.69, 9.6963e-05, 9.6963e-05 },
-				{ 84.69, 0.00038785, 0.00029089 }, { 85.69, 0.00096963, 0.00058178 }, { 86.69,
-						0.0019393, 0.00096963 }, { 87.69, 0.0033937, 0.0014544 }, { 88.69,
-						0.0054299, 0.0020362 }, { 89.69, 0.0081449, 0.002715 }, { 90.69, 0.011636,
-						0.0034907 }, { 91.69, 0.015999, 0.0043633 }, { 92.69, 0.021332, 0.005333 },
-				{ 93.69, 0.027731, 0.0063995 }, { 94.69, 0.035294, 0.0075631 }, { 95.69, 0.044118,
-						0.0088236 }, { 96.69, 0.054299, 0.010181 }, { 97.69, 0.065934, 0.011636 }, {
-						98.69, 0.07912, 0.013187 }, { 99.69, 0.093955, 0.014835 }, { 100.69,
-						0.11054, 0.016581 }, { 101.69, 0.12896, 0.018423 }, { 102.69, 0.14932,
-						0.020362 }, { 103.69, 0.17171, 0.022398 }, { 104.69, 0.19624, 0.024532 }, {
-						105.69, 0.223, 0.026762 }, { 106.69, 0.25209, 0.029089 }, { 107.69, 0.28359,
-						0.031513 }, { 108.69, 0.31762, 0.034034 }, { 109.69, 0.35427, 0.036652 }, {
-						110.69, 0.39362, 0.039367 }, { 111.68, 0.43579, 0.042179 }, { 112.68,
-						0.48086, 0.045088 }, { 113.68, 0.52894, 0.048094 }, { 114.68, 0.58011,
-						0.051196 }, { 115.68, 0.63448, 0.054396 }, { 116.68, 0.69214, 0.057693 }, {
-						117.68, 0.75319, 0.061087 }, { 118.67, 0.81772, 0.064577 }, { 119.67,
-						0.88583, 0.068165 }, { 120.67, 0.95762, 0.071849 }, { 121.67, 1.0332,
-						0.075631 }, { 122.66, 1.1126, 0.079509 }, { 123.66, 1.196, 0.083485 }, {
-						124.66, 1.2834, 0.087557 }, { 125.65, 1.375, 0.091727 }, { 126.65, 1.4709,
-						0.095993 }, { 127.64, 1.5711, 0.10036 }, { 128.64, 1.6757, 0.10482 }, {
-						129.63, 1.7849, 0.10937 }, { 130.62, 1.8986, 0.11403 }, { 131.62, 2.0171,
-						0.11878 }, { 132.61, 2.1404, 0.12363 }, { 133.6, 2.2687, 0.12857 }, {
-						134.59, 2.4019, 0.13361 }, { 135.58, 2.5402, 0.13875 }, { 136.57, 2.6837,
-						0.14399 }, { 137.56, 2.8325, 0.14932 }, { 138.55, 2.9866, 0.15475 }, {
-						139.54, 3.1462, 0.16028 }, { 140.52, 3.3113, 0.1659 }, { 141.51, 3.4821,
-						0.17162 }, { 142.49, 3.6586, 0.17744 }, { 143.48, 3.841, 0.18336 }, {
-						144.46, 4.0292, 0.18937 }, { 145.44, 4.2234, 0.19548 }, { 146.42, 4.4237,
-						0.20168 }, { 147.4, 4.6303, 0.20805 }, { 148.37, 4.8431, 0.21441 }, {
-						149.35, 5.062, 0.22078 }, { 150.32, 5.2872, 0.22714 }, { 151.3, 5.5186,
-						0.23351 }, { 152.27, 5.7562, 0.23987 }, { 153.24, 6, 0.24623 }, { 154.21,
-						6.2499, 0.2526 }, { 155.17, 6.506, 0.25896 }, { 156.14, 6.7682, 0.26533 }, {
-						157.1, 7.0366, 0.27169 }, { 158.06, 7.311, 0.27806 }, { 159.02, 7.5916,
-						0.28442 }, { 159.98, 7.8783, 0.29079 }, { 160.94, 8.1711, 0.29715 }, {
-						161.89, 8.47, 0.30352 }, { 162.84, 8.775, 0.30988 }, { 163.79, 9.086,
-						0.31624 }, { 164.74, 9.403, 0.32261 }, { 165.69, 9.7261, 0.32897 }, {
-						166.63, 10.055, 0.33534 }, { 167.57, 10.39, 0.3417 }, { 168.51, 10.731,
-						0.34807 }, { 169.45, 11.078, 0.35443 }, { 170.39, 11.431, 0.3608 }, {
-						171.32, 11.79, 0.36716 }, { 172.25, 12.155, 0.37353 }, { 173.18, 12.526,
-						0.37989 }, { 174.11, 12.903, 0.38626 }, { 175.03, 13.285, 0.39262 }, {
-						175.95, 13.674, 0.39898 }, { 176.87, 14.068, 0.40535 }, { 177.79, 14.468,
-						0.41171 }, { 178.7, 14.874, 0.41808 }, { 179.61, 15.286, 0.42444 }, {
-						180.52, 15.704, 0.43081 }, { 181.43, 16.127, 0.43717 }, { 182.33, 16.556,
-						0.44354 }, { 183.23, 16.991, 0.4499 }, { 184.13, 17.432, 0.45627 }, {
-						185.02, 17.878, 0.46263 }, { 185.92, 18.33, 0.46899 }, { 186.81, 18.788,
-						0.47536 }, { 187.69, 19.251, 0.48172 }, { 188.58, 19.72, 0.48809 }, {
-						189.46, 20.195, 0.49445 }, { 190.33, 20.675, 0.50082 }, { 191.21, 21.16,
-						0.50718 }, { 192.08, 21.652, 0.51355 }, { 192.95, 22.149, 0.51991 }, {
-						193.81, 22.651, 0.52628 }, { 194.67, 23.159, 0.53264 }, { 195.53, 23.672,
-						0.539 }, { 196.38, 24.191, 0.54537 }, { 197.24, 24.715, 0.55173 }, { 198.08,
-						25.244, 0.5581 }, { 198.93, 25.779, 0.56446 }, { 199.77, 26.32, 0.57083 }, {
-						200.61, 26.865, 0.57719 }, { 201.44, 27.416, 0.58356 }, { 202.27, 27.973,
-						0.58992 }, { 203.1, 28.534, 0.59603 }, { 203.93, 29.1, 0.60204 }, { 204.75,
-						29.672, 0.60796 }, { 205.56, 30.248, 0.61377 }, { 206.38, 30.828, 0.61949 },
-				{ 207.19, 31.413, 0.62512 }, { 208, 32.003, 0.63065 }, { 208.8, 32.597, 0.63608 }, {
-						209.6, 33.195, 0.64141 }, { 210.4, 33.798, 0.64664 }, { 211.2, 34.404,
-						0.65178 }, { 211.99, 35.015, 0.65683 }, { 212.78, 35.63, 0.66177 }, {
-						213.56, 36.248, 0.66662 }, { 214.35, 36.87, 0.67137 }, { 215.13, 37.496,
-						0.67602 }, { 215.9, 38.125, 0.68058 }, { 216.68, 38.758, 0.68504 }, {
-						217.45, 39.394, 0.68941 }, { 218.22, 40.033, 0.69367 }, { 218.98, 40.676,
-						0.69784 }, { 219.75, 41.321, 0.70191 }, { 220.51, 41.97, 0.70589 }, {
-						221.27, 42.622, 0.70977 }, { 222.02, 43.276, 0.71355 }, { 222.78, 43.934,
-						0.71723 }, { 223.53, 44.594, 0.72082 }, { 224.28, 45.256, 0.72431 }, {
-						225.02, 45.921, 0.72771 }, { 225.77, 46.589, 0.731 }, { 226.51, 47.259,
-						0.7342 }, { 227.25, 47.931, 0.7373 }, { 227.99, 48.606, 0.74031 }, { 228.73,
-						49.282, 0.74322 }, { 229.46, 49.961, 0.74603 }, { 230.19, 50.642, 0.74875 },
-				{ 230.92, 51.324, 0.75136 }, { 231.65, 52.009, 0.75389 },
-				{ 232.38, 52.695, 0.75631 }, { 233.11, 53.383, 0.75864 },
-				{ 233.83, 54.073, 0.76087 }, { 234.55, 54.764, 0.763 }, { 235.27, 55.456, 0.76504 },
-				{ 235.99, 56.15, 0.76698 }, { 236.71, 56.846, 0.76882 },
-				{ 237.43, 57.542, 0.77056 }, { 238.15, 58.24, 0.77221 },
-				{ 238.86, 58.939, 0.77376 }, { 239.58, 59.639, 0.77522 },
-				{ 240.29, 60.339, 0.77657 }, { 241, 61.041, 0.77784 }, { 241.71, 61.744, 0.779 }, {
-						242.42, 62.447, 0.78007 }, { 243.13, 63.151, 0.78103 }, { 243.84, 63.856,
-						0.78191 }, { 244.55, 64.561, 0.78268 }, { 245.26, 65.266, 0.78336 }, {
-						245.97, 65.973, 0.78394 }, { 246.68, 66.679, 0.78443 }, { 247.39, 67.386,
-						0.78482 }, { 248.09, 68.093, 0.78511 }, { 248.8, 68.8, 0.7853 }, { 249.51,
-						69.507, 0.7854 }, { 250.21, 70.214, 0.7854 }, { 250.21, 70.214, 0.7854 }, {
-						250.92, 70.921, 0.7854 }, { 251.63, 71.628, 0.7854 }, { 252.34, 72.335,
-						0.7854 }, { 253.04, 73.042, 0.7854 }, { 253.75, 73.749, 0.7854 }, { 254.46,
-						74.456, 0.7854 }, { 255.16, 75.164, 0.7854 }, { 255.87, 75.871, 0.7854 }, {
-						256.58, 76.578, 0.7854 }, { 257.28, 77.285, 0.7854 }, { 257.99, 77.992,
-						0.7854 }, { 258.7, 78.699, 0.7854 }, { 259.41, 79.406, 0.7854 }, { 260.11,
-						80.113, 0.7854 }, { 260.82, 80.82, 0.7854 }, { 261.53, 81.528, 0.7854 }, {
-						262.23, 82.235, 0.7854 }, { 262.94, 82.942, 0.7854 }, { 263.65, 83.649,
-						0.7854 }, { 264.36, 84.356, 0.7854 }, { 265.06, 85.063, 0.7854 }, { 265.77,
-						85.77, 0.7854 }, { 266.48, 86.477, 0.7854 }, { 267.18, 87.184, 0.7854 }, {
-						267.89, 87.892, 0.7854 }, { 268.6, 88.599, 0.7854 },
-
-		};
-		return Position(data[index][0], data[index][1], data[index][2]);
 	}
 };
 
@@ -455,7 +440,6 @@ public:
 		FAST_START_STEP,
 		FAST_GO_STRAIGHT,
 		FAST_GO_DIAGONAL,
-		FAST_GO_HALF,
 		FAST_TURN_LEFT_45,
 		FAST_TURN_LEFT_90,
 		FAST_TURN_LEFT_135,
@@ -471,9 +455,8 @@ public:
 	const char* action_string(enum ACTION action) {
 		static const char name[][32] = { "start_step", "start_init", "go_straight", "turn_left_90",
 				"turn_right_90", "return", "stop", "fast_start_step", "fast_go_straight",
-				"fast_go_diagonal", "fast_go_half", "fast_turn_left_45", "fast_turn_left_90",
-				"fast_turn_left_135", "fast_turn_right_45", "fast_turn_right_90",
-				"fast_turn_right_135", "fast_stop" };
+				"fast_go_diagonal", "fast_turn_left_45", "fast_turn_left_90", "fast_turn_left_135",
+				"fast_turn_right_45", "fast_turn_right_90", "fast_turn_right_135", "fast_stop" };
 		return name[action];
 	}
 	void enable() {
@@ -587,47 +570,11 @@ private:
 				sc->set_target(0, -target_speed);
 			}
 		}
-		sc->position = sc->position.rotate(-target_angle);
-	}
-	void curve_left(const float velocity) {
-		Curve90 cv90;
-		int cnt = 0;
-		float integral = 0;
-		while (1) {
-			if (sc->position.y > 90) break;
-			Thread::signal_wait(0x01);
-			Position dir = cv90.getNextDir(sc->position, velocity);
-			integral += dir.theta * TRAJECTORY_INTEGRAL_GAIN * MOVE_ACTION_PERIOD / 1000000;
-			sc->set_target(dir.x, (dir.theta + integral) * TRAJECTORY_PROP_GAIN);
-			if (cnt % 10 == 0) {
-//				printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
-			}
-			cnt++;
-		}
-		sc->set_target(velocity, 0);
-		sc->position = (sc->position - Position(90, 90, 0)).rotate(-M_PI / 2);
-	}
-	void curve_right(const float velocity) {
-		Curve90 cv90;
-		int cnt = 0;
-		float integral = 0;
-		while (1) {
-			if (-sc->position.y > 90) break;
-			Thread::signal_wait(0x01);
-			Position dir = cv90.getNextDir(sc->position.mirror_x(), velocity).mirror_x();
-			integral += dir.theta * TRAJECTORY_INTEGRAL_GAIN * MOVE_ACTION_PERIOD / 1000000;
-			sc->set_target(dir.x, (dir.theta + integral) * TRAJECTORY_PROP_GAIN);
-			if (cnt % 10 == 0) {
-//				printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
-			}
-			cnt++;
-		}
-		sc->set_target(velocity, 0);
-		sc->position = (sc->position - Position(90, -90, 0)).rotate(M_PI / 2);
+		sc->position.rotate(-target_angle);
 	}
 	void straight_x(const float distance, const float v0, const float v1, const float v2,
 			const float accel = 9000) {
-		Straight st;
+		Trajectory st;
 		timer.reset();
 		timer.start();
 		int cnt = 0;
@@ -654,7 +601,26 @@ private:
 			wall_avoid();
 		}
 		sc->set_target(v2, 0);
+		printf("End:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
+				sc->position.theta);
 		sc->position -= Position(distance, 0, 0);
+	}
+	template<class C> void trace(C tr, const float velocity) {
+		int cnt = 0;
+		float integral = 0;
+		while (1) {
+			if (tr.getPortion() > 0.99) break;
+			Thread::signal_wait(0x01);
+			Position dir = tr.getNextDir(sc->position, velocity);
+			integral += dir.theta * TRAJECTORY_INTEGRAL_GAIN * MOVE_ACTION_PERIOD / 1000000;
+			sc->set_target(dir.x, (dir.theta + integral) * TRAJECTORY_PROP_GAIN);
+			if (cnt % 10 == 0) {
+				//				printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
+			}
+			cnt++;
+		}
+		sc->set_target(velocity, 0);
+		tr.shift(sc->position);
 	}
 	void task() {
 		while (1) {
@@ -667,7 +633,7 @@ private:
 			printf("Action:\t%s\tNumber:\t%d\n", action_string(operation->action), operation->num);
 			printf("Start:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
 					sc->position.theta);
-			const float velocity = 400;
+			const float velocity = 600;
 			const float omega = 4.0f * M_PI;
 			switch (operation->action) {
 				case START_STEP:
@@ -695,13 +661,17 @@ private:
 					sc->set_target(0, 0);
 					break;
 				case GO_STRAIGHT:
-					straight_x(180, velocity, velocity, velocity);
+					straight_x(180, velocity, 1000, velocity);
 					break;
-				case TURN_LEFT_90:
-					curve_left(velocity);
+				case TURN_LEFT_90: {
+					Curve90 tr(false);
+					trace(tr, velocity);
+				}
 					break;
-				case TURN_RIGHT_90:
-					curve_right(velocity);
+				case TURN_RIGHT_90: {
+					Curve90 tr(true);
+					trace(tr, velocity);
+				}
 					break;
 				case RETURN:
 					straight_x(90, velocity, velocity, 0);
@@ -730,58 +700,37 @@ private:
 					straight_x(180, velocity, velocity, velocity);
 					break;
 				case FAST_GO_DIAGONAL:
-					break;
-				case FAST_GO_HALF:
+					straight_x(90 * 1.41421356, velocity, velocity, velocity);
 					break;
 				case FAST_TURN_LEFT_45: {
-					Curve45 tr;
-					int cnt = 0;
-					float integral = 0;
-					while (1) {
-						if (sc->position.y > 90) break;
-						Thread::signal_wait(0x01);
-						Position dir = tr.getNextDir(sc->position, velocity);
-						integral += dir.theta * TRAJECTORY_INTEGRAL_GAIN * MOVE_ACTION_PERIOD
-								/ 1000000;
-						sc->set_target(dir.x, (dir.theta + integral) * TRAJECTORY_PROP_GAIN);
-						if (cnt % 10 == 0) {
-							//				printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
-						}
-						cnt++;
-					}
-					sc->set_target(velocity, 0);
-					sc->position = (sc->position - Position(270, 90, 0)).rotate(-M_PI / 4);
+					Curve45 tr(false);
+					trace(tr, velocity);
 				}
 					break;
-				case FAST_TURN_LEFT_90:
-					curve_left(velocity);
-					break;
-				case FAST_TURN_RIGHT_45:
-					break;
-				case FAST_TURN_RIGHT_90:
-					curve_right(velocity);
+				case FAST_TURN_LEFT_90: {
+					Curve90 tr(false);
+					trace(tr, velocity);
+				}
 					break;
 				case FAST_TURN_LEFT_135: {
-					Curve135 tr;
-					int cnt = 0;
-					float integral = 0;
-					while (1) {
-						if (sc->position.y > 90) break;
-						Thread::signal_wait(0x01);
-						Position dir = tr.getNextDir(sc->position, velocity);
-						integral += dir.theta * TRAJECTORY_INTEGRAL_GAIN * MOVE_ACTION_PERIOD
-								/ 1000000;
-						sc->set_target(dir.x, (dir.theta + integral) * TRAJECTORY_PROP_GAIN);
-						if (cnt % 10 == 0) {
-							//				printf("%.3f\t%.3f\t%.4f\n", dir.x, dir.y, dir.theta);
-						}
-						cnt++;
-					}
-					sc->set_target(velocity, 0);
-					sc->position = (sc->position - Position(0, 180, 0)).rotate(-M_PI * 3 / 4);
+					Curve135 tr(false);
+					trace(tr, velocity);
 				}
 					break;
-				case FAST_TURN_RIGHT_135:
+				case FAST_TURN_RIGHT_45: {
+					Curve45 tr(true);
+					trace(tr, velocity);
+				}
+					break;
+				case FAST_TURN_RIGHT_90: {
+					Curve90 tr(true);
+					trace(tr, velocity);
+				}
+					break;
+				case FAST_TURN_RIGHT_135: {
+					Curve135 tr(true);
+					trace(tr, velocity);
+				}
 					break;
 				case FAST_STOP:
 					straight_x(90, velocity, velocity, 0);
