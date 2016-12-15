@@ -15,8 +15,8 @@
 #define WALL_ATTACH_ENABLED			false
 #define WALL_AVOID_ENABLED			false
 
-#define LOOK_AHEAD_UNIT				5
-#define TRAJECTORY_PROP_GAIN		50
+#define LOOK_AHEAD_UNIT				8
+#define TRAJECTORY_PROP_GAIN		60
 #define TRAJECTORY_INTEGRAL_GAIN	0
 
 class Trajectory {
@@ -31,8 +31,6 @@ public:
 		last_index = 0;
 	}
 	Position getNextDir(const Position &cur, const float velocity) {
-//		int look_ahead = LOOK_AHEAD_UNIT;
-//		int look_ahead = LOOK_AHEAD_UNIT * 20 * (1 + 5 * velocity / v_const);
 		int look_ahead = LOOK_AHEAD_UNIT * (1 + 5 * velocity / v_const);
 		Position dir = (getNextPoint(cur, look_ahead) - cur).rotate(-cur.theta);
 		dir.theta = atan(dir.y / (dir.x + interval));
@@ -1025,8 +1023,6 @@ private:
 			wall_avoid();
 		}
 		sc->set_target(v2, 0);
-		printf("End:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
-				sc->position.theta);
 		sc->position -= Position(distance, 0, 0);
 	}
 	template<class C> void trace(C tr, const float velocity) {
@@ -1064,6 +1060,7 @@ private:
 			switch (action) {
 				case START_STEP:
 					sc->position.reset();
+					sc->position_abs.reset();
 					straight_x(180 - 24 - 6, 0, velocity, velocity);
 					break;
 				case START_INIT:
@@ -1120,10 +1117,12 @@ private:
 					sc->set_target(0, 0);
 					break;
 				case FAST_START_STEP:
+					sc->position.reset();
+					sc->position_abs.reset();
 					straight_x(180 - 24 - 6, 0, velocity, velocity);
 					break;
 				case FAST_GO_STRAIGHT:
-					straight_x(180 * num, velocity, 3000, velocity);
+					straight_x(180 * num, velocity, 1800, velocity);
 					break;
 				case FAST_GO_DIAGONAL:
 					straight_x(90 * 1.41421356 * num, velocity, velocity, velocity);
@@ -1208,7 +1207,8 @@ private:
 			mail.free(operation);
 			printf("Error:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
 					sc->position.theta);
-			Thread::wait(5);
+			printf("Abs:\t(%06.1f, %06.1f, %06.3f)\n", sc->position_abs.x + 24 + 6,
+					sc->position_abs.y, sc->position_abs.theta);
 		}
 	}
 };

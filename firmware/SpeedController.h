@@ -212,11 +212,12 @@ private:
 			position.y += (actual_prev.trans + actual_p.trans) / 2 * sin(position.theta)
 					* SPEED_CONTROLLER_PERIOD_US / 1000000;
 
-			position_abs.theta += actual_p.rot * SPEED_CONTROLLER_PERIOD_US / 1000000;
-			position_abs.x += actual_p.trans * cos(position_abs.theta) * SPEED_CONTROLLER_PERIOD_US
+			position_abs.theta += (actual_prev.rot + actual_p.rot) / 2 * SPEED_CONTROLLER_PERIOD_US
 					/ 1000000;
-			position_abs.y += actual_p.trans * sin(position_abs.theta) * SPEED_CONTROLLER_PERIOD_US
-					/ 1000000;
+			position_abs.x += (actual_prev.trans + actual_p.trans) / 2 * cos(position_abs.theta)
+					* SPEED_CONTROLLER_PERIOD_US / 1000000;
+			position_abs.y += (actual_prev.trans + actual_p.trans) / 2 * sin(position_abs.theta)
+					* SPEED_CONTROLLER_PERIOD_US / 1000000;
 
 			actual_prev.trans = actual_p.trans;
 			actual_prev.rot = actual_p.rot;
