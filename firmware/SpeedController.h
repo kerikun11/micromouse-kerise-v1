@@ -128,6 +128,8 @@ public:
 			actual_i.wheel[i] = 0;
 			actual_d.wheel[i] = 0;
 		}
+		actual_prev.trans = 0;
+		actual_prev.rot = 0;
 	}
 	void enable() {
 		for (int i = 0; i < 2; i++) {
@@ -156,6 +158,8 @@ public:
 		return actual_p;
 	}
 	Position position;
+	Position position_abs;
+	Position position_accel;
 private:
 	Motor *mt;
 	Encoders *enc;
@@ -164,6 +168,7 @@ private:
 	Ticker ctrlTicker;
 	float wheel_position[3][2];
 	WheelParameter target_p;
+	WheelParameter actual_prev;
 	WheelParameter actual_p;
 	WheelParameter actual_i;
 	WheelParameter actual_d;
@@ -185,9 +190,6 @@ private:
 						* 1000000/ SPEED_CONTROLLER_PERIOD_US;
 				actual_i.wheel[i] += (actual_p.wheel[i] - target_p.wheel[i])
 						* SPEED_CONTROLLER_PERIOD_US / 1000000;
-//				const float int_saturation = 1000.0f;
-//				if (actual_i.wheel[i] > int_saturation) actual_i.wheel[i] = int_saturation;
-//				if (actual_i.wheel[i] < -int_saturation) actual_i.wheel[i] = -int_saturation;
 				actual_d.wheel[i] = (wheel_position[0][i] - 2 * wheel_position[1][i]
 						+ wheel_position[2][i]) * 1000000 / SPEED_CONTROLLER_PERIOD_US;
 			}
@@ -203,11 +205,21 @@ private:
 			}
 			mt->drive(pwm_value[0], pwm_value[1]);
 
-			position.theta += actual_p.rot * SPEED_CONTROLLER_PERIOD_US / 1000000;
-			position.x += actual_p.trans * cos(position.theta) * SPEED_CONTROLLER_PERIOD_US
+			position.theta += (actual_prev.rot + actual_p.rot) / 2 * SPEED_CONTROLLER_PERIOD_US
 					/ 1000000;
-			position.y += actual_p.trans * sin(position.theta) * SPEED_CONTROLLER_PERIOD_US
+			position.x += (actual_prev.trans + actual_p.trans) / 2 * cos(position.theta)
+					* SPEED_CONTROLLER_PERIOD_US / 1000000;
+			position.y += (actual_prev.trans + actual_p.trans) / 2 * sin(position.theta)
+					* SPEED_CONTROLLER_PERIOD_US / 1000000;
+
+			position_abs.theta += actual_p.rot * SPEED_CONTROLLER_PERIOD_US / 1000000;
+			position_abs.x += actual_p.trans * cos(position_abs.theta) * SPEED_CONTROLLER_PERIOD_US
 					/ 1000000;
+			position_abs.y += actual_p.trans * sin(position_abs.theta) * SPEED_CONTROLLER_PERIOD_US
+					/ 1000000;
+
+			actual_prev.trans = actual_p.trans;
+			actual_prev.rot = actual_p.rot;
 		}
 	}
 };
