@@ -45,8 +45,8 @@
 
 /* Hardware Parameter */
 
-#define MACHINE_ROTATION_RADIUS		33.0f	// [mm]
-#define WHEEL_DIAMETER_MM			24.665f
+#define MACHINE_ROTATION_RADIUS		33.5f	// [mm]
+#define WHEEL_DIAMETER_MM			24.55f
 #define WHEEL_GEER_RATIO			0.25f
 #define ENCODER_PULSES				(1024*4)
 
