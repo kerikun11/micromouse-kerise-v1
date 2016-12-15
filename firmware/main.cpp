@@ -5,7 +5,11 @@
  *      Author: kerikun11
  */
 
+
 #include "mbed.h"
+
+//#define printf(...)	((void)0)
+
 #include "config.h"
 #include "Battery.h"
 #include "Buzzer.h"
@@ -201,6 +205,20 @@ void serial_ctrl() {
 				ma->set_action(MoveAction::FAST_TURN_RIGHT_60R);
 				ma->set_action(MoveAction::FAST_TURN_RIGHT_60);
 				ma->set_action(MoveAction::FAST_TURN_LEFT_60R);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60R);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60R);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60R);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60R);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60R);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_60);
+				ma->set_action(MoveAction::FAST_TURN_LEFT_60R);
 				ma->set_action(MoveAction::START_INIT);
 				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();
@@ -227,36 +245,58 @@ void serial_ctrl() {
 				ma->set_action(MoveAction::RETURN);
 				ma->set_action(MoveAction::TURN_LEFT_90);
 				ma->set_action(MoveAction::TURN_LEFT_90);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				ma->set_action(MoveAction::TURN_RIGHT_90);
+				ma->set_action(MoveAction::RETURN);
+				ma->set_action(MoveAction::TURN_LEFT_90);
+				ma->set_action(MoveAction::TURN_LEFT_90);
 				ma->set_action(MoveAction::START_INIT);
 				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();
 				wd->calibration();
 				ma->enable();
 				break;
-			case 'o':
+			case 'o': {
 				ms->terminate();
+				const int cnt = 9;
 				ma->set_action(MoveAction::START_STEP);
-				ma->set_action(MoveAction::FAST_GO_STRAIGHT, 3);
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, cnt);
 				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
 				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
-				ma->set_action(MoveAction::FAST_GO_STRAIGHT, 3);
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, cnt);
 				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
 				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
-				ma->set_action(MoveAction::FAST_GO_STRAIGHT, 3);
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, cnt);
 				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
 				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
-				ma->set_action(MoveAction::FAST_GO_STRAIGHT, 3);
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, cnt);
 				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
 				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
-				ma->set_action(MoveAction::FAST_GO_STRAIGHT, 3);
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, cnt);
 				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
 				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
-				ma->set_action(MoveAction::FAST_GO_STRAIGHT, 3);
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, cnt);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, cnt);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, cnt);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
+				ma->set_action(MoveAction::FAST_TURN_RIGHT_90);
 				ma->set_action(MoveAction::FAST_STOP);
 				bz->play(Buzzer::CONFIRM);
 				mpu->calibration();
 				wd->calibration();
 				ma->enable();
+			}
 				break;
 			case 'm':
 				ms->terminate();
@@ -273,8 +313,8 @@ void serial_ctrl() {
 				printf("%s %s %s %s\n", wd->wall().side[0] ? "X" : ".",
 						wd->wall().flont[0] ? "X" : ".", wd->wall().flont[1] ? "X" : ".",
 						wd->wall().side[1] ? "X" : ".");
-				printf("Position:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
-						sc->position.theta);
+				printf("Position:\t(%06.1f, %06.1f, %06.3f)\n", sc->getPosition().x,
+						sc->getPosition().y, sc->getPosition().theta);
 //				printf("Gyro: %7.4f\tAngle: %07.4f\n", mpu->gyroZ(), mpu->angleZ());
 //				printf("L: %ld\tR: %ld\n", enc->left(), enc->right());
 				break;

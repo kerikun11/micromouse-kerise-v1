@@ -35,7 +35,7 @@ public:
 		float _y = y;
 		x = _x * cos(angle) - _y * sin(angle);
 		y = _x * sin(angle) + _y * cos(angle);
-		theta = theta + angle;
+//		theta = theta + angle;
 		return *this;
 	}
 	inline float getNorm() const {
@@ -154,12 +154,12 @@ public:
 		target_p.rot = rot;
 		target_p.pole2wheel();
 	}
-	WheelParameter& actual() {
+	WheelParameter& actual_velocity() {
 		return actual_p;
 	}
-	Position position;
-	Position position_abs;
-	Position position_accel;
+	Position& getPosition() {
+		return position;
+	}
 private:
 	Motor *mt;
 	Encoders *enc;
@@ -173,6 +173,7 @@ private:
 	WheelParameter actual_i;
 	WheelParameter actual_d;
 	float pwm_value[2];
+	Position position;
 
 	void ctrlIsr() {
 		ctrlThread.signal_set(0x01);
@@ -210,13 +211,6 @@ private:
 			position.x += (actual_prev.trans + actual_p.trans) / 2 * cos(position.theta)
 					* SPEED_CONTROLLER_PERIOD_US / 1000000;
 			position.y += (actual_prev.trans + actual_p.trans) / 2 * sin(position.theta)
-					* SPEED_CONTROLLER_PERIOD_US / 1000000;
-
-			position_abs.theta += (actual_prev.rot + actual_p.rot) / 2 * SPEED_CONTROLLER_PERIOD_US
-					/ 1000000;
-			position_abs.x += (actual_prev.trans + actual_p.trans) / 2 * cos(position_abs.theta)
-					* SPEED_CONTROLLER_PERIOD_US / 1000000;
-			position_abs.y += (actual_prev.trans + actual_p.trans) / 2 * sin(position_abs.theta)
 					* SPEED_CONTROLLER_PERIOD_US / 1000000;
 
 			actual_prev.trans = actual_p.trans;

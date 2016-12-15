@@ -15,8 +15,8 @@
 #define WALL_ATTACH_ENABLED			false
 #define WALL_AVOID_ENABLED			false
 
-#define LOOK_AHEAD_UNIT				8
-#define TRAJECTORY_PROP_GAIN		60
+#define LOOK_AHEAD_UNIT				4
+#define TRAJECTORY_PROP_GAIN		40
 #define TRAJECTORY_INTEGRAL_GAIN	0
 
 class Trajectory {
@@ -31,7 +31,7 @@ public:
 		last_index = 0;
 	}
 	Position getNextDir(const Position &cur, const float velocity) {
-		int look_ahead = LOOK_AHEAD_UNIT * (1 + 5 * velocity / v_const);
+		int look_ahead = LOOK_AHEAD_UNIT * (1 + 20 * velocity * velocity / v_const / v_const);
 		Position dir = (getNextPoint(cur, look_ahead) - cur).rotate(-cur.theta);
 		dir.theta = atan(dir.y / (dir.x + interval));
 		dir *= velocity / look_ahead;
@@ -40,10 +40,8 @@ public:
 	float getPortion() const {
 		return (float) last_index / getSize();
 	}
-	void shift(Position &cur) {
-		Position moved = getPosition(getSize() - 1);
-		cur = (cur - moved).rotate(-moved.theta);
-		cur.theta += moved.theta;
+	Position getEndPosition() {
+		return getPosition(getSize() - 1);
 	}
 protected:
 	bool mirror;
@@ -912,6 +910,28 @@ public:
 	int actions() const {
 		return _actions;
 	}
+	void printPosition(const char* name) {
+//		printf("%s\t", name);
+//		printf("Ori:(%06.1f, %06.1f, %06.3f)\t", origin.x, origin.y, origin.theta);
+//		printf("Abs:(%06.1f, %06.1f, %06.3f)\t", sc->getPosition().x, sc->getPosition().y,
+//				sc->getPosition().theta);
+//		printf("Rel:(%06.1f, %06.1f, %06.3f)\t", getRelativePosition().x, getRelativePosition().y,
+//				getRelativePosition().theta);
+//		printf("\n");
+	}
+	Position getRelativePosition() {
+		return (sc->getPosition() - origin).rotate(-origin.theta);
+	}
+	void updateOrigin(Position passed) {
+		origin += passed.rotate(origin.theta);
+	}
+	void setPosition(Position pos = Position(6 + 24, -90, 0)) {
+		origin = pos;
+		sc->getPosition() = pos;
+	}
+	void fixPosition(Position pos) {
+		sc->getPosition() -= pos;
+	}
 private:
 	Buzzer *bz;
 	Encoders *enc;
@@ -925,8 +945,7 @@ private:
 	Timer timer;
 	int _actions;
 	float fast_speed;
-	Position& cur = sc->position;
-	Position passed;
+	Position origin;
 
 	void isr() {
 		thread.signal_set(0x01);
@@ -960,9 +979,9 @@ private:
 				Thread::wait(1);
 			}
 			sc->set_target(0, 0);
-			sc->position.x = 0;
-			printf("Attach:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
-					sc->position.theta);
+			fixPosition(Position(getRelativePosition().x, 0, 0));
+			printf("Attach:\t(%06.1f, %06.1f, %06.3f)\n", getRelativePosition().x,
+					getRelativePosition().y, getRelativePosition().theta);
 		}
 #endif
 	}
@@ -972,7 +991,7 @@ private:
 		timer.start();
 		while (1) {
 			Thread::signal_wait(0x01);
-			if (fabs(sc->actual().rot) > speed) break;
+			if (fabs(sc->actual_velocity().rot) > speed) break;
 			if (target_angle > 0) {
 				sc->set_target(0, timer.read() * accel);
 			} else {
@@ -981,8 +1000,8 @@ private:
 		}
 		while (1) {
 			Thread::signal_wait(0x01);
-			if (fabs(sc->actual().rot) < 0.2) break;
-			float extra = target_angle - sc->position.theta;
+			if (fabs(sc->actual_velocity().rot) < 0.2) break;
+			float extra = target_angle - getRelativePosition().theta;
 			float target_speed = sqrt(2 * accel * fabs(extra));
 			target_speed = (target_speed > speed) ? speed : target_speed;
 			if (extra > 0) {
@@ -991,10 +1010,11 @@ private:
 				sc->set_target(0, -target_speed);
 			}
 		}
-		sc->position.rotate(-target_angle);
+		updateOrigin(Position(0, 0, target_angle));
 	}
-	void straight_x(const float distance, const float v0, const float v1, const float v2,
-			const float accel = 6000) {
+	void straight_x(const float distance, const float v0, const float v1, const float v2) {
+		const float accel = 8000;
+		const float decel = 4000;
 		Trajectory st;
 		timer.reset();
 		timer.start();
@@ -1002,18 +1022,18 @@ private:
 		float integral = 0;
 		bool isAccel = true;
 		while (1) {
-			if (sc->position.x > distance * 0.98) break;
-			if (v2 < 1.0f && sc->actual().trans < 1.0f) break;
+			if (getRelativePosition().x > distance * 0.98) break;
+			if (v2 < 1.0f && sc->actual_velocity().trans < 1.0f) break;
 			Thread::signal_wait(0x01);
-			float extra = distance - sc->position.x;
-			float velocity = sqrt(2 * accel * fabs(extra) + v2 * v2);
+			float extra = distance - getRelativePosition().x;
+			float velocity = sqrt(2 * decel * fabs(extra) + v2 * v2);
 			if (extra < 0) velocity = -velocity;
-			if (velocity < sc->actual().trans) isAccel = false;
-			if (isAccel && sc->actual().trans < v1) {
+			if (velocity < sc->actual_velocity().trans) isAccel = false;
+			if (isAccel && sc->actual_velocity().trans < v1) {
 				velocity = v0 + timer.read() * accel;
 			}
 			if (velocity > v1) velocity = v1;
-			Position dir = st.getNextDir(sc->position, velocity);
+			Position dir = st.getNextDir(getRelativePosition(), velocity);
 			integral += dir.theta * TRAJECTORY_INTEGRAL_GAIN * MOVE_ACTION_PERIOD / 1000000;
 			sc->set_target(dir.x, (dir.theta + integral) * TRAJECTORY_PROP_GAIN);
 			if (cnt % 10 == 0) {
@@ -1023,7 +1043,7 @@ private:
 			wall_avoid();
 		}
 		sc->set_target(v2, 0);
-		sc->position -= Position(distance, 0, 0);
+		updateOrigin(Position(distance, 0, 0));
 	}
 	template<class C> void trace(C tr, const float velocity) {
 		int cnt = 0;
@@ -1031,7 +1051,7 @@ private:
 		while (1) {
 			if (tr.getPortion() > 0.98) break;
 			Thread::signal_wait(0x01);
-			Position dir = tr.getNextDir(sc->position, velocity);
+			Position dir = tr.getNextDir(getRelativePosition(), velocity);
 			integral += dir.theta * TRAJECTORY_INTEGRAL_GAIN * MOVE_ACTION_PERIOD / 1000000;
 			sc->set_target(dir.x, (dir.theta + integral) * TRAJECTORY_PROP_GAIN);
 			if (cnt % 10 == 0) {
@@ -1040,7 +1060,7 @@ private:
 			cnt++;
 		}
 		sc->set_target(velocity, 0);
-		tr.shift(sc->position);
+		updateOrigin(tr.getEndPosition());
 	}
 	void task() {
 		while (1) {
@@ -1053,162 +1073,161 @@ private:
 			enum ACTION action = operation->action;
 			int num = operation->num;
 			printf("Action:\t%s\tNumber:\t%d\n", action_string(operation->action), operation->num);
-			printf("Start:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
-					sc->position.theta);
-			const float velocity = 600;
+			printPosition("Start");
+			const float velocity = 500;
 			const float omega = 4.0f * M_PI;
-			switch (action) {
-				case START_STEP:
-					sc->position.reset();
-					sc->position_abs.reset();
-					straight_x(180 - 24 - 6, 0, velocity, velocity);
-					break;
-				case START_INIT:
-					straight_x(90, velocity, velocity, 0);
-					if (mpu->angleZ() > 0) {
-						wall_attach();
-						turn(-M_PI / 2, omega);
-						wall_attach();
-						turn(-M_PI / 2, omega);
-					} else {
-						wall_attach();
-						turn(M_PI / 2, omega);
-						wall_attach();
-						turn(M_PI / 2, omega);
+			for (int i = 0; i < num; i++) {
+				switch (action) {
+					case START_STEP:
+						setPosition();
+						straight_x(180 - 24 - 6, 0, velocity, velocity);
+						break;
+					case START_INIT:
+						straight_x(90, velocity, velocity, 0);
+						if (mpu->angleZ() > 0) {
+							wall_attach();
+							turn(-M_PI / 2, omega);
+							wall_attach();
+							turn(-M_PI / 2, omega);
+						} else {
+							wall_attach();
+							turn(M_PI / 2, omega);
+							wall_attach();
+							turn(M_PI / 2, omega);
+						}
+						for (int i = 0; i < 200; i++) {
+							sc->set_target(-i, 0);
+							Thread::wait(1);
+						}
+						sc->set_target(-200, 0);
+						Thread::wait(1000);
+						sc->set_target(0, 0);
+						break;
+					case GO_STRAIGHT:
+						straight_x(180, velocity, velocity, velocity);
+						break;
+					case TURN_LEFT_90: {
+						Curve90 tr(false);
+						trace(tr, velocity);
 					}
-					sc->set_target(-10, 0);
-					Thread::wait(100);
-					sc->set_target(-200, 0);
-					Thread::wait(1000);
-					sc->position.reset();
-					sc->set_target(0, 0);
-					break;
-				case GO_STRAIGHT:
-					straight_x(180, velocity, velocity, velocity);
-					break;
-				case TURN_LEFT_90: {
-					Curve90 tr(false);
-					trace(tr, velocity);
-				}
-					break;
-				case TURN_RIGHT_90: {
-					Curve90 tr(true);
-					trace(tr, velocity);
-				}
-					break;
-				case RETURN:
-					straight_x(90, velocity, velocity, 0);
-					if (mpu->angleZ() > 0) {
-						wall_attach();
-						turn(-M_PI / 2, omega);
-						wall_attach();
-						turn(-M_PI / 2, omega);
-					} else {
-						wall_attach();
-						turn(M_PI / 2, omega);
-						wall_attach();
-						turn(M_PI / 2, omega);
+						break;
+					case TURN_RIGHT_90: {
+						Curve90 tr(true);
+						trace(tr, velocity);
 					}
-					straight_x(90, 0, velocity, velocity);
-					break;
-				case STOP:
-					straight_x(90, velocity, velocity, 0);
-					wall_attach();
-					sc->set_target(0, 0);
-					break;
-				case FAST_START_STEP:
-					sc->position.reset();
-					sc->position_abs.reset();
-					straight_x(180 - 24 - 6, 0, velocity, velocity);
-					break;
-				case FAST_GO_STRAIGHT:
-					straight_x(180 * num, velocity, 1800, velocity);
-					break;
-				case FAST_GO_DIAGONAL:
-					straight_x(90 * 1.41421356 * num, velocity, velocity, velocity);
-					break;
-				case FAST_TURN_LEFT_45: {
-					Curve45 tr(false);
-					trace(tr, velocity);
+						break;
+					case RETURN:
+						straight_x(90, velocity, velocity, 0);
+						if (mpu->angleZ() > 0) {
+							wall_attach();
+							turn(-M_PI / 2, omega);
+							wall_attach();
+							turn(-M_PI / 2, omega);
+						} else {
+							wall_attach();
+							turn(M_PI / 2, omega);
+							wall_attach();
+							turn(M_PI / 2, omega);
+						}
+						straight_x(90, 0, velocity, velocity);
+						break;
+					case STOP:
+						straight_x(90, velocity, velocity, 0);
+						wall_attach();
+						sc->set_target(0, 0);
+						break;
+					case FAST_START_STEP:
+						setPosition();
+						straight_x(180 - 24 - 6, 0, velocity, velocity);
+						break;
+					case FAST_GO_STRAIGHT:
+						straight_x(180 * num, velocity, 1000, velocity);
+						i += num - 1;
+						break;
+					case FAST_GO_DIAGONAL:
+						straight_x(90 * 1.41421356 * num, velocity, velocity, velocity);
+						i += num - 1;
+						break;
+					case FAST_TURN_LEFT_45: {
+						Curve45 tr(false);
+						trace(tr, velocity);
+					}
+						break;
+					case FAST_TURN_RIGHT_45: {
+						Curve45 tr(true);
+						trace(tr, velocity);
+					}
+						break;
+					case FAST_TURN_LEFT_45R: {
+						Curve45R tr(false);
+						trace(tr, velocity);
+					}
+						break;
+					case FAST_TURN_RIGHT_45R: {
+						Curve45R tr(true);
+						trace(tr, velocity);
+					}
+						break;
+					case FAST_TURN_LEFT_60: {
+						Curve60 tr(false);
+						trace(tr, velocity);
+					}
+						break;
+					case FAST_TURN_RIGHT_60: {
+						Curve60 tr(true);
+						trace(tr, velocity);
+					}
+						break;
+					case FAST_TURN_LEFT_60R: {
+						Curve60R tr(false);
+						trace(tr, velocity);
+					}
+						break;
+					case FAST_TURN_RIGHT_60R: {
+						Curve60R tr(true);
+						trace(tr, velocity);
+					}
+						break;
+					case FAST_TURN_LEFT_90: {
+						Curve90 tr(false);
+						trace(tr, velocity);
+					}
+						break;
+					case FAST_TURN_RIGHT_90: {
+						Curve90 tr(true);
+						trace(tr, velocity);
+					}
+						break;
+					case FAST_TURN_LEFT_135: {
+						Curve135 tr(false);
+						trace(tr, velocity);
+					}
+						break;
+					case FAST_TURN_RIGHT_135: {
+						Curve135 tr(true);
+						trace(tr, velocity);
+					}
+						break;
+					case FAST_TURN_LEFT_135R: {
+						Curve135R tr(false);
+						trace(tr, velocity);
+					}
+						break;
+					case FAST_TURN_RIGHT_135R: {
+						Curve135R tr(true);
+						trace(tr, velocity);
+					}
+						break;
+					case FAST_STOP:
+						straight_x(90, velocity, velocity, 0);
+						wall_attach();
+						sc->set_target(0, 0);
+						break;
 				}
-					break;
-				case FAST_TURN_RIGHT_45: {
-					Curve45 tr(true);
-					trace(tr, velocity);
-				}
-					break;
-				case FAST_TURN_LEFT_45R: {
-					Curve45R tr(false);
-					trace(tr, velocity);
-				}
-					break;
-				case FAST_TURN_RIGHT_45R: {
-					Curve45R tr(true);
-					trace(tr, velocity);
-				}
-					break;
-				case FAST_TURN_LEFT_60: {
-					Curve60 tr(false);
-					trace(tr, velocity);
-				}
-					break;
-				case FAST_TURN_RIGHT_60: {
-					Curve60 tr(true);
-					trace(tr, velocity);
-				}
-					break;
-				case FAST_TURN_LEFT_60R: {
-					Curve60R tr(false);
-					trace(tr, velocity);
-				}
-					break;
-				case FAST_TURN_RIGHT_60R: {
-					Curve60R tr(true);
-					trace(tr, velocity);
-				}
-					break;
-				case FAST_TURN_LEFT_90: {
-					Curve90 tr(false);
-					trace(tr, velocity);
-				}
-					break;
-				case FAST_TURN_RIGHT_90: {
-					Curve90 tr(true);
-					trace(tr, velocity);
-				}
-					break;
-				case FAST_TURN_LEFT_135: {
-					Curve135 tr(false);
-					trace(tr, velocity);
-				}
-					break;
-				case FAST_TURN_RIGHT_135: {
-					Curve135 tr(true);
-					trace(tr, velocity);
-				}
-					break;
-				case FAST_TURN_LEFT_135R: {
-					Curve135R tr(false);
-					trace(tr, velocity);
-				}
-					break;
-				case FAST_TURN_RIGHT_135R: {
-					Curve135R tr(true);
-					trace(tr, velocity);
-				}
-					break;
-				case FAST_STOP:
-					straight_x(90, velocity, velocity, 0);
-					wall_attach();
-					sc->set_target(0, 0);
-					break;
 			}
 			_actions -= operation->num;
 			mail.free(operation);
-			printf("Error:\t(%06.1f, %06.1f, %06.3f)\n", sc->position.x, sc->position.y,
-					sc->position.theta);
-			printf("Abs:\t(%06.1f, %06.1f, %06.3f)\n", sc->position_abs.x + 24 + 6,
-					sc->position_abs.y, sc->position_abs.theta);
+			printPosition("End");
 		}
 	}
 };
