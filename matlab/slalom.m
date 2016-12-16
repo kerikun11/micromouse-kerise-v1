@@ -83,6 +83,19 @@ theta_start = 0;
 theta_end = pi/4;
 dt = 0.001;
 %}
+%%{
+% curve180
+v_const = 1000;
+omega_dot = 32 * pi;
+omega_max = 4 * pi;
+pos_start = [0; 0];
+pos_end = [0; 180];
+omega_start = 0;
+omega_end = 0;
+theta_start = 0;
+theta_end = pi;
+dt = 0.001;
+%}
 
 [theta, omega] = trapezoid(omega_dot, omega_max, omega_start, omega_end, theta_end-theta_start, dt);
 theta = theta + theta_start;
@@ -110,7 +123,12 @@ end
 
 x_end = pos(end,1);
 y_end = pos(end,2);
-straight_len = inv([cos(theta_start), cos(theta_end); sin(theta_start), sin(theta_end)])*[pos_end-pos(end,:)'];
+straight_mat = [cos(theta_start), cos(theta_end); sin(theta_start), sin(theta_end)];
+if abs(det(straight_mat)) < 1e-12
+    straight_len = [0;0];
+else
+    straight_len = inv(straight_mat)*[pos_end-pos(end,:)'];
+end
 
 straight_len_1st = straight_len(1);
 straight_len_2nd = straight_len(2);

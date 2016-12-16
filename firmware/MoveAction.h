@@ -925,7 +925,7 @@ public:
 	void updateOrigin(Position passed) {
 		origin += passed.rotate(origin.theta);
 	}
-	void setPosition(Position pos = Position(6 + 24, -90, 0)) {
+	void setPosition(Position pos = Position(90, 6 + 24, M_PI / 2)) {
 		origin = pos;
 		sc->getPosition() = pos;
 	}
