@@ -38,8 +38,11 @@ public:
 //		theta = theta + angle;
 		return *this;
 	}
-	inline float getNorm() const {
+	inline float norm() const {
 		return sqrt(x * x + y * y);
+	}
+	inline float norm2() const {
+		return x * x + y * y;
 	}
 	inline Position mirror_x() {
 		y = -y;
@@ -91,6 +94,9 @@ public:
 		x *= div;
 		y *= div;
 		return *this;
+	}
+	inline void print(const char* name) {
+		printf("%s: (%06.1f, %06.1f, %06.3f)\n", name, x, y, theta);
 	}
 };
 
