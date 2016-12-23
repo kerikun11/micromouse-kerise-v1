@@ -96,12 +96,13 @@ void serial_ctrl() {
 				bz->play(Buzzer::CONFIRM);
 				break;
 			case 't':
-				fr->set_route(Position(180 * 0, 180 * 1));
-				fr->set_route(Position(180 * 0, 180 * 2));
-				fr->set_route(Position(180 * 0, 180 * 3));
-				fr->set_route(Position(180 * 0, 180 * 4));
-				fr->set_route(Position(180 * 0, 180 * 5));
-				fr->set_route(Position(180 * 0, 180 * 6));
+				fr->set_route(Position(90 * 1, 90 * 1));
+				fr->set_route(Position(90 * 1, 90 * 2));
+				fr->set_route(Position(90 * 1, 90 * 3));
+				fr->set_route(Position(90 * 1, 90 * 4));
+				fr->set_route(Position(90 * 1, 90 * 5));
+				fr->set_route(Position(90 * 1, 90 * 6));
+				fr->set_route(Position(90 * 1, 90 * 7));
 				fr->start();
 				break;
 			case 'u':

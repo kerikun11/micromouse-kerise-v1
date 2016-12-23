@@ -11,6 +11,7 @@
 #include "mbed.h"
 #include "config.h"
 #include <queue>
+#include <vector>
 
 #define MOVE_ACTION_PERIOD			1000
 #define WALL_ATTACH_ENABLED			false
@@ -20,7 +21,7 @@
 #define TRAJECTORY_PROP_GAIN		40
 #define TRAJECTORY_INTEGRAL_GAIN	0
 
-#define START_POSITION				Position(0, 24+6-90, M_PI/2)
+#define START_POSITION				Position(90, 24+6, M_PI/2)
 
 class Trajectory {
 public:
@@ -269,20 +270,12 @@ private:
 			while (1) {
 				float trans = wd->wall_difference().flont[0] + wd->wall_difference().flont[1];
 				float rot = wd->wall_difference().flont[1] - wd->wall_difference().flont[0];
-				const float trans_saturation = 0.4f;
-				const float rot_saturation = 0.4f;
-				if (trans > trans_saturation) trans = trans_saturation;
-				if (trans < -trans_saturation) trans = -trans_saturation;
-				if (rot > rot_saturation) rot = rot_saturation;
-				if (rot < -rot_saturation) rot = -rot_saturation;
-				sc->set_target(trans * 500, rot * 5);
+				sc->set_target(trans * 100, rot * 10);
 				if (fabs(trans) < 0.1f && fabs(rot) < 0.1f) break;
 				Thread::wait(1);
 			}
 			sc->set_target(0, 0);
-			fixPosition(Position(getRelativePosition().x, 0, 0));
-			printf("Attach:\t(%06.1f, %06.1f, %06.3f)\n", getRelativePosition().x,
-					getRelativePosition().y, getRelativePosition().theta);
+			fixPosition(Position(getRelativePosition().x, 0, 0).rotate(origin.theta));
 		}
 #endif
 	}
@@ -443,6 +436,48 @@ private:
 			mail.free(operation);
 			printPosition("End");
 		}
+	}
+};
+
+class FastTrajectory {
+public:
+	FastTrajectory() {
+		reset();
+	}
+	void reset() {
+		last_index = 0;
+	}
+	void set_path(const Position& pos) {
+		path.push_back(pos);
+	}
+	Position getNextDir(const Position &cur, const float velocity) {
+		int look_ahead = LOOK_AHEAD_UNIT * (1 + 20 * velocity * velocity / v_const / v_const);
+		Position dir = (getNextPoint(cur, look_ahead) - cur).rotate(-cur.theta);
+		dir.theta = atan(dir.y / (dir.x + interval));
+		dir *= velocity / look_ahead;
+		return dir;
+	}
+private:
+	int last_index;
+	const float interval = 1.0f;
+	const float v_const = 1000.0f;
+	std::vector<Position> path;
+	Position position(int index) const {
+		return Position(index * interval, 0, 0);
+	}
+	Position getPosition(const int index) {
+		return position(index);
+	}
+	Position getNextPoint(const Position& pos, int look_ahead) {
+		for (int i = last_index; i < 180 * 32; i++) {
+			Position target = getPosition(i);
+			Position dir = (target - pos).rotate(-target.theta);
+			if (dir.x > 0) {
+				last_index = i;
+				return getPosition(last_index + 1 + look_ahead);
+			}
+		}
+		return Position(0, 0, 0);
 	}
 };
 
