@@ -84,16 +84,16 @@ theta_end = pi/4;
 dt = 0.001;
 %}
 %%{
-% curve180
+% curvePlate
 v_const = 1000;
-omega_dot = 32 * pi;
-omega_max = 4 * pi;
+omega_dot = 12 * pi;
+omega_max = 2 * pi;
 pos_start = [0; 0];
-pos_end = [0; 180];
+pos_end = [360*1.41421356/2; 360*1.41421356/2];
 omega_start = 0;
 omega_end = 0;
 theta_start = 0;
-theta_end = pi;
+theta_end = pi/2;
 dt = 0.001;
 %}
 
@@ -149,3 +149,4 @@ tr = [pos_straight_1st', 0*ones(N_straight_1st,1), 0*ones(N_straight_1st,1);
     straight_len_1st+pos_straight_2nd'*cos(theta_end)+x_end, pos_straight_2nd'*sin(theta_end)+y_end, theta_end*ones(N_straight_2nd,1)];
 
 size(tr)
+tr(end,:)
