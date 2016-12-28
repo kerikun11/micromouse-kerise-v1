@@ -10,30 +10,6 @@
 
 #include "mbed.h"
 #include "config.h"
-//#include "QuadratureDemodulator.h"
-
-/* Definition for ADCx clock resources */
-#define ADCx_S							ADC2
-#define ADCx_F							ADC3
-#define ADCx_S_CLK_ENABLE()				__HAL_RCC_ADC2_CLK_ENABLE()
-#define ADCx_F_CLK_ENABLE()				__HAL_RCC_ADC3_CLK_ENABLE()
-#define ADCx_CHANNEL_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOC_CLK_ENABLE()
-
-#define ADCx_FORCE_RESET()              __HAL_RCC_ADC_FORCE_RESET()
-#define ADCx_RELEASE_RESET()            __HAL_RCC_ADC_RELEASE_RESET()
-
-/* Definition for ADCx Channel Pin */
-#define ADCx_CHANNEL_SL_PIN             GPIO_PIN_0
-#define ADCx_CHANNEL_FL_PIN             GPIO_PIN_1
-#define ADCx_CHANNEL_FR_PIN             GPIO_PIN_2
-#define ADCx_CHANNEL_SR_PIN             GPIO_PIN_3
-#define ADCx_CHANNEL_GPIO_PORT          GPIOC
-
-/* Definition for ADCx's Channel */
-#define ADCx_CHANNEL_SL					ADC_CHANNEL_10
-#define ADCx_CHANNEL_FL					ADC_CHANNEL_11
-#define ADCx_CHANNEL_FR					ADC_CHANNEL_12
-#define ADCx_CHANNEL_SR					ADC_CHANNEL_13
 
 #define IR_LED_PERIOD_US				500
 #define IR_LED_DUTY_US					100
@@ -41,13 +17,6 @@
 #define IR_RECEIVER_SAMPLE_SIZE			25
 #define IR_RECEIVER_SAMPLING_PERIOD_US	20
 #define IR_RECEIVER_UPDATE_PERIOD_US	1000
-
-////#define REFLECTOR_GAIN_SIDE				1.34f	// Home
-////#define REFLECTOR_GAIN_FLONT			1.24f	// Home
-////#define REFLECTOR_GAIN_SIDE				0.97f	// Mice
-////#define REFLECTOR_GAIN_FLONT			0.64f	// Mice
-//#define REFLECTOR_GAIN_SIDE				0.957f	// Rogy
-//#define REFLECTOR_GAIN_FLONT			0.780f	// Rogy
 
 class Reflector {
 public:
@@ -66,7 +35,7 @@ public:
 		IR_RECEIVER_SAMPLING_PERIOD_US);
 
 		updateThread.start(this, &Reflector::updateTask);
-		printf("0x%08X: Reflector\n", (unsigned int) updateThread.gettid());
+		DBG("0x%08X: Reflector\n", (unsigned int) updateThread.gettid());
 		updateTicker.attach_us(this, &Reflector::updateIsr,
 		IR_RECEIVER_UPDATE_PERIOD_US);
 	}
@@ -216,7 +185,7 @@ private:
 		AdcHandle_S.Init.DMAContinuousRequests = DISABLE;
 		AdcHandle_S.Init.EOCSelection = DISABLE;
 		if (HAL_ADC_Init(&AdcHandle_S) != HAL_OK) {
-			printf("Couldn't Init ADC S\r\n");
+			DBG("Couldn't Init ADC S\r\n");
 //			while (1) {
 //			}
 		}
@@ -235,7 +204,7 @@ private:
 		AdcHandle_F.Init.DMAContinuousRequests = DISABLE;
 		AdcHandle_F.Init.EOCSelection = DISABLE;
 		if (HAL_ADC_Init(&AdcHandle_F) != HAL_OK) {
-			printf("Couldn't Init ADC F\r\n");
+			DBG("Couldn't Init ADC F\r\n");
 //			while (1) {
 //			}
 		}

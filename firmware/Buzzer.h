@@ -16,7 +16,7 @@ public:
 	Buzzer(PinName pin) :
 			out(pin), thread(PRIORITY_BUZZER, STACK_SIZE_BUZZER) {
 		thread.start(this, &Buzzer::task);
-		printf("0x%08X: Buzzer\n", (unsigned int) thread.gettid());
+		DBG("0x%08X: Buzzer\n", (unsigned int) thread.gettid());
 	}
 	enum BUZZER_MUSIC {
 		BOOT, LOW_BATTERY, CONFIRM, CANCEL, SELECT, ERROR, START, EMERGENCY, COMPLETE, DOREMI, FROG,

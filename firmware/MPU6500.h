@@ -11,10 +11,8 @@
 #include "mbed.h"
 #include "config.h"
 
-#define MPU6500_GYRO_FACTOR			16.3835f
-
 #define MPU6500_ACCEL_FACTOR		2048.0f
-#define MPU6500_ACCEL_OFFSET		0
+#define MPU6500_GYRO_FACTOR			16.3835f
 
 #define MPU6500_UPDATE_PERIOD_US	1000
 
@@ -25,42 +23,71 @@ public:
 					updateThread(PRIORITY_MPU6500_UPDATE, STACK_SIZE_MPU6500_UPDATE) {
 		setup();
 		updateThread.start(this, &MPU6500::updateTask);
-		printf("0x%08X: MPU6500\n", (unsigned int) updateThread.gettid());
-		updateTicker.attach_us(this, &MPU6500::updateIsr,
-		MPU6500_UPDATE_PERIOD_US);
-		_accelY = 0;
-		_gyroZ = 0;
-		_angleZ = 0;
-		_offset_gyroZ = 0.6f;
+		DBG("0x%08X: MPU6500\n", (unsigned int ) updateThread.gettid());
+		updateTicker.attach_us(this, &MPU6500::updateIsr, MPU6500_UPDATE_PERIOD_US);
 	}
-	double accelY() {
-		return _accelY;
-	}
-	double gyroZ() {
-		return _gyroZ;
-	}
-	double angleZ() {
-		return _angleZ;
-	}
+	struct Parameter {
+		float x;
+		float y;
+		float z;
+		Parameter(float x = 0, float y = 0, float z = 0) :
+				x(x), y(y), z(z) {
+		}
+		inline Parameter operator+(const Parameter& obj) const {
+			return Parameter(x + obj.x, y + obj.y, z + obj.z);
+		}
+		inline Parameter operator*(const float mul) const {
+			return Parameter(x * mul, y * mul, z * mul);
+		}
+		inline Parameter operator/(const float div) const {
+			return Parameter(x / div, y / div, z / div);
+		}
+		inline const Parameter& operator+=(const Parameter& obj) {
+			x += obj.x;
+			y += obj.y;
+			z += obj.z;
+			return *this;
+		}
+		inline const Parameter& operator/=(const float& div) {
+			x /= div;
+			y /= div;
+			z /= div;
+			return *this;
+		}
+	};
+	Parameter accel;
+	Parameter gyro;
+	Parameter angle;
+	Parameter velocity;
 	void calibration() {
-		double sum = 0;
+		updateTicker.detach();
+		angle = Parameter();
+		velocity = Parameter();
+		Parameter accel_sum, gyro_sum;
 		const int ave_count = 500;
 		for (int i = 0; i < ave_count; i++) {
-			sum += gyroZ();
+			readAll();
+			accel_sum += accel;
+			gyro_sum += gyro;
 			Thread::wait(1);
 		}
-		sum /= ave_count;
-		_offset_gyroZ += sum;
-		_angleZ = 0;
+		accel_sum /= ave_count;
+		gyro_sum /= ave_count;
+		accel_offset += accel_sum;
+		gyro_offset += gyro_sum;
+		DBG("MPU6500 Calibration: %.3f\t%.3f\n", gyro_offset.z, accel_offset.y);
+		updateTicker.attach_us(this, &MPU6500::updateIsr, MPU6500_UPDATE_PERIOD_US);
+		angle = Parameter();
+		velocity = Parameter();
 	}
 private:
 	DigitalOut cs;
 	Thread updateThread;
 	Ticker updateTicker;
-	volatile double _accelY;
-	volatile double _gyroZ;
-	volatile double _angleZ;
-	double _offset_gyroZ;
+	Parameter accel_offset;
+	Parameter gyro_offset;
+	Parameter accel_prev;
+	Parameter gyro_prev;
 
 	void updateIsr() {
 		updateThread.signal_set(0x01);
@@ -68,9 +95,11 @@ private:
 	void updateTask() {
 		while (1) {
 			Thread::signal_wait(0x01);
-			_accelY = readAccY() / MPU6500_ACCEL_FACTOR;
-			_gyroZ = readGyrZ() / MPU6500_GYRO_FACTOR - _offset_gyroZ;
-			_angleZ += _gyroZ * MPU6500_UPDATE_PERIOD_US / 1000000;
+			readAll();
+			velocity += (accel + accel_prev) / 2 * MPU6500_UPDATE_PERIOD_US / 1000000;
+			accel_prev = accel;
+			angle += (gyro + gyro_prev) / 2 * MPU6500_UPDATE_PERIOD_US / 1000000;
+			gyro_prev = gyro;
 		}
 	}
 	void setup() {
@@ -138,27 +167,41 @@ private:
 	inline int16_t readGyrZ() {
 		return readInt16(0x47);
 	}
-	void readGyrXYZT(int16_t &x, int16_t &y, int16_t &z, int16_t &t) {
+	void readAll() {
 		union {
-			uint16_t u;
 			int16_t i;
-		} _u2i;
-		uint8_t addr = 0x41 | 0x80;
-		unsigned char rx[8];
+			struct {
+				uint8_t l :8;
+				uint8_t h :8;
+			};
+		} bond;
+		const int readBytes = 14;
+		unsigned char rx[readBytes];
 		cs = 0;
-		this->write(addr);
-		for (int i = 0; i < 8; i++) {
+		this->write(0x3B | 0x80);
+		for (int i = 0; i < readBytes; i++) {
 			rx[i] = this->write(0x00);
 		}
 		cs = 1;
-		_u2i.u = ((uint16_t)(rx[0]) << 8) | rx[1];
-		t = _u2i.i;
-		_u2i.u = ((uint16_t)(rx[2]) << 8) | rx[3];
-		x = _u2i.i;
-		_u2i.u = ((uint16_t)(rx[4]) << 8) | rx[5];
-		y = _u2i.i;
-		_u2i.u = ((uint16_t)(rx[6]) << 8) | rx[7];
-		z = _u2i.i;
+		bond.h = rx[0];
+		bond.l = rx[1];
+		accel.x = bond.i / MPU6500_ACCEL_FACTOR * 1000 * 9.80665 - accel_offset.x;
+		bond.h = rx[2];
+		bond.l = rx[3];
+		accel.y = bond.i / MPU6500_ACCEL_FACTOR * 1000 * 9.80665 - accel_offset.y;
+		bond.h = rx[4];
+		bond.l = rx[5];
+		accel.z = bond.i / MPU6500_ACCEL_FACTOR * 1000 * 9.80665 - accel_offset.z;
+
+		bond.h = rx[8];
+		bond.l = rx[9];
+		gyro.x = bond.i / MPU6500_GYRO_FACTOR * M_PI / 180 - gyro_offset.x;
+		bond.h = rx[10];
+		bond.l = rx[11];
+		gyro.y = bond.i / MPU6500_GYRO_FACTOR * M_PI / 180 - gyro_offset.y;
+		bond.h = rx[12];
+		bond.l = rx[13];
+		gyro.z = bond.i / MPU6500_GYRO_FACTOR * M_PI / 180 - gyro_offset.z;
 	}
 };
 

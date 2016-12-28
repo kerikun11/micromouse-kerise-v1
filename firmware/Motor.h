@@ -11,19 +11,6 @@
 #include "mbed.h"
 #include "config.h"
 
-#define MOTOR_TIMx						TIM2
-#define MOTOR_TIMx_CLK_ENABLE()			__HAL_RCC_TIM2_CLK_ENABLE()
-#define MOTOR_TIMx_CHANNEL_GPIO_PORT()	__HAL_RCC_GPIOA_CLK_ENABLE()
-#define MOTOR_TIMx_GPIO_PORT_CHANNEL1	GPIOA
-#define MOTOR_TIMx_GPIO_PORT_CHANNEL2	GPIOA
-#define MOTOR_TIMx_GPIO_PORT_CHANNEL3	GPIOA
-#define MOTOR_TIMx_GPIO_PORT_CHANNEL4	GPIOA
-#define MOTOR_TIMx_GPIO_PIN_CHANNEL1	GPIO_PIN_0
-#define MOTOR_TIMx_GPIO_PIN_CHANNEL2	GPIO_PIN_1
-#define MOTOR_TIMx_GPIO_PIN_CHANNEL3	GPIO_PIN_2
-#define MOTOR_TIMx_GPIO_PIN_CHANNEL4	GPIO_PIN_3
-#define MOTOR_TIMx_GPIO_AF_CHANNEL		GPIO_AF1_TIM2
-
 #define MOTOR_PERIOD_VALUE				(1000 - 1)
 
 class Motor {
@@ -31,7 +18,8 @@ public:
 	Motor() {
 		GPIO_InitTypeDef GPIO_InitStruct;
 		MOTOR_TIMx_CLK_ENABLE();
-		MOTOR_TIMx_CHANNEL_GPIO_PORT();
+		MOTOR_TIMx_CHANNEL_GPIO_PORT()
+		;
 
 		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 		GPIO_InitStruct.Pull = GPIO_PULLUP;
@@ -60,7 +48,7 @@ public:
 		TimHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
 		TimHandle.Init.RepetitionCounter = 0;
 		if (HAL_TIM_PWM_Init(&TimHandle) != HAL_OK) {
-			printf("Couldn't Init PWM\r\n");
+			DBG("Couldn't Init PWM\r\n");
 			while (1) {
 			}
 		}
@@ -77,11 +65,11 @@ public:
 	}
 	void left(int16_t width) {
 		if (!emergency) {
-			if (width > MOTOR_PERIOD_VALUE / 2) {
-				width = MOTOR_PERIOD_VALUE / 2;
+			if (width > MOTOR_PERIOD_VALUE) {
+				width = MOTOR_PERIOD_VALUE;
 			}
-			if (width < -MOTOR_PERIOD_VALUE / 2) {
-				width = -MOTOR_PERIOD_VALUE / 2;
+			if (width < -MOTOR_PERIOD_VALUE) {
+				width = -MOTOR_PERIOD_VALUE;
 			}
 			if (width > 0) {
 				sConfig.Pulse = MOTOR_PERIOD_VALUE - width;
@@ -102,11 +90,11 @@ public:
 	}
 	void right(int16_t width) {
 		if (!emergency) {
-			if (width > MOTOR_PERIOD_VALUE / 2) {
-				width = MOTOR_PERIOD_VALUE / 2;
+			if (width > MOTOR_PERIOD_VALUE) {
+				width = MOTOR_PERIOD_VALUE;
 			}
-			if (width < -MOTOR_PERIOD_VALUE / 2) {
-				width = -MOTOR_PERIOD_VALUE / 2;
+			if (width < -MOTOR_PERIOD_VALUE) {
+				width = -MOTOR_PERIOD_VALUE;
 			}
 			if (width > 0) {
 				sConfig.Pulse = MOTOR_PERIOD_VALUE;
@@ -126,8 +114,8 @@ public:
 		}
 	}
 	void drive(int16_t valueL, int16_t valueR) {
-		right(valueR);
 		left(valueL);
+		right(valueR);
 	}
 	void free() {
 		sConfig.Pulse = 0;

@@ -21,7 +21,7 @@ public:
 	}
 	bool check() {
 		float _voltage = voltage();
-		printf("Battery Voltage: %.3f [V]\n", _voltage);
+		DBG("Battery Voltage: %.3f [V]\n", _voltage);
 		return (_voltage > _threshold_voltage);
 	}
 	int gage(int range) {

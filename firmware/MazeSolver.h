@@ -26,7 +26,7 @@ public:
 	}
 	void start() {
 		thread.start(this, &MazeSolver::task);
-		printf("0x%08X: Maze Solver\n", (unsigned int) thread.gettid());
+		DBG("0x%08X: Maze Solver\n", (unsigned int) thread.gettid());
 	}
 	void terminate() {
 		thread.terminate();
@@ -206,29 +206,28 @@ private:
 
 			Direction wallData = getWallData();		//< センサから取得した壁情報を入れる
 			IndexVec robotPos = getRobotPosion();	//< ロボットの座標を取得
-			printf("Position:\t(%d, %d)\tWall:\t%X\n", (int) robotPos.x, (int) robotPos.y,
+			DBG("Position:\t(%d, %d)\tWall:\t%X\n", (int) robotPos.x, (int) robotPos.y,
 					(int) wallData);
 
 			agent.update(robotPos, wallData);		//< 壁情報を更新 次に進むべき方向を計算
-			printf("agent.getState() => %d\n", agent.getState());
+			DBG("agent.getState() => %d\n", agent.getState());
 			if (agent.getState() == Agent::FINISHED) break;	//Agentの状態を確認 FINISHEDになったら計測走行にうつる
 
 			//ゴールにたどり着いた瞬間に一度だけmazeのバックアップをとる
 			//Mazeクラスはoperator=が定義してあるからa = bでコピーできる
 			if (prevState != Agent::SEARCHING_REACHED_GOAL
 					&& agent.getState() == Agent::SEARCHING_REACHED_GOAL) {
-				printf("maze_backup\n");
+				DBG("maze_backup\n");
 				maze_backup = maze;
 				bz->play(Buzzer::CONFIRM);
 			}
-			if (prevState != Agent::BACK_TO_START
-					&& agent.getState() == Agent::BACK_TO_START) {
+			if (prevState != Agent::BACK_TO_START && agent.getState() == Agent::BACK_TO_START) {
 				bz->play(Buzzer::COMPLETE);
 			}
 			prevState = agent.getState();
 
 			Direction nextDir = agent.getNextDirection();	//< Agentの状態が探索中の場合は次に進むべき方向を取得する
-			printf("agent.getNextDirection() => %X\n", (int) nextDir);
+			DBG("agent.getNextDirection() => %X\n", (int) nextDir);
 			if (nextDir == 0) {
 				bz->play(Buzzer::ERROR);
 				ma->set_action(MoveAction::STOP);
@@ -249,73 +248,109 @@ private:
 		maze.printWall();
 		Thread::wait(10);
 
-		printf("agent.calcRunSequence();\n");
+		DBG("agent.calcRunSequence();\n");
 		agent.calcRunSequence(false);
 	}
 	void fast_run() {
-//		const OperationList &runSequence = agent.getRunSequence();
-//		printf("runSequence.size() => %d\n", runSequence.size());
-//		bz->play(Buzzer::CONFIRM);
-//
-//		dir = NORTH;
-//		pos = IndexVec(0, 0);
-//
-//		ma->set_action(MoveAction::FAST_START_STEP);
-//		for (size_t i = 0; i < runSequence.size(); i++) {
-//			printf("runSequence[%d].n => %d, runSequence[%d].op => %d\n", i, runSequence[i].n, i,
-//					runSequence[i].op);
-//			const Operation& op = runSequence[i];
-//			if (i == 0) {
-//				for (int j = 0; j < op.n - 1; j++) {
-//					robotMove(op);
-//				}
-//			} else {
-//				for (int j = 0; j < op.n; j++) {
-//					robotMove(op);
-//				}
-//			}
-//			Thread::wait(1);
-//		}
-////		ma->set_action(MoveAction::FAST_STOP);
-//
-//		// start drive
-////		mpu->calibration();
-////		wd->calibration();
-//		ma->enable();
-//		while (ma->actions()) {
-//			Thread::wait(1);
-//		}
-//		bz->play(Buzzer::COMPLETE);
-//		// end drive
-//
-//		// back to start
-//		printf("Back to Start\n");
-//		ma->set_action(MoveAction::RETURN);
-//		for (size_t i = 0; i < runSequence.size(); i++) {
-//			printf("runSequence[%d].n => %d, runSequence[%d].op => %d\n",
-//					runSequence.size() - i - 1, runSequence[runSequence.size() - 1 - i].n,
-//					runSequence.size() - 1 - i, runSequence[runSequence.size() - 1 - i].op);
-//			const Operation& op = runSequence[runSequence.size() - 1 - i];
-//			if (i == runSequence.size() - 1) {
-//				for (int j = 0; j < op.n - 1; j++) {
-//					robotMove(op, true);
-//				}
-//			} else {
-//				for (int j = 0; j < op.n; j++) {
-//					robotMove(op, true);
-//				}
-//			}
-//			Thread::wait(1);
-//		}
-////		ma->set_action(MoveAction::FAST_STOP);
-//
-//		ma->set_action(MoveAction::START_INIT);
-//		while (ma->actions()) {
-//			Thread::wait(1);
-//		}
-//
-//		ma->disable();
-//		bz->play(Buzzer::COMPLETE);
+		const OperationList &runSequence = agent.getRunSequence();
+		DBG("runSequence.size() => %d\n", runSequence.size());
+		bz->play(Buzzer::CONFIRM);
+
+		dir = NORTH;
+		pos = IndexVec(0, 0);
+
+		ma->set_action(MoveAction::FAST_START_STEP);
+		for (size_t i = 0; i < runSequence.size(); i++) {
+			DBG("runSequence[%d].n => %d, runSequence[%d].op => %d\n", i, runSequence[i].n, i,
+					runSequence[i].op);
+			const Operation& op = runSequence[i];
+			if (i == 0) {
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, op.n - 1);
+			} else {
+				switch (op.op) {
+					case Operation::FORWARD:
+						ma->set_action(MoveAction::FAST_GO_STRAIGHT, op.n);
+						break;
+					case Operation::FORWARD_DIAG:
+//						ma->set_action(MoveAction::FAST_GO_DIAGONAL);
+						break;
+					case Operation::TURN_LEFT90:
+						ma->set_action(MoveAction::FAST_TURN_LEFT_90, op.n);
+						break;
+					case Operation::TURN_LEFT45:
+//						ma->set_action(MoveAction::FAST_TURN_LEFT_45);
+						break;
+					case Operation::TURN_RIGHT90:
+						ma->set_action(MoveAction::FAST_TURN_RIGHT_90, op.n);
+						break;
+					case Operation::TURN_RIGHT45:
+//						ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
+						break;
+					case Operation::STOP:
+						ma->set_action(MoveAction::FAST_STOP);
+						break;
+				}
+			}
+			Thread::wait(1);
+		}
+//		ma->set_action(MoveAction::FAST_STOP);
+
+		// start drive
+//		mpu->calibration();
+//		wd->calibration();
+		ma->enable();
+		while (ma->actions()) {
+			Thread::wait(1);
+		}
+		bz->play(Buzzer::COMPLETE);
+		// end drive
+
+		// back to start
+		DBG("Back to Start\n");
+		ma->set_action(MoveAction::RETURN);
+		for (size_t i = 0; i < runSequence.size(); i++) {
+			DBG("runSequence[%d].n => %d, runSequence[%d].op => %d\n",
+					runSequence.size() - i - 1, runSequence[runSequence.size() - 1 - i].n,
+					runSequence.size() - 1 - i, runSequence[runSequence.size() - 1 - i].op);
+			const Operation& op = runSequence[runSequence.size() - 1 - i];
+			if (i == runSequence.size() - 1) {
+				ma->set_action(MoveAction::FAST_GO_STRAIGHT, op.n - 1);
+			} else {
+				switch (op.op) {
+					case Operation::FORWARD:
+						ma->set_action(MoveAction::FAST_GO_STRAIGHT, op.n);
+						break;
+					case Operation::FORWARD_DIAG:
+//						ma->set_action(MoveAction::FAST_GO_DIAGONAL);
+						break;
+					case Operation::TURN_LEFT90:
+						ma->set_action(MoveAction::FAST_TURN_RIGHT_90, op.n);
+						break;
+					case Operation::TURN_LEFT45:
+//						ma->set_action(MoveAction::FAST_TURN_LEFT_45);
+						break;
+					case Operation::TURN_RIGHT90:
+						ma->set_action(MoveAction::FAST_TURN_LEFT_90, op.n);
+						break;
+					case Operation::TURN_RIGHT45:
+//						ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
+						break;
+					case Operation::STOP:
+						ma->set_action(MoveAction::FAST_STOP);
+						break;
+				}
+			}
+			Thread::wait(1);
+		}
+//		ma->set_action(MoveAction::FAST_STOP);
+
+		ma->set_action(MoveAction::START_INIT);
+		while (ma->actions()) {
+			Thread::wait(1);
+		}
+
+		ma->disable();
+		bz->play(Buzzer::COMPLETE);
 	}
 	void task() {
 		search_run();
@@ -323,7 +358,7 @@ private:
 		while (1) {
 			fast_run();
 			Thread::wait(1000);
-//			ma->set_params_relative(200);
+			ma->set_params_relative(200);
 		}
 	}
 }

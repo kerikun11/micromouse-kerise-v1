@@ -13,26 +13,13 @@
 #include "Reflector.h"
 
 #define WALL_UPDATE_PERIOD_US		1000
-//#define WALL_DETECTOR_FLONT_RATIO	0.56f
-#define WALL_DETECTOR_FLONT_RATIO	1.820f
 
 class WallDetector {
 public:
 	WallDetector(Reflector *rfl) :
 			rfl(rfl), updateThread(PRIORITY_WALL_UPDATE, STACK_SIZE_WALL_UPDATE) {
-
-//		_wall_ref.side[0] = 260;
-//		_wall_ref.side[1] = 260;
-//		_wall_ref.flont[0] = 200;
-//		_wall_ref.flont[1] = 200;
-
-//		_wall_distance.side[0] = 900;
-//		_wall_distance.side[1] = 700;
-//		_wall_distance.flont[0] = 560;
-//		_wall_distance.flont[1] = 560;
-
 		updateThread.start(this, &WallDetector::updateTask);
-		printf("0x%08X: Wall Detector\n", (unsigned int) updateThread.gettid());
+		DBG("0x%08X: Wall Detector\n", (unsigned int ) updateThread.gettid());
 		updateTicker.attach_us(this, &WallDetector::updateIsr,
 		WALL_UPDATE_PERIOD_US);
 	}
@@ -54,13 +41,13 @@ public:
 			_wall_ref.side[i] = _wall_distance.side[i] / 3;
 		}
 		for (int i = 0; i < 2; i++) {
-			_wall_distance.flont[i] = (_wall_distance.side[0] + _wall_distance.side[1])
-					/ 2 * WALL_DETECTOR_FLONT_RATIO;
-			_wall_ref.flont[i] = _wall_distance.flont[i] / 5;
+			_wall_distance.flont[i] = WALL_DETECTOR_FLONT_RATIO
+					* (_wall_distance.side[0] + _wall_distance.side[1]) / 2;
+			_wall_ref.flont[i] = _wall_distance.flont[i] / 5;	// KERISEv1: 5 KERISEv2: 9
 		}
-		printf("Reflector Calibration:\t%04d\t%04d\t%04d\t%04d\n", (int) _wall_distance.side[0],
-				(int) _wall_distance.flont[0], (int) _wall_distance.flont[1],
-				(int) _wall_distance.side[1]);
+		DBG("Reflector Calibration:\t%04d\t%04d\t%04d\t%04d\n", (int ) _wall_distance.side[0],
+				(int ) _wall_distance.flont[0], (int ) _wall_distance.flont[1],
+				(int ) _wall_distance.side[1]);
 	}
 	struct WALL {
 		bool side[2];

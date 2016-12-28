@@ -35,14 +35,10 @@ public:
 		float _y = y;
 		x = _x * cos(angle) - _y * sin(angle);
 		y = _x * sin(angle) + _y * cos(angle);
-//		theta = theta + angle;
 		return *this;
 	}
-	inline float norm() const {
+	inline float getNorm() const {
 		return sqrt(x * x + y * y);
-	}
-	inline float norm2() const {
-		return x * x + y * y;
 	}
 	inline Position mirror_x() {
 		y = -y;
@@ -95,26 +91,8 @@ public:
 		y *= div;
 		return *this;
 	}
-	inline void print(const char* name) {
-		printf("%s: (%06.1f, %06.1f, %06.3f)\n", name, x, y, theta);
-	}
-};
-
-class WheelParameter {
-public:
-	WheelParameter(float trans = 0, float rot = 0) :
-			trans(trans), rot(rot) {
-	}
-	float trans;	//< translation
-	float rot;		//< rotation
-	float wheel[2];	//< wheel [0]: left, [1]: right
-	void pole2wheel() {
-		wheel[0] = trans - MACHINE_ROTATION_RADIUS * rot;
-		wheel[1] = trans + MACHINE_ROTATION_RADIUS * rot;
-	}
-	void wheel2pole() {
-		rot = (wheel[1] - wheel[0]) / 2.0f / MACHINE_ROTATION_RADIUS;
-		trans = (wheel[1] + wheel[0]) / 2.0f;
+	inline void print(const char* name = "") {
+		DBG("%s: (%.1f,\t%.1f,\t%.3f)\n", name, x, y, theta);
 	}
 };
 
@@ -124,28 +102,43 @@ public:
 			mt(mt), enc(enc), mpu(mpu),
 					ctrlThread(PRIORITY_SPEED_CONTROLLER, STACK_SIZE_SPEED_CONTROLLER) {
 		ctrlThread.start(this, &SpeedController::ctrlTask);
-		printf("0x%08X: Speed Controller\n", (unsigned int) ctrlThread.gettid());
 		for (int i = 0; i < 2; i++) {
-			target_p.wheel[i] = 0;
+			target.wheel[i] = 0;
 			for (int j = 0; j < 3; j++) {
 				wheel_position[j][i] = enc->position(i);
 			}
-			actual_p.wheel[i] = 0;
-			actual_i.wheel[i] = 0;
-			actual_d.wheel[i] = 0;
+			actual.wheel[i] = 0;
+			integral.wheel[i] = 0;
+			differential.wheel[i] = 0;
 		}
 		actual_prev.trans = 0;
 		actual_prev.rot = 0;
 	}
+	struct WheelParameter {
+		WheelParameter(float trans = 0, float rot = 0) :
+				trans(trans), rot(rot) {
+		}
+		float trans;	//< translation
+		float rot;		//< rotation
+		float wheel[2];	//< wheel [0]: left, [1]: right
+		void pole2wheel() {
+			wheel[0] = trans - MACHINE_ROTATION_RADIUS * rot;
+			wheel[1] = trans + MACHINE_ROTATION_RADIUS * rot;
+		}
+		void wheel2pole() {
+			rot = (wheel[1] - wheel[0]) / 2.0f / MACHINE_ROTATION_RADIUS;
+			trans = (wheel[1] + wheel[0]) / 2.0f;
+		}
+	};
 	void enable() {
 		for (int i = 0; i < 2; i++) {
-			target_p.wheel[i] = 0;
+			target.wheel[i] = 0;
 			for (int j = 0; j < 3; j++) {
 				wheel_position[j][i] = enc->position(i);
 			}
-			actual_p.wheel[i] = 0;
-			actual_i.wheel[i] = 0;
-			actual_d.wheel[i] = 0;
+			actual.wheel[i] = 0;
+			integral.wheel[i] = 0;
+			differential.wheel[i] = 0;
 		}
 		position.reset();
 		ctrlTicker.attach_us(this, &SpeedController::ctrlIsr,
@@ -156,16 +149,20 @@ public:
 		mt->free();
 	}
 	void set_target(float trans, float rot) {
-		target_p.trans = trans;
-		target_p.rot = rot;
-		target_p.pole2wheel();
-	}
-	WheelParameter& actual_velocity() {
-		return actual_p;
+		target.trans = trans;
+		target.rot = rot;
+		target.pole2wheel();
 	}
 	Position& getPosition() {
 		return position;
 	}
+	WheelParameter target;
+	WheelParameter actual;
+	WheelParameter integral;
+	WheelParameter differential;
+	const float Kp = 2.4f;
+	const float Ki = 24.0f;
+	const float Kd = 0.01f;
 private:
 	Motor *mt;
 	Encoders *enc;
@@ -173,12 +170,7 @@ private:
 	Thread ctrlThread;
 	Ticker ctrlTicker;
 	float wheel_position[3][2];
-	WheelParameter target_p;
 	WheelParameter actual_prev;
-	WheelParameter actual_p;
-	WheelParameter actual_i;
-	WheelParameter actual_d;
-	float pwm_value[2];
 	Position position;
 
 	void ctrlIsr() {
@@ -193,34 +185,38 @@ private:
 				wheel_position[0][i] = enc->position(i);
 			}
 			for (int i = 0; i < 2; i++) {
-				actual_p.wheel[i] = (wheel_position[0][i] - wheel_position[1][i])
+				actual.wheel[i] = (wheel_position[0][i] - wheel_position[1][i])
 						* 1000000/ SPEED_CONTROLLER_PERIOD_US;
-				actual_i.wheel[i] += (actual_p.wheel[i] - target_p.wheel[i])
-						* SPEED_CONTROLLER_PERIOD_US / 1000000;
-				actual_d.wheel[i] = (wheel_position[0][i] - 2 * wheel_position[1][i]
-						+ wheel_position[2][i]) * 1000000 / SPEED_CONTROLLER_PERIOD_US;
 			}
-			actual_p.wheel2pole();
-			actual_p.rot = mpu->gyroZ() * M_PI / 180.0f;
-			actual_p.pole2wheel();
-			const float Kp = 2.40f;
-			const float Ki = 200.0f;
-			const float Kd = 4.00f;
+			actual.wheel2pole();
+			actual.rot = mpu->gyro.z;
+			actual.pole2wheel();
 			for (int i = 0; i < 2; i++) {
-				pwm_value[i] = Kp * (target_p.wheel[i] - actual_p.wheel[i])
-						+ Ki * (0 - actual_i.wheel[i]) + Kd * (0 - actual_d.wheel[i]);
+				integral.wheel[i] += (actual.wheel[i] - target.wheel[i])
+						* SPEED_CONTROLLER_PERIOD_US / 1000000;
+//				differential.wheel[i] = (wheel_position[0][i] - 2 * wheel_position[1][i]
+//						+ wheel_position[2][i]) * 1000000 / SPEED_CONTROLLER_PERIOD_US;
+			}
+			differential.wheel2pole();
+			differential.trans = mpu->accel.y;
+			differential.rot = 0;
+			differential.pole2wheel();
+			float pwm_value[2];
+			for (int i = 0; i < 2; i++) {
+				pwm_value[i] = Kp * (target.wheel[i] - actual.wheel[i])
+						+ Kp * Ki * (0 - integral.wheel[i]) + Kp * Kd * (0 - differential.wheel[i]);
 			}
 			mt->drive(pwm_value[0], pwm_value[1]);
 
-			position.theta += (actual_prev.rot + actual_p.rot) / 2 * SPEED_CONTROLLER_PERIOD_US
+			position.theta += (actual_prev.rot + actual.rot) / 2 * SPEED_CONTROLLER_PERIOD_US
 					/ 1000000;
-			position.x += (actual_prev.trans + actual_p.trans) / 2 * cos(position.theta)
+			position.x += (actual_prev.trans + actual.trans) / 2 * cos(position.theta)
 					* SPEED_CONTROLLER_PERIOD_US / 1000000;
-			position.y += (actual_prev.trans + actual_p.trans) / 2 * sin(position.theta)
+			position.y += (actual_prev.trans + actual.trans) / 2 * sin(position.theta)
 					* SPEED_CONTROLLER_PERIOD_US / 1000000;
 
-			actual_prev.trans = actual_p.trans;
-			actual_prev.rot = actual_p.rot;
+			actual_prev.trans = actual.trans;
+			actual_prev.rot = actual.rot;
 		}
 	}
 };
