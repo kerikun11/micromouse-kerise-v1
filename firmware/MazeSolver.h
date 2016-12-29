@@ -18,15 +18,15 @@
 
 class MazeSolver {
 public:
-	MazeSolver(Buzzer *bz, MPU6500 *mpu, Reflector *rfl, MoveAction *ma, WallDetector *wd) :
-			bz(bz), mpu(mpu), rfl(rfl), ma(ma), wd(wd), agent(maze),
-					thread(PRIORITY_MAZE_SOLVER, STACK_SIZE_MAZE_SOLVER) {
+	MazeSolver(Buzzer *bz, MPU6500 *mpu, Reflector *rfl, MoveAction *ma,
+			WallDetector *wd) :
+			bz(bz), mpu(mpu), rfl(rfl), ma(ma), wd(wd), agent(maze), thread(
+					PRIORITY_MAZE_SOLVER, STACK_SIZE_MAZE_SOLVER) {
 		dir = NORTH;
 		pos = IndexVec(0, 0);
 	}
 	void start() {
 		thread.start(this, &MazeSolver::task);
-		DBG("0x%08X: Maze Solver\n", (unsigned int) thread.gettid());
 	}
 	void terminate() {
 		thread.terminate();
@@ -185,7 +185,9 @@ private:
 		return pos;
 	}
 	void search_run() {
-		if (agent.getState() == Agent::FINISHED || agent.getState() == Agent::BACK_TO_START) return; //Agentの状態を確認 FINISHEDになったら計測走行にうつる
+		if (agent.getState() == Agent::FINISHED
+				|| agent.getState() == Agent::BACK_TO_START)
+			return; //Agentの状態を確認 FINISHEDになったら計測走行にうつる
 		maze = maze_backup;
 		dir = NORTH;
 		pos = IndexVec(0, 0);
@@ -206,28 +208,30 @@ private:
 
 			Direction wallData = getWallData();		//< センサから取得した壁情報を入れる
 			IndexVec robotPos = getRobotPosion();	//< ロボットの座標を取得
-			DBG("Position:\t(%d, %d)\tWall:\t%X\n", (int) robotPos.x, (int) robotPos.y,
-					(int) wallData);
+			printf("Position:\t(%d, %d)\tWall:\t%X\n", (int) robotPos.x, (int) robotPos.y,
+			(int) wallData);
 
 			agent.update(robotPos, wallData);		//< 壁情報を更新 次に進むべき方向を計算
-			DBG("agent.getState() => %d\n", agent.getState());
-			if (agent.getState() == Agent::FINISHED) break;	//Agentの状態を確認 FINISHEDになったら計測走行にうつる
+			printf("agent.getState() => %d\n", agent.getState());
+			if (agent.getState() == Agent::FINISHED)
+				break;	//Agentの状態を確認 FINISHEDになったら計測走行にうつる
 
 			//ゴールにたどり着いた瞬間に一度だけmazeのバックアップをとる
 			//Mazeクラスはoperator=が定義してあるからa = bでコピーできる
 			if (prevState != Agent::SEARCHING_REACHED_GOAL
 					&& agent.getState() == Agent::SEARCHING_REACHED_GOAL) {
-				DBG("maze_backup\n");
+				printf("maze_backup\n");
 				maze_backup = maze;
 				bz->play(Buzzer::CONFIRM);
 			}
-			if (prevState != Agent::BACK_TO_START && agent.getState() == Agent::BACK_TO_START) {
+			if (prevState != Agent::BACK_TO_START
+					&& agent.getState() == Agent::BACK_TO_START) {
 				bz->play(Buzzer::COMPLETE);
 			}
 			prevState = agent.getState();
 
-			Direction nextDir = agent.getNextDirection();	//< Agentの状態が探索中の場合は次に進むべき方向を取得する
-			DBG("agent.getNextDirection() => %X\n", (int) nextDir);
+			Direction nextDir = agent.getNextDirection();//< Agentの状態が探索中の場合は次に進むべき方向を取得する
+			printf("agent.getNextDirection() => %X\n", (int) nextDir);
 			if (nextDir == 0) {
 				bz->play(Buzzer::ERROR);
 				ma->set_action(MoveAction::STOP);
@@ -248,12 +252,12 @@ private:
 		maze.printWall();
 		Thread::wait(10);
 
-		DBG("agent.calcRunSequence();\n");
+		printf("agent.calcRunSequence();\n");
 		agent.calcRunSequence(false);
 	}
 	void fast_run() {
 		const OperationList &runSequence = agent.getRunSequence();
-		DBG("runSequence.size() => %d\n", runSequence.size());
+		printf("runSequence.size() => %d\n", runSequence.size());
 		bz->play(Buzzer::CONFIRM);
 
 		dir = NORTH;
@@ -261,34 +265,34 @@ private:
 
 		ma->set_action(MoveAction::FAST_START_STEP);
 		for (size_t i = 0; i < runSequence.size(); i++) {
-			DBG("runSequence[%d].n => %d, runSequence[%d].op => %d\n", i, runSequence[i].n, i,
-					runSequence[i].op);
+			printf("runSequence[%d].n => %d, runSequence[%d].op => %d\n", i, runSequence[i].n, i,
+			runSequence[i].op);
 			const Operation& op = runSequence[i];
 			if (i == 0) {
 				ma->set_action(MoveAction::FAST_GO_STRAIGHT, op.n - 1);
 			} else {
 				switch (op.op) {
 					case Operation::FORWARD:
-						ma->set_action(MoveAction::FAST_GO_STRAIGHT, op.n);
-						break;
+					ma->set_action(MoveAction::FAST_GO_STRAIGHT, op.n);
+					break;
 					case Operation::FORWARD_DIAG:
 //						ma->set_action(MoveAction::FAST_GO_DIAGONAL);
-						break;
+					break;
 					case Operation::TURN_LEFT90:
-						ma->set_action(MoveAction::FAST_TURN_LEFT_90, op.n);
-						break;
+					ma->set_action(MoveAction::FAST_TURN_LEFT_90, op.n);
+					break;
 					case Operation::TURN_LEFT45:
 //						ma->set_action(MoveAction::FAST_TURN_LEFT_45);
-						break;
+					break;
 					case Operation::TURN_RIGHT90:
-						ma->set_action(MoveAction::FAST_TURN_RIGHT_90, op.n);
-						break;
+					ma->set_action(MoveAction::FAST_TURN_RIGHT_90, op.n);
+					break;
 					case Operation::TURN_RIGHT45:
 //						ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
-						break;
+					break;
 					case Operation::STOP:
-						ma->set_action(MoveAction::FAST_STOP);
-						break;
+					ma->set_action(MoveAction::FAST_STOP);
+					break;
 				}
 			}
 			Thread::wait(1);
@@ -306,38 +310,38 @@ private:
 		// end drive
 
 		// back to start
-		DBG("Back to Start\n");
+		printf("Back to Start\n");
 		ma->set_action(MoveAction::RETURN);
 		for (size_t i = 0; i < runSequence.size(); i++) {
-			DBG("runSequence[%d].n => %d, runSequence[%d].op => %d\n",
-					runSequence.size() - i - 1, runSequence[runSequence.size() - 1 - i].n,
-					runSequence.size() - 1 - i, runSequence[runSequence.size() - 1 - i].op);
+			printf("runSequence[%d].n => %d, runSequence[%d].op => %d\n",
+			runSequence.size() - i - 1, runSequence[runSequence.size() - 1 - i].n,
+			runSequence.size() - 1 - i, runSequence[runSequence.size() - 1 - i].op);
 			const Operation& op = runSequence[runSequence.size() - 1 - i];
 			if (i == runSequence.size() - 1) {
 				ma->set_action(MoveAction::FAST_GO_STRAIGHT, op.n - 1);
 			} else {
 				switch (op.op) {
 					case Operation::FORWARD:
-						ma->set_action(MoveAction::FAST_GO_STRAIGHT, op.n);
-						break;
+					ma->set_action(MoveAction::FAST_GO_STRAIGHT, op.n);
+					break;
 					case Operation::FORWARD_DIAG:
 //						ma->set_action(MoveAction::FAST_GO_DIAGONAL);
-						break;
+					break;
 					case Operation::TURN_LEFT90:
-						ma->set_action(MoveAction::FAST_TURN_RIGHT_90, op.n);
-						break;
+					ma->set_action(MoveAction::FAST_TURN_RIGHT_90, op.n);
+					break;
 					case Operation::TURN_LEFT45:
 //						ma->set_action(MoveAction::FAST_TURN_LEFT_45);
-						break;
+					break;
 					case Operation::TURN_RIGHT90:
-						ma->set_action(MoveAction::FAST_TURN_LEFT_90, op.n);
-						break;
+					ma->set_action(MoveAction::FAST_TURN_LEFT_90, op.n);
+					break;
 					case Operation::TURN_RIGHT45:
 //						ma->set_action(MoveAction::FAST_TURN_RIGHT_45);
-						break;
+					break;
 					case Operation::STOP:
-						ma->set_action(MoveAction::FAST_STOP);
-						break;
+					ma->set_action(MoveAction::FAST_STOP);
+					break;
 				}
 			}
 			Thread::wait(1);

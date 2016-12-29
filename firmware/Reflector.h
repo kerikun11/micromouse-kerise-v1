@@ -35,7 +35,6 @@ public:
 		IR_RECEIVER_SAMPLING_PERIOD_US);
 
 		updateThread.start(this, &Reflector::updateTask);
-		DBG("0x%08X: Reflector\n", (unsigned int) updateThread.gettid());
 		updateTicker.attach_us(this, &Reflector::updateIsr,
 		IR_RECEIVER_UPDATE_PERIOD_US);
 	}
@@ -185,7 +184,7 @@ private:
 		AdcHandle_S.Init.DMAContinuousRequests = DISABLE;
 		AdcHandle_S.Init.EOCSelection = DISABLE;
 		if (HAL_ADC_Init(&AdcHandle_S) != HAL_OK) {
-			DBG("Couldn't Init ADC S\r\n");
+			printf("Couldn't Init ADC S\r\n");
 //			while (1) {
 //			}
 		}
@@ -204,7 +203,7 @@ private:
 		AdcHandle_F.Init.DMAContinuousRequests = DISABLE;
 		AdcHandle_F.Init.EOCSelection = DISABLE;
 		if (HAL_ADC_Init(&AdcHandle_F) != HAL_OK) {
-			DBG("Couldn't Init ADC F\r\n");
+			printf("Couldn't Init ADC F\r\n");
 //			while (1) {
 //			}
 		}

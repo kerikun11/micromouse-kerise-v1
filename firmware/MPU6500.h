@@ -14,8 +14,6 @@
 #define MPU6500_ACCEL_FACTOR		2048.0f
 #define MPU6500_GYRO_FACTOR			16.3835f
 
-#define MPU6500_UPDATE_PERIOD_US	1000
-
 class MPU6500: private SPI {
 public:
 	MPU6500(PinName mosi_pin, PinName miso_pin, PinName sclk_pin, PinName cs_pin) :
@@ -23,13 +21,10 @@ public:
 					updateThread(PRIORITY_MPU6500_UPDATE, STACK_SIZE_MPU6500_UPDATE) {
 		setup();
 		updateThread.start(this, &MPU6500::updateTask);
-		DBG("0x%08X: MPU6500\n", (unsigned int ) updateThread.gettid());
 		updateTicker.attach_us(this, &MPU6500::updateIsr, MPU6500_UPDATE_PERIOD_US);
 	}
 	struct Parameter {
-		float x;
-		float y;
-		float z;
+		float x, y, z;
 		Parameter(float x = 0, float y = 0, float z = 0) :
 				x(x), y(y), z(z) {
 		}
@@ -75,7 +70,7 @@ public:
 		gyro_sum /= ave_count;
 		accel_offset += accel_sum;
 		gyro_offset += gyro_sum;
-		DBG("MPU6500 Calibration: %.3f\t%.3f\n", gyro_offset.z, accel_offset.y);
+		printf("MPU6500 Calibration: %.3f\t%.3f\n", gyro_offset.z, accel_offset.y);
 		updateTicker.attach_us(this, &MPU6500::updateIsr, MPU6500_UPDATE_PERIOD_US);
 		angle = Parameter();
 		velocity = Parameter();
@@ -130,42 +125,6 @@ private:
 		this->write(val);
 		cs = 1;
 		return true;
-	}
-	inline int16_t readInt16(uint8_t addr) {
-		union {
-			uint16_t u;
-			int16_t i;
-		} _u2i;
-		addr |= 0x80;
-		unsigned char rx[2];
-		cs = 0;
-		this->write(addr);
-		rx[0] = this->write(0x00);
-		rx[1] = this->write(0x00);
-		cs = 1;
-		_u2i.u = ((uint16_t)(rx[0]) << 8) | rx[1];
-		return _u2i.i;
-	}
-	inline int16_t readAccX() {
-		return readInt16(0x3b);
-	}
-	inline int16_t readAccY() {
-		return readInt16(0x3d);
-	}
-	inline int16_t readAccZ() {
-		return readInt16(0x3f);
-	}
-	inline int16_t readTemp() {
-		return readInt16(0x41);
-	}
-	inline int16_t readGyrX() {
-		return readInt16(0x43);
-	}
-	inline int16_t readGyrY() {
-		return readInt16(0x45);
-	}
-	inline int16_t readGyrZ() {
-		return readInt16(0x47);
 	}
 	void readAll() {
 		union {

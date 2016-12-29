@@ -14,14 +14,12 @@ class Battery {
 public:
 	Battery(PinName pin, float threshold_voltage = 3.8f * 2) :
 			adc(pin), _threshold_voltage(threshold_voltage) {
-
 	}
 	float voltage() {
 		return adc.read() * 3.3 * (10 + 20) / 10;
 	}
 	bool check() {
 		float _voltage = voltage();
-		DBG("Battery Voltage: %.3f [V]\n", _voltage);
 		return (_voltage > _threshold_voltage);
 	}
 	int gage(int range) {

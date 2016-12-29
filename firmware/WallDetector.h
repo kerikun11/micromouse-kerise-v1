@@ -19,7 +19,6 @@ public:
 	WallDetector(Reflector *rfl) :
 			rfl(rfl), updateThread(PRIORITY_WALL_UPDATE, STACK_SIZE_WALL_UPDATE) {
 		updateThread.start(this, &WallDetector::updateTask);
-		DBG("0x%08X: Wall Detector\n", (unsigned int ) updateThread.gettid());
 		updateTicker.attach_us(this, &WallDetector::updateIsr,
 		WALL_UPDATE_PERIOD_US);
 	}
@@ -43,11 +42,11 @@ public:
 		for (int i = 0; i < 2; i++) {
 			_wall_distance.flont[i] = WALL_DETECTOR_FLONT_RATIO
 					* (_wall_distance.side[0] + _wall_distance.side[1]) / 2;
-			_wall_ref.flont[i] = _wall_distance.flont[i] / 5;	// KERISEv1: 5 KERISEv2: 9
+			_wall_ref.flont[i] = _wall_distance.flont[i] / 5; // KERISEv1: 5 KERISEv2: 9
 		}
-		DBG("Reflector Calibration:\t%04d\t%04d\t%04d\t%04d\n", (int ) _wall_distance.side[0],
-				(int ) _wall_distance.flont[0], (int ) _wall_distance.flont[1],
-				(int ) _wall_distance.side[1]);
+		printf("Reflector Calibration:\t%04d\t%04d\t%04d\t%04d\n", (int ) _wall_distance.side[0],
+		(int ) _wall_distance.flont[0], (int ) _wall_distance.flont[1],
+		(int ) _wall_distance.side[1]);
 	}
 	struct WALL {
 		bool side[2];
@@ -86,14 +85,14 @@ private:
 				if (value > _wall_ref.side[i] * 1.02) _wall.side[i] = true;
 				else if (value < _wall_ref.side[i] * 0.98) _wall.side[i] = false;
 				_wall_difference.side[i] = (_wall_distance.side[i] - value)
-						/ _wall_distance.side[i];
+				/ _wall_distance.side[i];
 			}
 			for (int i = 0; i < 2; i++) {
 				int16_t value = rfl->flont(i);
 				if (value > _wall_ref.flont[i] * 1.02) _wall.flont[i] = true;
 				else if (value < _wall_ref.flont[i] * 0.98) _wall.flont[i] = false;
 				_wall_difference.flont[i] = (_wall_distance.flont[i] - value)
-						/ _wall_distance.flont[i];
+				/ _wall_distance.flont[i];
 			}
 		}
 	}

@@ -48,7 +48,7 @@ public:
 		TimHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
 		TimHandle.Init.RepetitionCounter = 0;
 		if (HAL_TIM_PWM_Init(&TimHandle) != HAL_OK) {
-			DBG("Couldn't Init PWM\r\n");
+			printf("Couldn't Init PWM\r\n");
 			while (1) {
 			}
 		}

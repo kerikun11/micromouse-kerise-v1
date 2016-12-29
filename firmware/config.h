@@ -40,7 +40,6 @@
 #define STACK_SIZE_REFLECTOR_UPDATE	512
 #define STACK_SIZE_SPEED_CONTROLLER	1024
 #define STACK_SIZE_WALL_UPDATE		512
-
 #define STACK_SIZE_DEBUG_INFO		2048
 #define STACK_SIZE_SERIAL_CTRL		2048
 #define STACK_SIZE_EMERGENCY		512
@@ -56,6 +55,8 @@
 
 #define WALL_DETECTOR_FLONT_RATIO	1.82f	/* KERISEv1 */
 //#define WALL_DETECTOR_FLONT_RATIO	1.33f	/* KERISEv2 */
+
+#define MPU6500_UPDATE_PERIOD_US	1000
 
 /* Pin Mapping */
 
@@ -114,25 +115,6 @@
 #define ADCx_CHANNEL_FL					ADC_CHANNEL_11
 #define ADCx_CHANNEL_FR					ADC_CHANNEL_12
 #define ADCx_CHANNEL_SR					ADC_CHANNEL_13
-
-/* debug output */
-//Debug is disabled by default
-#if 1
-#define DBG(x, ...)  std::printf(x, ##__VA_ARGS__)
-#define WARN(x, ...) std::printf("[WARN] " x, ##__VA_ARGS__)
-#define ERR(x, ...)  std::printf("[ERR] " x, ##__VA_ARGS__)
-#else
-#define DBG(x, ...) //wait_us(10);
-#define WARN(x, ...) //wait_us(10);
-#define ERR(x, ...)
-#endif
-
-//Debug is disabled by default
-#if 0
-#define LOG(x, ...)  printf(x, ##__VA_ARGS__)
-#else
-#define LOG(x, ...) //wait_us(10);
-#endif
 
 /*
  * TIM1		IR LED

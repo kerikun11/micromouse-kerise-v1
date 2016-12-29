@@ -11,13 +11,10 @@
 #include "mbed.h"
 #include "config.h"
 
-#define MOTOR_CH_L	0
-#define MOTOR_CH_R	1
-
 #define ENCODER_L_TIMx	TIM3
 #define ENCODER_R_TIMx	TIM4
 
-#define ENCODER_UPDATE_PERIOD_US	100
+#define ENCODER_UPDATE_PERIOD_US	1000
 
 class Encoder {
 public:
@@ -25,7 +22,6 @@ public:
 			updateThread(PRIORITY_ENCODER_UPDATE, STACK_SIZE_ENCODER) {
 		EncoderInit(TIMx, 0xffff, TIM_ENCODERMODE_TI12);
 		updateThread.start(this, &Encoder::updateTask);
-		DBG("0x%08X: Encoder\n", (unsigned int) updateThread.gettid());
 		prev_count = 0;
 		overflow_count = 0;
 	}
@@ -34,7 +30,8 @@ public:
 		return overflow_count * 65536 + getRawCount();
 	}
 	float position() {
-		return value() * WHEEL_DIAMETER_MM * M_PI * WHEEL_GEER_RATIO / ENCODER_PULSES;
+		return value() * WHEEL_DIAMETER_MM * M_PI * WHEEL_GEER_RATIO
+				/ ENCODER_PULSES;
 	}
 private:
 	TIM_Encoder_InitTypeDef encoder;
@@ -48,8 +45,10 @@ private:
 	}
 	void update() {
 		int16_t now_count = getRawCount();
-		if (now_count > prev_count + 20000) overflow_count--;
-		if (now_count < prev_count - 20000) overflow_count++;
+		if (now_count > prev_count + 20000)
+			overflow_count--;
+		if (now_count < prev_count - 20000)
+			overflow_count++;
 		prev_count = now_count;
 	}
 	void updateTask() {
@@ -118,13 +117,13 @@ private:
 		encoder.IC2Selection = TIM_ICSELECTION_DIRECTTI;
 
 		if (HAL_TIM_Encoder_Init(&timer, &encoder) != HAL_OK) {
-			DBG("Couldn't Init Encoder\r\n");
+			printf("Couldn't Init Encoder\r\n");
 			while (1) {
 			}
 		}
 
 		if (HAL_TIM_Encoder_Start(&timer, TIM_CHANNEL_1) != HAL_OK) {
-			DBG("Couldn't Start Encoder\r\n");
+			printf("Couldn't Start Encoder\r\n");
 			while (1) {
 			}
 		}
@@ -144,24 +143,24 @@ public:
 	}
 	int32_t value(uint8_t ch) {
 		switch (ch) {
-			case 0:
-				return left();
-			case 1:
-				return right();
-			default:
-				return 0;
+		case 0:
+			return left();
+		case 1:
+			return right();
+		default:
+			return 0;
 		}
 	}
 	float position(uint8_t ch = 2) {
 		switch (ch) {
-			case 0:
-				return -encoderL.position();
-			case 1:
-				return encoderR.position();
-			case 2:
-				return (encoderR.position() - encoderL.position()) / 2;
-			default:
-				return 0;
+		case 0:
+			return -encoderL.position();
+		case 1:
+			return encoderR.position();
+		case 2:
+			return (encoderR.position() - encoderL.position()) / 2;
+		default:
+			return 0;
 		}
 	}
 private:
