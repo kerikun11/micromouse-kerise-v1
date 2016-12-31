@@ -42,7 +42,7 @@ public:
 		for (int i = 0; i < 2; i++) {
 			_wall_distance.flont[i] = WALL_DETECTOR_FLONT_RATIO
 					* (_wall_distance.side[0] + _wall_distance.side[1]) / 2;
-			_wall_ref.flont[i] = _wall_distance.flont[i] / 5; // KERISEv1: 5 KERISEv2: 9
+			_wall_ref.flont[i] = _wall_distance.flont[i] / 9; // KERISEv1: 5 KERISEv2: 9
 		}
 		printf("Reflector Calibration:\t%04d\t%04d\t%04d\t%04d\n", (int ) _wall_distance.side[0],
 		(int ) _wall_distance.flont[0], (int ) _wall_distance.flont[1],

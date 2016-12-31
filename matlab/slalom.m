@@ -13,7 +13,7 @@ theta_start = 0;
 theta_end = pi/4*3;
 dt = 0.001;
 %}
-%{
+%%{
 % curve135R
 gain = 1;
 v_const = 1000 * gain;
@@ -83,7 +83,7 @@ theta_start = 0;
 theta_end = pi/4;
 dt = 0.001;
 %}
-%%{
+%{
 % curvePlate
 v_const = 1000;
 omega_dot = 12 * pi;
