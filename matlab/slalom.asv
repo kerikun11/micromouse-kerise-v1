@@ -97,10 +97,10 @@ dt = 0.001;
 %%{
 % curve180
 v_const = 1000;
-omega_dot = pi * 76;
-omega_max = pi * 3.6;
+omega_dot = pi * 32;
+omega_max = pi * 6;
 pos_start = [0; 0];
-pos_end = [120; 90];
+pos_end = [240; 90];
 omega_start = 0;
 omega_end = omega_max;
 theta_start = 0;
@@ -162,7 +162,7 @@ tr = [pos_straight_1st', 0*ones(N_straight_1st,1), 0*ones(N_straight_1st,1);
 size(tr)
 tr(end,:)
 
-%%{
+%{
 ftr = flipud(tr);
 ftr(:,2) = 180-ftr(:,2);
 ftr(:,3) = pi-ftr(:,3);

@@ -173,7 +173,7 @@ void serial_ctrl() {
 void emergencyTask() {
 	while (1) {
 		Thread::wait(1);
-		if (fabs(mpu->accel.y) > 96000 || fabs(mpu->gyro.z) > 10 * M_PI) {
+		if (fabs(mpu->accel.y) > 98000 || fabs(mpu->gyro.z) > 12 * M_PI) {
 			mt->emergency_stop();
 			ms->terminate();
 			bz->play(Buzzer::EMERGENCY);
@@ -375,48 +375,32 @@ int main() {
 					case 3:
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
 						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
 						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
 						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
 						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
-						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
-						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
-						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
-						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
-						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
-						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						mpu->calibration();
@@ -424,7 +408,11 @@ int main() {
 						ma->enable();
 						break;
 					case 4:
-						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
 						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
 						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
 						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
