@@ -282,7 +282,6 @@ int main() {
 					case 0:
 						ms->terminate();
 						mpu->calibration();
-						bz->play(Buzzer::SELECT);
 						wd->calibration();
 						bz->play(Buzzer::CONFIRM);
 						ms->start();
@@ -320,6 +319,156 @@ int main() {
 						ma->set_action(MoveAction::TURN_LEFT_90);
 						ma->set_action(MoveAction::TURN_LEFT_90);
 						ma->set_action(MoveAction::START_INIT);
+						mpu->calibration();
+						wd->calibration();
+						ma->enable();
+						break;
+					case 2: {
+						std::vector<FastTrajectory::FAST_ACTION> acts = {
+								FastTrajectory::FAST_TURN_RIGHT_45,
+								FastTrajectory::FAST_TURN_LEFT_45_45,
+								FastTrajectory::FAST_TURN_RIGHT_45_45,
+								FastTrajectory::FAST_TURN_LEFT_45_45,
+								FastTrajectory::FAST_TURN_RIGHT_45_45,
+								FastTrajectory::FAST_TURN_LEFT_135R,
+								FastTrajectory::FAST_TURN_LEFT_90,
+
+								FastTrajectory::FAST_TURN_LEFT_45,
+								FastTrajectory::FAST_TURN_RIGHT_45_45,
+								FastTrajectory::FAST_TURN_LEFT_45_45,
+								FastTrajectory::FAST_TURN_RIGHT_45_45,
+								FastTrajectory::FAST_TURN_LEFT_135R,
+								FastTrajectory::FAST_TURN_LEFT_90,
+
+								FastTrajectory::FAST_TURN_LEFT_45,
+								FastTrajectory::FAST_TURN_RIGHT_45_45,
+								FastTrajectory::FAST_TURN_LEFT_45_45,
+								FastTrajectory::FAST_TURN_RIGHT_45_45,
+								FastTrajectory::FAST_TURN_LEFT_135R,
+								FastTrajectory::FAST_TURN_LEFT_90,
+
+								FastTrajectory::FAST_TURN_LEFT_45,
+								FastTrajectory::FAST_TURN_RIGHT_45_45,
+								FastTrajectory::FAST_TURN_LEFT_45_45,
+								FastTrajectory::FAST_TURN_RIGHT_45_45,
+								FastTrajectory::FAST_TURN_LEFT_135R,
+								FastTrajectory::FAST_TURN_LEFT_90,
+
+								FastTrajectory::FAST_TURN_LEFT_45,
+								FastTrajectory::FAST_TURN_RIGHT_45_45,
+								FastTrajectory::FAST_TURN_LEFT_45_45,
+								FastTrajectory::FAST_TURN_RIGHT_45_45,
+								FastTrajectory::FAST_TURN_LEFT_135R,
+								FastTrajectory::FAST_TURN_LEFT_90,
+
+								FastTrajectory::FAST_TURN_LEFT_45,
+								FastTrajectory::FAST_TURN_RIGHT_45_45,
+								FastTrajectory::FAST_TURN_LEFT_45_45,
+								FastTrajectory::FAST_TURN_RIGHT_45_45,
+								FastTrajectory::FAST_TURN_LEFT_45R, };
+						ma->set_action(acts);
+					}
+						mpu->calibration();
+						wd->calibration();
+						ma->enable();
+						break;
+					case 3:
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						mpu->calibration();
+						wd->calibration();
+						ma->enable();
+						break;
+					case 4:
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
 						mpu->calibration();
 						wd->calibration();
 						ma->enable();

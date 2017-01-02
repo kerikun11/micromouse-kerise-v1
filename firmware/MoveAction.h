@@ -16,13 +16,15 @@
 #define WALL_ATTACH_ENABLED			false
 #define WALL_AVOID_ENABLED			false
 
-#define LOOK_AHEAD_UNIT				4
-#define DETERMINE_VELOCITY_UNIT		150
-#define TRAJECTORY_PROP_GAIN		20
+#define LOOK_AHEAD_UNIT				6
+#define DETERMINE_VELOCITY_UNIT		10
+#define TRAJECTORY_PROP_GAIN		40
+#define TRAJECTORY_INT_GAIN			5
 
 class Trajectory {
 public:
-	Trajectory() {
+	Trajectory(bool accel = false) :
+			accel(accel) {
 		reset();
 	}
 	virtual ~Trajectory() {
@@ -31,11 +33,17 @@ public:
 		last_index = 0;
 	}
 	Position getNextDir(const Position &cur, float velocity) {
-		int next = getNextIndex(cur);
-		Position dv = (getPosition(next + DETERMINE_VELOCITY_UNIT) - cur).rotate(-cur.theta);
-		velocity *= dv.x / DETERMINE_VELOCITY_UNIT;
+		int index_cur = getNextIndex(cur);
+		if (accel) {
+			float t1 = getPosition(index_cur + 0).theta;
+			float t2 = getPosition(index_cur + 30).theta;
+			float t3 = getPosition(index_cur + 60).theta;
+			float t4 = getPosition(index_cur + 90).theta;
+			float theta = fabs(t1 - t2) * 3 + fabs(t2 - t3) * 2 + fabs(t3 - t4);
+			velocity *= 1 / (1 + theta / 6);
+		}
 		int look_ahead = LOOK_AHEAD_UNIT * (1 + 20 * velocity * velocity / v_const / v_const);
-		Position dir = (getPosition(next + look_ahead) - cur).rotate(-cur.theta);
+		Position dir = (getPosition(index_cur + look_ahead) - cur).rotate(-cur.theta);
 		dir.theta = atan2f(dir.y, dir.x + interval);
 		dir *= velocity / look_ahead;
 		return dir;
@@ -50,6 +58,7 @@ protected:
 	int last_index;
 	const float interval = 1.0f;
 	const float v_const = 1000.0f;
+	bool accel;
 	virtual int size() const {
 		return 180;
 	}
@@ -78,7 +87,7 @@ protected:
 	}
 };
 
-class FastRun: public Trajectory {
+class FastTrajectory: public Trajectory {
 public:
 	enum FAST_ACTION {
 		FAST_GO_STRAIGHT,
@@ -98,8 +107,8 @@ public:
 		FAST_TURN_RIGHT_135,
 		FAST_TURN_RIGHT_135R,
 	};
-	FastRun(std::vector<enum FAST_ACTION> actions) :
-			actions(actions) {
+	FastTrajectory(std::vector<enum FAST_ACTION> actions) :
+			Trajectory(true), actions(actions) {
 		point_index = 0;
 		action_index = 0;
 		cached_action_index = 0;
@@ -2429,7 +2438,11 @@ public:
 	void enable() {
 		rfl->enable();
 		sc->enable();
-		thread.start(this, &MoveAction::fastTask);
+		if (path.size() > 0) {
+			thread.start(this, &MoveAction::fastRun);
+		} else {
+			thread.start(this, &MoveAction::searchRun);
+		}
 	}
 	void disable() {
 		thread.terminate();
@@ -2442,6 +2455,13 @@ public:
 			}
 		}
 		_actions = 0;
+		path.clear();
+	}
+	void set_action(FastTrajectory::FAST_ACTION action) {
+		path.push_back(action);
+	}
+	void set_action(std::vector<FastTrajectory::FAST_ACTION> actions) {
+		path = actions;
 	}
 	void set_action(enum ACTION action, int num = 1) {
 		_actions += num;
@@ -2496,6 +2516,7 @@ private:
 	int _actions;
 	float fast_speed;
 	Position origin;
+	std::vector<FastTrajectory::FAST_ACTION> path;
 
 	void isr() {
 		thread.signal_set(0x01);
@@ -2562,8 +2583,8 @@ private:
 		updateOrigin(Position(0, 0, target_angle));
 	}
 	void straight_x(const float distance, const float v_max, const float v_end) {
-		const float accel = 6000;
-		const float decel = 3000;
+		const float accel = 8000;
+		const float decel = 4000;
 		Trajectory st;
 		timer.reset();
 		timer.start();
@@ -2595,13 +2616,18 @@ private:
 	}
 	template<class C>
 	void trace(C tr, const float velocity) {
+		const float accel = 9000;
 		int cnt = 0;
+		float integral = 0;
 		while (1) {
 			if (tr.getRemain() < 5.0f)
 				break;
 			Thread::signal_wait(0x01);
 			Position dir = tr.getNextDir(getRelativePosition(), velocity);
-			sc->set_target(dir.x, dir.theta * TRAJECTORY_PROP_GAIN);
+			integral += dir.theta * TRAJECTORY_INT_GAIN * MOVE_ACTION_PERIOD / 1000000;
+			if (dir.x > sc->actual.trans + accel * MOVE_ACTION_PERIOD / 1000000)
+				dir.x = sc->actual.trans + accel * MOVE_ACTION_PERIOD / 1000000;
+			sc->set_target(dir.x, (dir.theta + integral) * TRAJECTORY_PROP_GAIN);
 			if (cnt++ % 20 == 0) {
 //				printf("%.1f\t%.3f\n", dir.x, dir.theta);
 			}
@@ -2609,63 +2635,7 @@ private:
 		sc->set_target(velocity, 0);
 		updateOrigin(tr.getEndPosition());
 	}
-	void fastTask() {
-		const float velocity = 1200;
-		setPosition();
-		straight_x(180 - 24 - 6, velocity, velocity);
-		printPosition("S");
-		{
-			std::vector<FastRun::FAST_ACTION> acts = {
-					FastRun::FAST_TURN_RIGHT_45,
-					FastRun::FAST_TURN_LEFT_45_45,
-					FastRun::FAST_TURN_RIGHT_45_45,
-					FastRun::FAST_TURN_LEFT_45_45,
-					FastRun::FAST_TURN_RIGHT_45_45,
-					FastRun::FAST_TURN_LEFT_135R,
-					FastRun::FAST_TURN_LEFT_90,
-
-					FastRun::FAST_TURN_LEFT_45,
-					FastRun::FAST_TURN_RIGHT_45_45,
-					FastRun::FAST_TURN_LEFT_45_45,
-					FastRun::FAST_TURN_RIGHT_45_45,
-					FastRun::FAST_TURN_LEFT_135R,
-					FastRun::FAST_TURN_LEFT_90,
-
-					FastRun::FAST_TURN_LEFT_45,
-					FastRun::FAST_TURN_RIGHT_45_45,
-					FastRun::FAST_TURN_LEFT_45_45,
-					FastRun::FAST_TURN_RIGHT_45_45,
-					FastRun::FAST_TURN_LEFT_135R,
-					FastRun::FAST_TURN_LEFT_90,
-
-					FastRun::FAST_TURN_LEFT_45,
-					FastRun::FAST_TURN_RIGHT_45_45,
-					FastRun::FAST_TURN_LEFT_45_45,
-					FastRun::FAST_TURN_RIGHT_45_45,
-					FastRun::FAST_TURN_LEFT_135R,
-					FastRun::FAST_TURN_LEFT_90,
-
-					FastRun::FAST_TURN_LEFT_45,
-					FastRun::FAST_TURN_RIGHT_45_45,
-					FastRun::FAST_TURN_LEFT_45_45,
-					FastRun::FAST_TURN_RIGHT_45_45,
-					FastRun::FAST_TURN_LEFT_135R,
-					FastRun::FAST_TURN_LEFT_90,
-
-					FastRun::FAST_TURN_LEFT_45,
-					FastRun::FAST_TURN_RIGHT_45_45,
-					FastRun::FAST_TURN_LEFT_45_45,
-					FastRun::FAST_TURN_RIGHT_45_45,
-					FastRun::FAST_TURN_LEFT_45R, };
-			FastRun tr(acts);
-			trace(tr, velocity);
-		}
-		printPosition("E");
-		straight_x(90, velocity, 0);
-		wall_attach();
-		sc->set_target(0, 0);
-	}
-	void searchTask() {
+	void searchRun() {
 		while (1) {
 			osEvent evt = mail.get();
 			if (evt.status != osEventMail) {
@@ -2676,8 +2646,8 @@ private:
 			enum ACTION action = operation->action;
 			int num = operation->num;
 			printf("Action:\t%s\tNumber:\t%d\n", action_string(operation->action), operation->num);
-			printPosition("Start");
-			const float velocity = 300;
+//			printPosition("Start");
+			const float velocity = 600;
 			const float omega = 4 * M_PI;
 			switch (action) {
 			case START_STEP:
@@ -2738,8 +2708,22 @@ private:
 			}
 			_actions -= operation->num;
 			mail.free(operation);
-			printPosition("End");
+//			printPosition("End");
 		}
+	}
+	void fastRun() {
+		const float velocity = 900;
+		setPosition();
+		straight_x(180 - 24 - 6, velocity, velocity);
+		printPosition("S");
+		FastTrajectory tr(path);
+		trace(tr, velocity);
+		printPosition("E");
+		straight_x(90, velocity, 0);
+		wall_attach();
+		sc->set_target(0, 0);
+		Thread::wait(100);
+		disable();
 	}
 };
 

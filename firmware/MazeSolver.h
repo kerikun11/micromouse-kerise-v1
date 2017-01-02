@@ -209,7 +209,7 @@ private:
 			printf("Position:\t(%d, %d)\tWall:\t%X\n", (int) robotPos.x, (int) robotPos.y, (int) wallData);
 
 			agent.update(robotPos, wallData);		//< 壁情報を更新 次に進むべき方向を計算
-			printf("agent.getState() => %d\n", agent.getState());
+			printf("State: %d\n", agent.getState());
 			if (agent.getState() == Agent::FINISHED)
 				break;	//Agentの状態を確認 FINISHEDになったら計測走行にうつる
 
@@ -226,7 +226,7 @@ private:
 			prevState = agent.getState();
 
 			Direction nextDir = agent.getNextDirection();			//< Agentの状態が探索中の場合は次に進むべき方向を取得する
-			printf("agent.getNextDirection() => %X\n", (int) nextDir);
+			printf("NextDir: %X\n", (int) nextDir);
 			if (nextDir == 0) {
 				bz->play(Buzzer::ERROR);
 				ma->set_action(MoveAction::STOP);
