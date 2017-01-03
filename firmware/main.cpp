@@ -403,12 +403,21 @@ int main() {
 						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
+						ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 						mpu->calibration();
 						wd->calibration();
 						ma->enable();
 						break;
 					case 4:
 						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
+						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
 						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
 						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
 						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
