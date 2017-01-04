@@ -11,11 +11,11 @@ omega_end = 0;
 theta_start = 0;
 theta_end = pi/2;
 %}
-%%{
+%{
 % curve45
-v_const = 1680;
+v_const = 2390;
 pos_start = [0; 0];
-pos_end = [180; 90];
+pos_end = [270; 90];
 omega_start = 0;
 omega_end = 0;
 theta_start = 0;
@@ -23,26 +23,16 @@ theta_end = pi/4;
 %}
 %{
 % curve45R
-v_const = 1680;
+v_const = 2390;
 pos_start = [0; 0];
-pos_end = [90*sqrt(2)/2*3; 90*sqrt(2)/2*1];
+pos_end = [90*sqrt(2)/2*4; 90*sqrt(2)/2*2];
 omega_start = 0;
 omega_end = 0;
 theta_start = 0;
 theta_end = pi/4;
 %}
 %{
-% curve45_45
-v_const = 1460;
-pos_start = [0; 0];
-pos_end = [180*1.41421356/2; 180*1.41421356/2];
-omega_start = 0;
-omega_end = 0;
-theta_start = 0;
-theta_end = pi/2;
-%}
-%{
-% curve45_S_45
+% curvePlate
 v_const = 2900;
 pos_start = [0; 0];
 pos_end = [360*1.41421356/2; 360*1.41421356/2];
@@ -158,9 +148,7 @@ figure();
 plot(tr(:,3), '.');
 %}
 
-tr = tr(1:100:size(tr, 1),:);
-format short;
-csvwrite('data.csv',tr);
+tr = tr(1:100:size(tr, 1),:)
 
 size(tr)
 tr(end,:)
