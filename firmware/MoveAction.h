@@ -19,8 +19,8 @@
 
 //#define LOOK_AHEAD_UNIT				10
 //#define DETERMINE_VELOCITY_UNIT		10
-#define TRAJECTORY_PROP_GAIN		40
-#define TRAJECTORY_INT_GAIN			0
+#define TRAJECTORY_PROP_GAIN		100
+#define TRAJECTORY_INT_GAIN			10
 
 class Trajectory {
 public:
@@ -37,13 +37,13 @@ public:
 		int index_cur = getNextIndex(cur);
 		if (accel) {
 //			float t1 = getPosition(index_cur + 0).theta;
-//			float t2 = getPosition(index_cur + 30).theta;
-//			float t3 = getPosition(index_cur + 60).theta;
-//			float t4 = getPosition(index_cur + 90).theta;
+//			float t2 = getPosition(index_cur + 20).theta;
+//			float t3 = getPosition(index_cur + 40).theta;
+//			float t4 = getPosition(index_cur + 60).theta;
 //			float theta = fabs(t1 - t2) * 3 + fabs(t2 - t3) * 2 + fabs(t3 - t4);
 //			velocity *= 1 / (1 + theta / 6);
 		}
-		int look_ahead = 10;
+		int look_ahead = 60;
 		Position dir = (getPosition(index_cur + look_ahead) - cur).rotate(-cur.theta);
 		dir.theta = atan2f(dir.y, dir.x);
 		dir *= velocity / look_ahead;
@@ -163,7 +163,7 @@ private:
 				cached_position += point(act, point_size(act)).rotate(cached_position.theta);
 				cached_index += point_size(act);
 				cached_action_index++;
-//				printf("#: %d\n", cached_action_index);
+				printf("#: %d\n", cached_action_index);
 			}
 		}
 	}
@@ -516,6 +516,117 @@ private:
 				{ 96.805, 3.601, 0.18433 },
 				{ 97.788, 3.7874, 0.19066 },
 				{ 98.769, 3.9801, 0.19709 },
+				{ 99.749, 4.1791, 0.20364 },
+				{ 100.73, 4.3846, 0.21029 },
+				{ 101.7, 4.5967, 0.21705 },
+				{ 102.68, 4.8154, 0.22391 },
+				{ 103.65, 5.0409, 0.23088 },
+				{ 104.63, 5.2732, 0.23796 },
+				{ 105.6, 5.5124, 0.24514 },
+				{ 106.57, 5.7587, 0.25244 },
+				{ 107.54, 6.0121, 0.25983 },
+				{ 108.5, 6.2726, 0.26734 },
+				{ 109.46, 6.5405, 0.27495 },
+				{ 110.43, 6.8157, 0.28267 },
+				{ 111.38, 7.0984, 0.2905 },
+				{ 112.34, 7.3887, 0.29843 },
+				{ 113.3, 7.6866, 0.30647 },
+				{ 114.25, 7.9922, 0.31462 },
+				{ 115.2, 8.3056, 0.32287 },
+				{ 116.14, 8.6269, 0.33123 },
+				{ 117.09, 8.9561, 0.3397 },
+				{ 118.03, 9.2934, 0.34827 },
+				{ 118.97, 9.6388, 0.35695 },
+				{ 119.9, 9.9923, 0.36574 },
+				{ 120.84, 10.354, 0.37463 },
+				{ 121.77, 10.724, 0.38364 },
+				{ 122.69, 11.103, 0.39274 },
+				{ 123.61, 11.49, 0.40185 },
+				{ 124.53, 11.885, 0.41085 },
+				{ 125.45, 12.289, 0.41975 },
+				{ 126.36, 12.7, 0.42853 },
+				{ 127.27, 13.12, 0.43721 },
+				{ 128.17, 13.547, 0.44579 },
+				{ 129.07, 13.982, 0.45425 },
+				{ 129.97, 14.425, 0.46261 },
+				{ 130.86, 14.875, 0.47086 },
+				{ 131.75, 15.332, 0.47901 },
+				{ 132.63, 15.797, 0.48705 },
+				{ 133.52, 16.268, 0.49498 },
+				{ 134.39, 16.747, 0.5028 },
+				{ 135.27, 17.232, 0.51052 },
+				{ 136.14, 17.724, 0.51813 },
+				{ 137.01, 18.222, 0.52564 },
+				{ 137.87, 18.727, 0.53304 },
+				{ 138.73, 19.239, 0.54033 },
+				{ 139.58, 19.756, 0.54751 },
+				{ 140.44, 20.28, 0.55459 },
+				{ 141.28, 20.81, 0.56156 },
+				{ 142.13, 21.345, 0.56842 },
+				{ 142.97, 21.886, 0.57518 },
+				{ 143.81, 22.433, 0.58183 },
+				{ 144.64, 22.985, 0.58837 },
+				{ 145.47, 23.543, 0.59481 },
+				{ 146.3, 24.106, 0.60113 },
+				{ 147.12, 24.674, 0.60736 },
+				{ 147.94, 25.247, 0.61347 },
+				{ 148.76, 25.826, 0.61948 },
+				{ 149.57, 26.409, 0.62538 },
+				{ 150.38, 26.996, 0.63118 },
+				{ 151.18, 27.589, 0.63686 },
+				{ 151.99, 28.186, 0.64244 },
+				{ 152.78, 28.787, 0.64792 },
+				{ 153.58, 29.393, 0.65329 },
+				{ 154.37, 30.003, 0.65855 },
+				{ 155.16, 30.617, 0.6637 },
+				{ 155.95, 31.235, 0.66875 },
+				{ 156.73, 31.857, 0.67369 },
+				{ 157.51, 32.483, 0.67852 },
+				{ 158.29, 33.112, 0.68324 },
+				{ 159.06, 33.745, 0.68786 },
+				{ 159.83, 34.382, 0.69238 },
+				{ 160.6, 35.022, 0.69678 },
+				{ 161.37, 35.665, 0.70108 },
+				{ 162.13, 36.312, 0.70527 },
+				{ 162.89, 36.962, 0.70936 },
+				{ 163.65, 37.615, 0.71333 },
+				{ 164.4, 38.271, 0.71721 },
+				{ 165.15, 38.929, 0.72097 },
+				{ 165.9, 39.591, 0.72463 },
+				{ 166.65, 40.255, 0.72818 },
+				{ 167.4, 40.922, 0.73162 },
+				{ 168.14, 41.591, 0.73496 },
+				{ 168.88, 42.263, 0.73819 },
+				{ 169.62, 42.937, 0.74131 },
+				{ 170.36, 43.613, 0.74433 },
+				{ 171.09, 44.292, 0.74724 },
+				{ 171.82, 44.973, 0.75004 },
+				{ 172.55, 45.655, 0.75273 },
+				{ 173.28, 46.34, 0.75532 },
+				{ 174.01, 47.026, 0.7578 },
+				{ 174.74, 47.715, 0.76018 },
+				{ 175.46, 48.404, 0.76245 },
+				{ 176.18, 49.096, 0.76461 },
+				{ 176.9, 49.789, 0.76666 },
+				{ 177.62, 50.483, 0.76861 },
+				{ 178.34, 51.179, 0.77045 },
+				{ 179.06, 51.876, 0.77219 },
+				{ 179.77, 52.575, 0.77381 },
+				{ 180.49, 53.274, 0.77533 },
+				{ 181.2, 53.974, 0.77675 },
+				{ 181.91, 54.676, 0.77805 },
+				{ 182.63, 55.378, 0.77925 },
+				{ 183.34, 56.081, 0.78034 },
+				{ 184.05, 56.785, 0.78133 },
+				{ 184.76, 57.49, 0.78221 },
+				{ 185.47, 58.195, 0.78298 },
+				{ 186.18, 58.901, 0.78365 },
+				{ 186.88, 59.607, 0.78421 },
+				{ 187.59, 60.313, 0.78466 },
+				{ 188.3, 61.02, 0.785 },
+				{ 189.01, 61.727, 0.78524 },
+				{ 189.71, 62.434, 0.78537 },
+				{ 190.41, 63.134, 0.7854 },
 				{ 190.9188, 63.6396, 0.7854 }, };
 		static const float data_45_45[214 + 1][3] = {
 				{ 0, 0, 0 },
@@ -2386,22 +2497,6 @@ private:
 	}
 };
 
-class Straight: public Trajectory {
-public:
-	Straight(const float distance) :
-			distance(distance) {
-
-	}
-	virtual int size() const {
-		return distance / interval;
-	}
-	virtual Position position(int index) const {
-		return Position(index * interval, 0, 0);
-	}
-private:
-	float distance;
-};
-
 class Curve90: public Trajectory {
 public:
 	Curve90(bool mirror = false) :
@@ -2818,15 +2913,14 @@ private:
 		while (1) {
 			float integral = 0;
 			while (q.empty()) {
-				Thread::wait(1);
-//				Thread::signal_wait(0x01);
-//				Position cur = getRelativePosition();
-//				int look_ahead = 30;
-//				Position dir = (Position(cur.x + look_ahead) - cur).rotate(-cur.theta);
-//				dir.theta = atan2f(dir.y, dir.x);
-//				dir *= velocity / look_ahead;
-//				integral += dir.theta * TRAJECTORY_INT_GAIN * MOVE_ACTION_PERIOD / 1000000;
-//				sc->set_target(dir.x, (dir.theta + integral) * TRAJECTORY_PROP_GAIN);
+				Thread::signal_wait(0x01);
+				Position cur = getRelativePosition();
+				int look_ahead = 30;
+				Position dir = (Position(cur.x + look_ahead) - cur).rotate(-cur.theta);
+				dir.theta = atan2f(dir.y, dir.x);
+				dir *= velocity / look_ahead;
+				integral += dir.theta * TRAJECTORY_INT_GAIN * MOVE_ACTION_PERIOD / 1000000;
+				sc->set_target(dir.x, (dir.theta + integral) * TRAJECTORY_PROP_GAIN);
 			}
 			struct Operation operation = q.front();
 			enum ACTION action = operation.action;
@@ -2896,13 +2990,13 @@ private:
 		}
 	}
 	void fastRun() {
-		const float velocity = 600;
+		const float velocity = 900;
 		setPosition();
 		straight_x(180 - 24 - 6, velocity, velocity);
-//		printPosition("S");
+		printPosition("S");
 		FastTrajectory tr(path);
 		trace(tr, velocity);
-//		printPosition("E");
+		printPosition("E");
 		straight_x(90, velocity, 0);
 		wall_attach();
 		sc->set_target(0, 0);

@@ -165,3 +165,6 @@ csvwrite('data.csv',tr);
 size(tr)
 tr(end,:)
 pos_end
+figure();
+plot(tr(:,1),tr(:,2), '.', 'MarkerSize', 10);
+grid on;

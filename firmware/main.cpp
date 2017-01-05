@@ -289,30 +289,14 @@ int main() {
 					case 1:
 						ms->terminate();
 						ma->set_action(MoveAction::START_STEP);
-						ma->set_action(MoveAction::TURN_RIGHT_90);
-						ma->set_action(MoveAction::TURN_RIGHT_90);
-						ma->set_action(MoveAction::RETURN);
-						ma->set_action(MoveAction::TURN_LEFT_90);
-						ma->set_action(MoveAction::TURN_LEFT_90);
-						ma->set_action(MoveAction::RETURN);
-						ma->set_action(MoveAction::TURN_RIGHT_90);
-						ma->set_action(MoveAction::TURN_RIGHT_90);
-						ma->set_action(MoveAction::RETURN);
-						ma->set_action(MoveAction::TURN_LEFT_90);
-						ma->set_action(MoveAction::TURN_LEFT_90);
-						ma->set_action(MoveAction::RETURN);
-						ma->set_action(MoveAction::TURN_RIGHT_90);
-						ma->set_action(MoveAction::TURN_RIGHT_90);
-						ma->set_action(MoveAction::RETURN);
-						ma->set_action(MoveAction::TURN_LEFT_90);
-						ma->set_action(MoveAction::TURN_LEFT_90);
-						ma->set_action(MoveAction::RETURN);
-						ma->set_action(MoveAction::TURN_RIGHT_90);
-						ma->set_action(MoveAction::TURN_RIGHT_90);
-						ma->set_action(MoveAction::RETURN);
-						ma->set_action(MoveAction::TURN_LEFT_90);
-						ma->set_action(MoveAction::TURN_LEFT_90);
-						ma->set_action(MoveAction::RETURN);
+						for (int i = 0; i < 4; i++) {
+							ma->set_action(MoveAction::TURN_RIGHT_90);
+							ma->set_action(MoveAction::TURN_RIGHT_90);
+							ma->set_action(MoveAction::RETURN);
+							ma->set_action(MoveAction::TURN_LEFT_90);
+							ma->set_action(MoveAction::TURN_LEFT_90);
+							ma->set_action(MoveAction::RETURN);
+						}
 						ma->set_action(MoveAction::TURN_RIGHT_90);
 						ma->set_action(MoveAction::TURN_RIGHT_90);
 						ma->set_action(MoveAction::RETURN);
@@ -332,7 +316,7 @@ int main() {
 						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_45_45);
 						ma->set_action(FastTrajectory::FAST_TURN_LEFT_135R);
 						ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
-						for (int i = 0; i < 10; i++) {
+						for (int i = 0; i < 4; i++) {
 							ma->set_action(FastTrajectory::FAST_GO_HALF);
 							ma->set_action(FastTrajectory::FAST_TURN_LEFT_45);
 							ma->set_action(FastTrajectory::FAST_TURN_RIGHT_45_45);
@@ -353,7 +337,7 @@ int main() {
 						ma->enable();
 						break;
 					case 3:
-						for (int i = 0; i < 10; i++) {
+						for (int i = 0; i < 4; i++) {
 							ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 							ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 							ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
@@ -369,7 +353,7 @@ int main() {
 						break;
 					case 4:
 						ma->set_action(FastTrajectory::FAST_TURN_RIGHT_90);
-						for (int i = 0; i < 10; i++) {
+						for (int i = 0; i < 4; i++) {
 							ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
 							ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
 							ma->set_action(FastTrajectory::FAST_TURN_LEFT_90);
@@ -385,7 +369,7 @@ int main() {
 						ma->enable();
 						break;
 					case 5:
-						for (int i = 0; i < 10; i++) {
+						for (int i = 0; i < 4; i++) {
 							ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 							ma->set_action(FastTrajectory::FAST_GO_STRAIGHT);
 							ma->set_action(FastTrajectory::FAST_TURN_RIGHT_180);
