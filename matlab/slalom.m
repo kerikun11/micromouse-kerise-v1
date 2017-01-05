@@ -1,9 +1,9 @@
 clear;
 omega_dot = pi * 96;
 omega_max = pi * 6;
-%{
+%%{
 % curve90 (search)
-v_const = 600;
+v_const = 800;
 pos_start = [0; 0];
 pos_end = [90; 90];
 omega_start = 0;
@@ -11,7 +11,7 @@ omega_end = 0;
 theta_start = 0;
 theta_end = pi/2;
 %}
-%%{
+%{
 % curve45
 v_const = 1680;
 pos_start = [0; 0];
