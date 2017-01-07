@@ -18,8 +18,7 @@
 #define WALL_AVOID_ENABLED			false
 
 //#define LOOK_AHEAD_UNIT				10
-//#define DETERMINE_VELOCITY_UNIT		10
-#define TRAJECTORY_PROP_GAIN		100
+#define TRAJECTORY_PROP_GAIN		50
 #define TRAJECTORY_INT_GAIN			10
 
 class Trajectory {
@@ -34,19 +33,11 @@ public:
 		last_index = 0;
 	}
 	Position getNextDir(const Position &cur, float velocity) {
-		int index_cur = getNextIndex(cur);
-		if (accel) {
-//			float t1 = getPosition(index_cur + 0).theta;
-//			float t2 = getPosition(index_cur + 20).theta;
-//			float t3 = getPosition(index_cur + 40).theta;
-//			float t4 = getPosition(index_cur + 60).theta;
-//			float theta = fabs(t1 - t2) * 3 + fabs(t2 - t3) * 2 + fabs(t3 - t4);
-//			velocity *= 1 / (1 + theta / 6);
-		}
-		int look_ahead = 60;
-		Position dir = (getPosition(index_cur + look_ahead) - cur).rotate(-cur.theta);
+		int look_ahead = 30;
+		Position dir = (getPosition(last_index + look_ahead) - cur).rotate(-cur.theta);
 		dir.theta = atan2f(dir.y, dir.x);
 		dir *= velocity / look_ahead;
+		last_index++;
 		return dir;
 	}
 	float getRemain() const {
@@ -72,18 +63,6 @@ protected:
 	}
 	Position getPosition(const int index) {
 		return position(index);
-	}
-	int getNextIndex(const Position& pos) {
-		for (int i = last_index;; i++) {
-			Position target = getPosition(i);
-			Position dir = (target - pos).rotate(-target.theta);
-			if (dir.x > 0) {
-				last_index = i;
-				cache(last_index);
-				return last_index;
-			}
-		}
-		return last_index;
 	}
 };
 
