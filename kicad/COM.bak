@@ -1,4 +1,5 @@
 EESchema Schematic File Version 2
+LIBS:KERISEv1-rescue
 LIBS:74xgxx
 LIBS:74xx
 LIBS:ac-dc
@@ -13,7 +14,6 @@ LIBS:brooktre
 LIBS:cmos_ieee
 LIBS:cmos4000
 LIBS:conn
-LIBS:connectors
 LIBS:contrib
 LIBS:cypress
 LIBS:dc-dc
@@ -26,18 +26,12 @@ LIBS:elec-unifil
 LIBS:ESD_Protection
 LIBS:ftdi
 LIBS:gennum
-LIBS:graphic
 LIBS:hc11
-LIBS:ic-cpu
-LIBS:ic-io
-LIBS:ic-misc
-LIBS:ic-power
 LIBS:intel
 LIBS:interface
 LIBS:ir
 LIBS:Lattice
 LIBS:linear
-LIBS:logo
 LIBS:maxim
 LIBS:memory
 LIBS:microchip
@@ -56,7 +50,6 @@ LIBS:nxp_armmcu
 LIBS:onsemi
 LIBS:opto
 LIBS:Oscillators
-LIBS:passive
 LIBS:philips
 LIBS:power
 LIBS:Power_Management
@@ -83,7 +76,6 @@ LIBS:Xicor
 LIBS:xilinx
 LIBS:Zilog
 LIBS:KERISEv1
-LIBS:kerikun11
 LIBS:KERISEv1-cache
 EELAYER 25 0
 EELAYER END
@@ -108,10 +100,10 @@ Text HLabel 4900 4300 2    60   Input ~ 0
 Text HLabel 4900 4400 2    60   Input ~ 0
 SWO
 $Comp
-L GND #PWR95
+L GND #PWR?
 U 1 1 57CDA951
 P 4800 4500
-F 0 "#PWR95" H 4800 4250 50  0001 C CNN
+F 0 "#PWR?" H 4800 4250 50  0001 C CNN
 F 1 "GND" H 4800 4350 50  0000 C CNN
 F 2 "" H 4800 4500 50  0000 C CNN
 F 3 "" H 4800 4500 50  0000 C CNN
@@ -131,10 +123,10 @@ Wire Wire Line
 Wire Wire Line
 	4900 4400 4700 4400
 $Comp
-L GND #PWR96
+L GND #PWR?
 U 1 1 57CDAC76
 P 5850 4500
-F 0 "#PWR96" H 5850 4250 50  0001 C CNN
+F 0 "#PWR?" H 5850 4250 50  0001 C CNN
 F 1 "GND" H 5850 4350 50  0000 C CNN
 F 2 "" H 5850 4500 50  0000 C CNN
 F 3 "" H 5850 4500 50  0000 C CNN
@@ -152,10 +144,10 @@ Wire Wire Line
 Wire Wire Line
 	5850 4200 5750 4200
 $Comp
-L CONN_01X04 P6
+L CONN_01X04 P?
 U 1 1 57CDB029
 P 5550 4250
-F 0 "P6" H 5550 4500 50  0000 C CNN
+F 0 "P?" H 5550 4500 50  0000 C CNN
 F 1 "UART" V 5650 4250 50  0000 C CNN
 F 2 "Connectors_JST:JST_SH_BM04B-SRSS-TB_04x1.00mm_Straight" H 5550 4250 50  0001 C CNN
 F 3 "" H 5550 4250 50  0000 C CNN
@@ -165,10 +157,10 @@ $EndComp
 Wire Wire Line
 	5950 4400 5750 4400
 $Comp
-L +5V #PWR94
+L +5V #PWR?
 U 1 1 57CDB089
 P 5850 4000
-F 0 "#PWR94" H 5850 3850 50  0001 C CNN
+F 0 "#PWR?" H 5850 3850 50  0001 C CNN
 F 1 "+5V" H 5850 4140 50  0000 C CNN
 F 2 "" H 5850 4000 50  0000 C CNN
 F 3 "" H 5850 4000 50  0000 C CNN
@@ -182,10 +174,10 @@ Wire Wire Line
 Text Notes 4100 3600 0    100  ~ 0
 COM Port
 $Comp
-L CONN_01X05 P5
+L CONN_01X05 P?
 U 1 1 57D2587E
 P 4500 4200
-F 0 "P5" H 4500 4500 50  0000 C CNN
+F 0 "P?" H 4500 4500 50  0000 C CNN
 F 1 "SWD" V 4600 4200 50  0000 C CNN
 F 2 "Connectors_JST:JST_SH_BM05B-SRSS-TB_05x1.00mm_Straight" H 4500 4200 50  0001 C CNN
 F 3 "" H 4500 4200 50  0000 C CNN
