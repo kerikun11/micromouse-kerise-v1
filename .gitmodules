@@ -1,0 +1,4 @@
+[submodule "firmware/mbed-os"]
+	path = firmware/mbed-os
+	url = git@github.com:kerikun11/mbed-os.git
+	branch = mbed-os-5.1_stm32f405
