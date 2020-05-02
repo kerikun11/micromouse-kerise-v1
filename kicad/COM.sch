@@ -1,83 +1,5 @@
-EESchema Schematic File Version 2
-LIBS:KERISEv1-rescue
-LIBS:74xgxx
-LIBS:74xx
-LIBS:ac-dc
-LIBS:actel
-LIBS:adc-dac
-LIBS:Altera
-LIBS:analog_devices
-LIBS:analog_switches
-LIBS:atmel
-LIBS:audio
-LIBS:brooktre
-LIBS:cmos_ieee
-LIBS:cmos4000
-LIBS:conn
-LIBS:contrib
-LIBS:cypress
-LIBS:dc-dc
-LIBS:device
-LIBS:digital-audio
-LIBS:diode
-LIBS:display
-LIBS:dsp
-LIBS:elec-unifil
-LIBS:ESD_Protection
-LIBS:ftdi
-LIBS:gennum
-LIBS:hc11
-LIBS:intel
-LIBS:interface
-LIBS:ir
-LIBS:Lattice
-LIBS:linear
-LIBS:maxim
-LIBS:memory
-LIBS:microchip
-LIBS:microchip_dspic33dsc
-LIBS:microchip_pic10mcu
-LIBS:microchip_pic12mcu
-LIBS:microchip_pic16mcu
-LIBS:microchip_pic18mcu
-LIBS:microchip_pic32mcu
-LIBS:microcontrollers
-LIBS:motor_drivers
-LIBS:motorola
-LIBS:msp430
-LIBS:nordicsemi
-LIBS:nxp_armmcu
-LIBS:onsemi
-LIBS:opto
-LIBS:Oscillators
-LIBS:philips
-LIBS:power
-LIBS:Power_Management
-LIBS:powerint
-LIBS:pspice
-LIBS:references
-LIBS:regul
-LIBS:relays
-LIBS:rfcom
-LIBS:sensors
-LIBS:silabs
-LIBS:siliconi
-LIBS:stm8
-LIBS:stm32
-LIBS:supertex
-LIBS:switches
-LIBS:texas
-LIBS:transf
-LIBS:transistors
-LIBS:ttl_ieee
-LIBS:valves
-LIBS:video
-LIBS:Xicor
-LIBS:xilinx
-LIBS:Zilog
-LIBS:KERISEv1
-LIBS:KERISEv1-cache
-EELAYER 25 0
+EESchema Schematic File Version 4
+EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -100,7 +22,7 @@ Text HLabel 4900 4300 2    60   Input ~ 0
 Text HLabel 4900 4400 2    60   Input ~ 0
 SWO
 $Comp
-L GND #PWR98
+L power:GND #PWR98
 U 1 1 57CDA951
 P 4800 4500
 F 0 "#PWR98" H 4800 4250 50  0001 C CNN
@@ -123,7 +45,7 @@ Wire Wire Line
 Wire Wire Line
 	4900 4400 4700 4400
 $Comp
-L GND #PWR100
+L power:GND #PWR100
 U 1 1 57CDAC76
 P 5850 4500
 F 0 "#PWR100" H 5850 4250 50  0001 C CNN
@@ -144,7 +66,7 @@ Wire Wire Line
 Wire Wire Line
 	5850 4200 5750 4200
 $Comp
-L CONN_01X04 P6
+L KERISEv1-rescue:CONN_01X04 P6
 U 1 1 57CDB029
 P 5550 4250
 F 0 "P6" H 5550 4500 50  0000 C CNN
@@ -157,7 +79,7 @@ $EndComp
 Wire Wire Line
 	5950 4400 5750 4400
 $Comp
-L +5V #PWR99
+L power:+5V #PWR99
 U 1 1 57CDB089
 P 5850 4000
 F 0 "#PWR99" H 5850 3850 50  0001 C CNN
@@ -174,7 +96,7 @@ Wire Wire Line
 Text Notes 4100 3600 0    100  ~ 0
 COM Port
 $Comp
-L CONN_01X05 P5
+L KERISEv1-rescue:CONN_01X05 P5
 U 1 1 57D2587E
 P 4500 4200
 F 0 "P5" H 4500 4500 50  0000 C CNN

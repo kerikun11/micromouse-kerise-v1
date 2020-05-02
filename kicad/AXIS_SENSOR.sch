@@ -1,83 +1,5 @@
-EESchema Schematic File Version 2
-LIBS:KERISEv1-rescue
-LIBS:74xgxx
-LIBS:74xx
-LIBS:ac-dc
-LIBS:actel
-LIBS:adc-dac
-LIBS:Altera
-LIBS:analog_devices
-LIBS:analog_switches
-LIBS:atmel
-LIBS:audio
-LIBS:brooktre
-LIBS:cmos_ieee
-LIBS:cmos4000
-LIBS:conn
-LIBS:contrib
-LIBS:cypress
-LIBS:dc-dc
-LIBS:device
-LIBS:digital-audio
-LIBS:diode
-LIBS:display
-LIBS:dsp
-LIBS:elec-unifil
-LIBS:ESD_Protection
-LIBS:ftdi
-LIBS:gennum
-LIBS:hc11
-LIBS:intel
-LIBS:interface
-LIBS:ir
-LIBS:Lattice
-LIBS:linear
-LIBS:maxim
-LIBS:memory
-LIBS:microchip
-LIBS:microchip_dspic33dsc
-LIBS:microchip_pic10mcu
-LIBS:microchip_pic12mcu
-LIBS:microchip_pic16mcu
-LIBS:microchip_pic18mcu
-LIBS:microchip_pic32mcu
-LIBS:microcontrollers
-LIBS:motor_drivers
-LIBS:motorola
-LIBS:msp430
-LIBS:nordicsemi
-LIBS:nxp_armmcu
-LIBS:onsemi
-LIBS:opto
-LIBS:Oscillators
-LIBS:philips
-LIBS:power
-LIBS:Power_Management
-LIBS:powerint
-LIBS:pspice
-LIBS:references
-LIBS:regul
-LIBS:relays
-LIBS:rfcom
-LIBS:sensors
-LIBS:silabs
-LIBS:siliconi
-LIBS:stm8
-LIBS:stm32
-LIBS:supertex
-LIBS:switches
-LIBS:texas
-LIBS:transf
-LIBS:transistors
-LIBS:ttl_ieee
-LIBS:valves
-LIBS:video
-LIBS:Xicor
-LIBS:xilinx
-LIBS:Zilog
-LIBS:KERISEv1
-LIBS:KERISEv1-cache
-EELAYER 25 0
+EESchema Schematic File Version 4
+EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -92,7 +14,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L +3.3V #PWR84
+L power:+3.3V #PWR84
 U 1 1 57CCAAD0
 P 5700 2700
 F 0 "#PWR84" H 5700 2550 50  0001 C CNN
@@ -103,9 +25,9 @@ F 3 "" H 5700 2700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	5700 2700 5700 3200
+	5700 2700 5700 2900
 $Comp
-L GND #PWR83
+L power:GND #PWR83
 U 1 1 57CCAAFB
 P 5500 4700
 F 0 "#PWR83" H 5500 4450 50  0001 C CNN
@@ -128,7 +50,7 @@ AXIS_MOSI
 Text HLabel 6500 3500 2    60   Input ~ 0
 AXIS_MISO
 $Comp
-L GND #PWR86
+L power:GND #PWR86
 U 1 1 57CCAB79
 P 6400 4700
 F 0 "#PWR86" H 6400 4450 50  0001 C CNN
@@ -139,13 +61,15 @@ F 3 "" H 6400 4700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	6400 4700 6400 3700
+	6400 4700 6400 4000
 Wire Wire Line
 	6400 3700 6300 3700
 $Comp
-L C C31
+L KERISEv1-rescue:C C31
 U 1 1 57CCABB6
 P 7200 3950
+AR Path="/57CCABB6" Ref="C31"  Part="1" 
+AR Path="/57CC33F6/57CCABB6" Ref="C31"  Part="1" 
 F 0 "C31" H 7225 4050 50  0000 L CNN
 F 1 "0.1u" H 7225 3850 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0603" H 7238 3800 50  0001 C CNN
@@ -158,7 +82,7 @@ Wire Wire Line
 Wire Wire Line
 	7200 3600 6300 3600
 $Comp
-L GND #PWR87
+L power:GND #PWR87
 U 1 1 57CCAC2E
 P 7200 4700
 F 0 "#PWR87" H 7200 4450 50  0001 C CNN
@@ -186,7 +110,7 @@ Wire Wire Line
 Wire Wire Line
 	6500 4400 6300 4400
 $Comp
-L GND #PWR81
+L power:GND #PWR81
 U 1 1 57CCB3DF
 P 5100 3000
 F 0 "#PWR81" H 5100 2750 50  0001 C CNN
@@ -197,7 +121,7 @@ F 3 "" H 5100 3000 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L MPU6500 U10
+L KERISEv1:MPU6500 U10
 U 1 1 57CCB62A
 P 5700 3650
 F 0 "U10" H 5250 4050 50  0000 C CNN
@@ -208,7 +132,7 @@ F 3 "DOCUMENTATION" H 5250 2550 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L +3.3V #PWR82
+L power:+3.3V #PWR82
 U 1 1 57CCB773
 P 5500 2700
 F 0 "#PWR82" H 5500 2550 50  0001 C CNN
@@ -219,7 +143,7 @@ F 3 "" H 5500 2700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	5500 2700 5500 3200
+	5500 2700 5500 2900
 Wire Wire Line
 	5400 2900 5500 2900
 Connection ~ 5500 2900
@@ -228,9 +152,11 @@ Wire Wire Line
 Wire Wire Line
 	5100 2900 5200 2900
 $Comp
-L C_Small C29
+L KERISEv1-rescue:C_Small C29
 U 1 1 57CCB95E
 P 5300 2900
+AR Path="/57CCB95E" Ref="C29"  Part="1" 
+AR Path="/57CC33F6/57CCB95E" Ref="C29"  Part="1" 
 F 0 "C29" H 5310 2970 50  0000 L CNN
 F 1 "0.01u" H 5310 2820 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0603" H 5300 2900 50  0001 C CNN
@@ -239,9 +165,11 @@ F 3 "" H 5300 2900 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L C_Small C30
+L KERISEv1-rescue:C_Small C30
 U 1 1 57CCB9B9
 P 5900 2900
+AR Path="/57CCB9B9" Ref="C30"  Part="1" 
+AR Path="/57CC33F6/57CCB9B9" Ref="C30"  Part="1" 
 F 0 "C30" H 5910 2970 50  0000 L CNN
 F 1 "0.1u" H 5910 2820 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0603" H 5900 2900 50  0001 C CNN
@@ -253,7 +181,7 @@ Connection ~ 5700 2900
 Wire Wire Line
 	5800 2900 5700 2900
 $Comp
-L GND #PWR85
+L power:GND #PWR85
 U 1 1 57CCBA56
 P 6100 3000
 F 0 "#PWR85" H 6100 2750 50  0001 C CNN
@@ -269,4 +197,10 @@ Wire Wire Line
 	6100 2900 6000 2900
 Text Notes 4200 2400 0    100  ~ 0
 AXIS Sensor
+Wire Wire Line
+	6400 4000 6400 3700
+Wire Wire Line
+	5500 2900 5500 3200
+Wire Wire Line
+	5700 2900 5700 3200
 $EndSCHEMATC

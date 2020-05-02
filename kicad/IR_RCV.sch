@@ -1,83 +1,5 @@
-EESchema Schematic File Version 2
-LIBS:KERISEv1-rescue
-LIBS:74xgxx
-LIBS:74xx
-LIBS:ac-dc
-LIBS:actel
-LIBS:adc-dac
-LIBS:Altera
-LIBS:analog_devices
-LIBS:analog_switches
-LIBS:atmel
-LIBS:audio
-LIBS:brooktre
-LIBS:cmos_ieee
-LIBS:cmos4000
-LIBS:conn
-LIBS:contrib
-LIBS:cypress
-LIBS:dc-dc
-LIBS:device
-LIBS:digital-audio
-LIBS:diode
-LIBS:display
-LIBS:dsp
-LIBS:elec-unifil
-LIBS:ESD_Protection
-LIBS:ftdi
-LIBS:gennum
-LIBS:hc11
-LIBS:intel
-LIBS:interface
-LIBS:ir
-LIBS:Lattice
-LIBS:linear
-LIBS:maxim
-LIBS:memory
-LIBS:microchip
-LIBS:microchip_dspic33dsc
-LIBS:microchip_pic10mcu
-LIBS:microchip_pic12mcu
-LIBS:microchip_pic16mcu
-LIBS:microchip_pic18mcu
-LIBS:microchip_pic32mcu
-LIBS:microcontrollers
-LIBS:motor_drivers
-LIBS:motorola
-LIBS:msp430
-LIBS:nordicsemi
-LIBS:nxp_armmcu
-LIBS:onsemi
-LIBS:opto
-LIBS:Oscillators
-LIBS:philips
-LIBS:power
-LIBS:Power_Management
-LIBS:powerint
-LIBS:pspice
-LIBS:references
-LIBS:regul
-LIBS:relays
-LIBS:rfcom
-LIBS:sensors
-LIBS:silabs
-LIBS:siliconi
-LIBS:stm8
-LIBS:stm32
-LIBS:supertex
-LIBS:switches
-LIBS:texas
-LIBS:transf
-LIBS:transistors
-LIBS:ttl_ieee
-LIBS:valves
-LIBS:video
-LIBS:Xicor
-LIBS:xilinx
-LIBS:Zilog
-LIBS:KERISEv1
-LIBS:KERISEv1-cache
-EELAYER 25 0
+EESchema Schematic File Version 4
+EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -92,13 +14,14 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L D D4
+L KERISEv1-rescue:D D4
 U 1 1 57CF0F37
 P 4600 3850
 AR Path="/57CF0B09/57CF0F37" Ref="D4"  Part="1" 
 AR Path="/57CF289D/57CF0F37" Ref="D5"  Part="1" 
 AR Path="/57CF292E/57CF0F37" Ref="D6"  Part="1" 
 AR Path="/57CF2A30/57CF0F37" Ref="D7"  Part="1" 
+AR Path="/57CF0F37" Ref="D4"  Part="1" 
 F 0 "D4" H 4600 3950 50  0000 C CNN
 F 1 "SFH213FA" H 4600 3750 50  0000 C CNN
 F 2 "kerikun11:Photo-5MM_Angle" H 4600 3850 50  0001 C CNN
@@ -107,13 +30,14 @@ F 3 "" H 4600 3850 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L LM2902N U8
+L KERISEv1-rescue:LM2902N U8
 U 1 1 57CF0F3E
 P 5500 4000
 AR Path="/57CF0B09/57CF0F3E" Ref="U8"  Part="1" 
 AR Path="/57CF289D/57CF0F3E" Ref="U8"  Part="2" 
 AR Path="/57CF292E/57CF0F3E" Ref="U8"  Part="3" 
 AR Path="/57CF2A30/57CF0F3E" Ref="U8"  Part="4" 
+AR Path="/57CF0F3E" Ref="U8"  Part="1" 
 F 0 "U8" H 5550 4200 50  0000 C CNN
 F 1 "AD8604" H 5650 3800 50  0000 C CNN
 F 2 "Housings_SSOP:TSSOP-14_4.4x5mm_Pitch0.65mm" H 5450 4100 50  0001 C CNN
@@ -122,13 +46,14 @@ F 3 "" H 5550 4200 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C C21
+L KERISEv1-rescue:C C21
 U 1 1 57CF0F45
 P 4850 4100
 AR Path="/57CF0B09/57CF0F45" Ref="C21"  Part="1" 
 AR Path="/57CF289D/57CF0F45" Ref="C23"  Part="1" 
 AR Path="/57CF292E/57CF0F45" Ref="C25"  Part="1" 
 AR Path="/57CF2A30/57CF0F45" Ref="C27"  Part="1" 
+AR Path="/57CF0F45" Ref="C21"  Part="1" 
 F 0 "C21" H 4875 4200 50  0000 L CNN
 F 1 "0.01u" H 4875 4000 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0603" H 4888 3950 50  0001 C CNN
@@ -137,13 +62,14 @@ F 3 "" H 4850 4100 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L R R10
+L KERISEv1-rescue:R R10
 U 1 1 57CF0F4C
 P 4600 4650
 AR Path="/57CF0B09/57CF0F4C" Ref="R10"  Part="1" 
 AR Path="/57CF289D/57CF0F4C" Ref="R12"  Part="1" 
 AR Path="/57CF292E/57CF0F4C" Ref="R14"  Part="1" 
 AR Path="/57CF2A30/57CF0F4C" Ref="R16"  Part="1" 
+AR Path="/57CF0F4C" Ref="R10"  Part="1" 
 F 0 "R10" V 4680 4650 50  0000 C CNN
 F 1 "100k" V 4600 4650 50  0000 C CNN
 F 2 "Resistors_SMD:R_0603" V 4530 4650 50  0001 C CNN
@@ -159,13 +85,14 @@ Wire Wire Line
 	4600 4000 4600 4500
 Connection ~ 4600 4100
 $Comp
-L R R11
+L KERISEv1-rescue:R R11
 U 1 1 57CF0F57
 P 5650 3600
 AR Path="/57CF0B09/57CF0F57" Ref="R11"  Part="1" 
 AR Path="/57CF289D/57CF0F57" Ref="R13"  Part="1" 
 AR Path="/57CF292E/57CF0F57" Ref="R15"  Part="1" 
 AR Path="/57CF2A30/57CF0F57" Ref="R17"  Part="1" 
+AR Path="/57CF0F57" Ref="R11"  Part="1" 
 F 0 "R11" V 5730 3600 50  0000 C CNN
 F 1 "220k" V 5650 3600 50  0000 C CNN
 F 2 "Resistors_SMD:R_0603" V 5580 3600 50  0001 C CNN
@@ -174,13 +101,14 @@ F 3 "" H 5650 3600 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L C C22
+L KERISEv1-rescue:C C22
 U 1 1 57CF0F5E
 P 5650 3400
 AR Path="/57CF0B09/57CF0F5E" Ref="C22"  Part="1" 
 AR Path="/57CF289D/57CF0F5E" Ref="C24"  Part="1" 
 AR Path="/57CF292E/57CF0F5E" Ref="C26"  Part="1" 
 AR Path="/57CF2A30/57CF0F5E" Ref="C28"  Part="1" 
+AR Path="/57CF0F5E" Ref="C22"  Part="1" 
 F 0 "C22" H 5550 3500 50  0000 L CNN
 F 1 "22p" H 5500 3300 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0603" H 5688 3250 50  0001 C CNN
@@ -210,7 +138,7 @@ Wire Wire Line
 Wire Wire Line
 	4600 3200 4600 3700
 $Comp
-L +3.3VA-RESCUE-KERISEv1 #PWR58
+L KERISEv1-rescue:+3.3VA-RESCUE-KERISEv1 #PWR58
 U 1 1 57CF0F71
 P 4600 3200
 AR Path="/57CF0B09/57CF0F71" Ref="#PWR58"  Part="1" 
@@ -225,7 +153,7 @@ F 3 "" H 4600 3200 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L +3.3VA-RESCUE-KERISEv1 #PWR61
+L KERISEv1-rescue:+3.3VA-RESCUE-KERISEv1 #PWR61
 U 1 1 57CF0F77
 P 5400 3200
 AR Path="/57CF0B09/57CF0F77" Ref="#PWR61"  Part="1" 
@@ -240,7 +168,7 @@ F 3 "" H 5400 3200 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L +1.65VA #PWR60
+L KERISEv1:+1.65VA #PWR60
 U 1 1 57CF0F7D
 P 4900 3800
 AR Path="/57CF0B09/57CF0F7D" Ref="#PWR60"  Part="1" 
@@ -259,7 +187,7 @@ Wire Wire Line
 Wire Wire Line
 	4900 3900 5200 3900
 $Comp
-L GND #PWR59
+L power:GND #PWR59
 U 1 1 57CF0F85
 P 4600 4900
 AR Path="/57CF0B09/57CF0F85" Ref="#PWR59"  Part="1" 
@@ -276,7 +204,7 @@ $EndComp
 Wire Wire Line
 	4600 4900 4600 4800
 $Comp
-L GND #PWR62
+L power:GND #PWR62
 U 1 1 57CF0F8C
 P 5400 4900
 AR Path="/57CF0B09/57CF0F8C" Ref="#PWR62"  Part="1" 

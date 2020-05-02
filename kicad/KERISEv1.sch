@@ -1,83 +1,5 @@
-EESchema Schematic File Version 2
-LIBS:KERISEv1-rescue
-LIBS:74xgxx
-LIBS:74xx
-LIBS:ac-dc
-LIBS:actel
-LIBS:adc-dac
-LIBS:Altera
-LIBS:analog_devices
-LIBS:analog_switches
-LIBS:atmel
-LIBS:audio
-LIBS:brooktre
-LIBS:cmos_ieee
-LIBS:cmos4000
-LIBS:conn
-LIBS:contrib
-LIBS:cypress
-LIBS:dc-dc
-LIBS:device
-LIBS:digital-audio
-LIBS:diode
-LIBS:display
-LIBS:dsp
-LIBS:elec-unifil
-LIBS:ESD_Protection
-LIBS:ftdi
-LIBS:gennum
-LIBS:hc11
-LIBS:intel
-LIBS:interface
-LIBS:ir
-LIBS:Lattice
-LIBS:linear
-LIBS:maxim
-LIBS:memory
-LIBS:microchip
-LIBS:microchip_dspic33dsc
-LIBS:microchip_pic10mcu
-LIBS:microchip_pic12mcu
-LIBS:microchip_pic16mcu
-LIBS:microchip_pic18mcu
-LIBS:microchip_pic32mcu
-LIBS:microcontrollers
-LIBS:motor_drivers
-LIBS:motorola
-LIBS:msp430
-LIBS:nordicsemi
-LIBS:nxp_armmcu
-LIBS:onsemi
-LIBS:opto
-LIBS:Oscillators
-LIBS:philips
-LIBS:power
-LIBS:Power_Management
-LIBS:powerint
-LIBS:pspice
-LIBS:references
-LIBS:regul
-LIBS:relays
-LIBS:rfcom
-LIBS:sensors
-LIBS:silabs
-LIBS:siliconi
-LIBS:stm8
-LIBS:stm32
-LIBS:supertex
-LIBS:switches
-LIBS:texas
-LIBS:transf
-LIBS:transistors
-LIBS:ttl_ieee
-LIBS:valves
-LIBS:video
-LIBS:Xicor
-LIBS:xilinx
-LIBS:Zilog
-LIBS:KERISEv1
-LIBS:KERISEv1-cache
-EELAYER 25 0
+EESchema Schematic File Version 4
+EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -92,7 +14,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L +3.3V #PWR5
+L power:+3.3V #PWR5
 U 1 1 57C90296
 P 4800 1000
 F 0 "#PWR5" H 4800 850 50  0001 C CNN
@@ -103,7 +25,7 @@ F 3 "" H 4800 1000 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C_Small C8
+L KERISEv1-rescue:C_Small C8
 U 1 1 57C91C59
 P 4500 4800
 F 0 "C8" H 4510 4870 50  0000 L CNN
@@ -114,7 +36,7 @@ F 3 "" H 4500 4800 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L C_Small C7
+L KERISEv1-rescue:C_Small C7
 U 1 1 57C928EA
 P 4500 4550
 F 0 "C7" H 4510 4620 50  0000 L CNN
@@ -125,7 +47,7 @@ F 3 "" H 4500 4550 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L GND #PWR4
+L power:GND #PWR4
 U 1 1 57C96070
 P 4600 3700
 F 0 "#PWR4" H 4600 3450 50  0001 C CNN
@@ -136,7 +58,7 @@ F 3 "" H 4600 3700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR2
+L power:GND #PWR2
 U 1 1 57C960BE
 P 4300 3700
 F 0 "#PWR2" H 4300 3450 50  0001 C CNN
@@ -147,7 +69,7 @@ F 3 "" H 4300 3700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR3
+L power:GND #PWR3
 U 1 1 57C99E1F
 P 4300 5100
 F 0 "#PWR3" H 4300 4850 50  0001 C CNN
@@ -158,7 +80,7 @@ F 3 "" H 4300 5100 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR7
+L power:GND #PWR7
 U 1 1 57C9A3C2
 P 4800 6100
 F 0 "#PWR7" H 4800 5850 50  0001 C CNN
@@ -169,7 +91,7 @@ F 3 "" H 4800 6100 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR6
+L power:GND #PWR6
 U 1 1 57CA25EF
 P 4800 3900
 F 0 "#PWR6" H 4800 3650 50  0001 C CNN
@@ -257,7 +179,7 @@ MT-IN-L-2
 Text GLabel 10400 1100 2    50   Input ~ 0
 MT-IN-R-2
 $Comp
-L C_Small C3
+L KERISEv1-rescue:C_Small C3
 U 1 1 57CCF51A
 P 4500 1500
 F 0 "C3" H 4510 1570 50  0000 L CNN
@@ -268,7 +190,7 @@ F 3 "" H 4500 1500 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L C_Small C4
+L KERISEv1-rescue:C_Small C4
 U 1 1 57CDA654
 P 4500 1700
 F 0 "C4" H 4510 1770 50  0000 L CNN
@@ -279,7 +201,7 @@ F 3 "" H 4500 1700 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L C_Small C2
+L KERISEv1-rescue:C_Small C2
 U 1 1 57CDA6E0
 P 4500 1300
 F 0 "C2" H 4510 1370 50  0000 L CNN
@@ -290,7 +212,7 @@ F 3 "" H 4500 1300 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L C_Small C1
+L KERISEv1-rescue:C_Small C1
 U 1 1 57CDA771
 P 4500 1100
 F 0 "C1" H 4510 1170 50  0000 L CNN
@@ -301,7 +223,7 @@ F 3 "" H 4500 1100 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L C_Small C5
+L KERISEv1-rescue:C_Small C5
 U 1 1 57CDA805
 P 4500 2000
 F 0 "C5" H 4510 2070 50  0000 L CNN
@@ -312,7 +234,7 @@ F 3 "" H 4500 2000 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L GND #PWR1
+L power:GND #PWR1
 U 1 1 57CDA895
 P 4300 2600
 F 0 "#PWR1" H 4300 2350 50  0001 C CNN
@@ -323,7 +245,7 @@ F 3 "" H 4300 2600 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C_Small C6
+L KERISEv1-rescue:C_Small C6
 U 1 1 57CDB4B2
 P 4500 2300
 F 0 "C6" H 4510 2370 50  0000 L CNN
@@ -449,7 +371,7 @@ RESET
 Text GLabel 4200 2900 0    50   Input ~ 0
 RESET
 $Comp
-L C C9
+L KERISEv1-rescue:C C9
 U 1 1 57CDEB3C
 P 4600 3300
 F 0 "C9" H 4625 3400 50  0000 L CNN
@@ -500,7 +422,7 @@ BUTTON
 Text GLabel 10400 3400 2    50   Input ~ 0
 SPEAKER
 $Comp
-L PWR_FLAG #FLG1
+L power:PWR_FLAG #FLG1
 U 1 1 57D09A39
 P 4700 4450
 F 0 "#FLG1" H 4700 4545 50  0001 C CNN
@@ -511,7 +433,7 @@ F 3 "" H 4700 4450 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L PWR_FLAG #FLG2
+L power:PWR_FLAG #FLG2
 U 1 1 57D180C1
 P 4700 4900
 F 0 "#FLG2" H 4700 4995 50  0001 C CNN
@@ -542,20 +464,20 @@ NoConn ~ 10300 5900
 NoConn ~ 10300 6100
 NoConn ~ 10300 6200
 Wire Wire Line
-	4800 1000 4800 2300
+	4800 1000 4800 1100
 Wire Wire Line
-	4600 1500 4900 1500
+	4600 1500 4800 1500
 Connection ~ 4800 1500
 Wire Wire Line
-	4600 1700 4900 1700
+	4600 1700 4800 1700
 Connection ~ 4800 1700
 Wire Wire Line
-	4600 2000 4900 2000
+	4600 2000 4800 2000
 Wire Wire Line
-	4600 2300 4900 2300
+	4600 2300 4800 2300
 Connection ~ 4800 2000
 Wire Wire Line
-	4800 5500 4800 6100
+	4800 5500 4800 5700
 Wire Wire Line
 	4800 5700 4900 5700
 Connection ~ 4800 5700
@@ -586,9 +508,9 @@ Wire Wire Line
 Wire Wire Line
 	3000 5300 3100 5300
 Wire Wire Line
-	4600 1100 4900 1100
+	4600 1100 4800 1100
 Wire Wire Line
-	4600 1300 4900 1300
+	4600 1300 4800 1300
 Connection ~ 4800 1100
 Connection ~ 4800 1300
 Wire Wire Line
@@ -597,7 +519,7 @@ Wire Wire Line
 	4800 6000 4900 6000
 Connection ~ 4800 6000
 Wire Wire Line
-	4300 1100 4300 2600
+	4300 1100 4300 1300
 Wire Wire Line
 	4300 2000 4400 2000
 Wire Wire Line
@@ -655,7 +577,7 @@ Wire Wire Line
 Wire Wire Line
 	2300 2200 2400 2200
 Wire Wire Line
-	4200 2900 4900 2900
+	4200 2900 4300 2900
 Wire Wire Line
 	4300 3700 4300 3600
 Wire Wire Line
@@ -673,9 +595,9 @@ Wire Wire Line
 Wire Wire Line
 	4700 4450 4700 4550
 Wire Wire Line
-	4600 4550 4900 4550
+	4600 4550 4700 4550
 Wire Wire Line
-	4300 4550 4300 5100
+	4300 4550 4300 4800
 Wire Wire Line
 	4300 4800 4400 4800
 Wire Wire Line
@@ -683,7 +605,7 @@ Wire Wire Line
 Connection ~ 4300 4800
 Connection ~ 4700 4550
 Wire Wire Line
-	4600 4800 4900 4800
+	4600 4800 4700 4800
 Wire Wire Line
 	4700 4800 4700 4900
 Connection ~ 4700 4800
@@ -750,7 +672,7 @@ Wire Wire Line
 Wire Wire Line
 	10300 800  10400 800 
 $Comp
-L Tactile_SW_4P SW1
+L KERISEv1:Tactile_SW_4P SW1
 U 1 1 57DDDB01
 P 3900 3300
 F 0 "SW1" H 3900 3550 50  0000 C CNN
@@ -765,7 +687,7 @@ NoConn ~ 3500 3100
 Text Notes 700  800  0    100  ~ 0
 Main
 $Comp
-L STM32F405RGTx-RESCUE-KERISEv1 U1
+L KERISEv1-rescue:STM32F405RGTx-RESCUE-KERISEv1 U1
 U 1 1 5862791B
 P 7600 3600
 F 0 "U1" H 5050 6550 50  0000 L BNN
@@ -775,4 +697,50 @@ F 3 "" H 6050 4800 50  0000 C CNN
 	1    7600 3600
 	1    0    0    -1  
 $EndComp
+Wire Wire Line
+	4800 1500 4800 1700
+Wire Wire Line
+	4800 1500 4900 1500
+Wire Wire Line
+	4800 1700 4900 1700
+Wire Wire Line
+	4800 1700 4800 2000
+Wire Wire Line
+	4800 2000 4900 2000
+Wire Wire Line
+	4800 2000 4800 2300
+Wire Wire Line
+	4800 5700 4800 6000
+Wire Wire Line
+	4800 1100 4800 1300
+Wire Wire Line
+	4800 1100 4900 1100
+Wire Wire Line
+	4800 1300 4900 1300
+Wire Wire Line
+	4800 1300 4800 1500
+Wire Wire Line
+	4800 6000 4800 6100
+Wire Wire Line
+	4300 2000 4300 2300
+Wire Wire Line
+	4300 1700 4300 2000
+Wire Wire Line
+	4300 1500 4300 1700
+Wire Wire Line
+	4300 1300 4300 1500
+Wire Wire Line
+	4800 2300 4900 2300
+Wire Wire Line
+	4300 2300 4300 2600
+Wire Wire Line
+	4600 2900 4900 2900
+Wire Wire Line
+	4300 2900 4600 2900
+Wire Wire Line
+	4300 4800 4300 5100
+Wire Wire Line
+	4700 4550 4900 4550
+Wire Wire Line
+	4700 4800 4900 4800
 $EndSCHEMATC

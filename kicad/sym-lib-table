@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name KERISEv1-rescue)(type Legacy)(uri ${KIPRJMOD}/KERISEv1-rescue.lib)(options "")(descr ""))
+  (lib (name KERISEv1)(type Legacy)(uri ${KIPRJMOD}/KERISEv1.lib)(options "")(descr ""))
+)

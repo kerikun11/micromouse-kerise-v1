@@ -1,83 +1,5 @@
-EESchema Schematic File Version 2
-LIBS:KERISEv1-rescue
-LIBS:74xgxx
-LIBS:74xx
-LIBS:ac-dc
-LIBS:actel
-LIBS:adc-dac
-LIBS:Altera
-LIBS:analog_devices
-LIBS:analog_switches
-LIBS:atmel
-LIBS:audio
-LIBS:brooktre
-LIBS:cmos_ieee
-LIBS:cmos4000
-LIBS:conn
-LIBS:contrib
-LIBS:cypress
-LIBS:dc-dc
-LIBS:device
-LIBS:digital-audio
-LIBS:diode
-LIBS:display
-LIBS:dsp
-LIBS:elec-unifil
-LIBS:ESD_Protection
-LIBS:ftdi
-LIBS:gennum
-LIBS:hc11
-LIBS:intel
-LIBS:interface
-LIBS:ir
-LIBS:Lattice
-LIBS:linear
-LIBS:maxim
-LIBS:memory
-LIBS:microchip
-LIBS:microchip_dspic33dsc
-LIBS:microchip_pic10mcu
-LIBS:microchip_pic12mcu
-LIBS:microchip_pic16mcu
-LIBS:microchip_pic18mcu
-LIBS:microchip_pic32mcu
-LIBS:microcontrollers
-LIBS:motor_drivers
-LIBS:motorola
-LIBS:msp430
-LIBS:nordicsemi
-LIBS:nxp_armmcu
-LIBS:onsemi
-LIBS:opto
-LIBS:Oscillators
-LIBS:philips
-LIBS:power
-LIBS:Power_Management
-LIBS:powerint
-LIBS:pspice
-LIBS:references
-LIBS:regul
-LIBS:relays
-LIBS:rfcom
-LIBS:sensors
-LIBS:silabs
-LIBS:siliconi
-LIBS:stm8
-LIBS:stm32
-LIBS:supertex
-LIBS:switches
-LIBS:texas
-LIBS:transf
-LIBS:transistors
-LIBS:ttl_ieee
-LIBS:valves
-LIBS:video
-LIBS:Xicor
-LIBS:xilinx
-LIBS:Zilog
-LIBS:KERISEv1
-LIBS:KERISEv1-cache
-EELAYER 25 0
+EESchema Schematic File Version 4
+EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -92,7 +14,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 Wire Wire Line
-	6500 2800 6500 3100
+	6500 2800 6500 2900
 Wire Wire Line
 	6500 2900 6600 2900
 Connection ~ 6500 2800
@@ -103,9 +25,11 @@ Wire Wire Line
 	6500 3100 6600 3100
 Connection ~ 6500 3000
 $Comp
-L C C15
+L KERISEv1-rescue:C C15
 U 1 1 57CA1844
 P 6300 3350
+AR Path="/57CA1844" Ref="C15"  Part="1" 
+AR Path="/57CA15C1/57CA1844" Ref="C15"  Part="1" 
 F 0 "C15" H 6325 3450 50  0000 L CNN
 F 1 "0.1u" H 6325 3250 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0603" H 6338 3200 50  0001 C CNN
@@ -114,10 +38,10 @@ F 3 "" H 6300 3350 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	6300 2700 6300 3200
+	6300 2700 6300 2800
 Connection ~ 6300 2800
 $Comp
-L GND #PWR42
+L power:GND #PWR42
 U 1 1 57CA1878
 P 6300 3700
 F 0 "#PWR42" H 6300 3450 50  0001 C CNN
@@ -130,7 +54,7 @@ $EndComp
 Wire Wire Line
 	6300 3700 6300 3500
 $Comp
-L GND #PWR45
+L power:GND #PWR45
 U 1 1 57CA18AE
 P 7100 3700
 F 0 "#PWR45" H 7100 3450 50  0001 C CNN
@@ -141,11 +65,11 @@ F 3 "" H 7100 3700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	7100 3500 7100 3700
+	7100 3500 7100 3600
 Wire Wire Line
 	7200 3500 7200 3600
 Wire Wire Line
-	7100 3600 7400 3600
+	7100 3600 7200 3600
 Connection ~ 7100 3600
 Wire Wire Line
 	7300 3600 7300 3500
@@ -154,9 +78,11 @@ Wire Wire Line
 	7400 3600 7400 3500
 Connection ~ 7300 3600
 $Comp
-L R R6
+L KERISEv1-rescue:R R6
 U 1 1 57CA1AA6
 P 8400 3450
+AR Path="/57CA1AA6" Ref="R6"  Part="1" 
+AR Path="/57CA15C1/57CA1AA6" Ref="R6"  Part="1" 
 F 0 "R6" V 8480 3450 50  0000 C CNN
 F 1 "68" V 8400 3450 50  0000 C CNN
 F 2 "Resistors_SMD:R_0603" V 8330 3450 50  0001 C CNN
@@ -165,7 +91,7 @@ F 3 "" H 8400 3450 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR49
+L power:GND #PWR49
 U 1 1 57CA1AC2
 P 8400 3700
 F 0 "#PWR49" H 8400 3450 50  0001 C CNN
@@ -181,9 +107,9 @@ Wire Wire Line
 	8000 3200 7900 3200
 NoConn ~ 7900 3100
 Wire Wire Line
-	7900 2800 9000 2800
+	7900 2800 8000 2800
 Wire Wire Line
-	8000 2800 8000 3000
+	8000 2800 8000 2900
 Wire Wire Line
 	8000 2900 7900 2900
 Connection ~ 8000 2800
@@ -191,7 +117,7 @@ Wire Wire Line
 	8000 3000 7900 3000
 Connection ~ 8000 2900
 $Comp
-L +5V #PWR51
+L power:+5V #PWR51
 U 1 1 57CA2050
 P 9000 2700
 F 0 "#PWR51" H 9000 2550 50  0001 C CNN
@@ -202,9 +128,9 @@ F 3 "" H 9000 2700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	9000 2700 9000 3200
+	9000 2700 9000 2800
 $Comp
-L +BATT #PWR41
+L power:+BATT #PWR41
 U 1 1 57CA210F
 P 6300 2700
 F 0 "#PWR41" H 6300 2550 50  0001 C CNN
@@ -215,11 +141,13 @@ F 3 "" H 6300 2700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	6300 2800 6600 2800
+	6300 2800 6500 2800
 $Comp
-L C C18
+L KERISEv1-rescue:C C18
 U 1 1 57CA2382
 P 8700 3350
+AR Path="/57CA2382" Ref="C18"  Part="1" 
+AR Path="/57CA15C1/57CA2382" Ref="C18"  Part="1" 
 F 0 "C18" H 8725 3450 50  0000 L CNN
 F 1 "0.1u" H 8725 3250 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0603" H 8738 3200 50  0001 C CNN
@@ -228,7 +156,7 @@ F 3 "" H 8700 3350 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR50
+L power:GND #PWR50
 U 1 1 57CA23AF
 P 8700 3700
 F 0 "#PWR50" H 8700 3450 50  0001 C CNN
@@ -244,9 +172,11 @@ Wire Wire Line
 	8700 3200 8700 2800
 Connection ~ 8700 2800
 $Comp
-L CP C19
+L KERISEv1-rescue:CP C19
 U 1 1 57CA26EB
 P 9000 3350
+AR Path="/57CA26EB" Ref="C19"  Part="1" 
+AR Path="/57CA15C1/57CA26EB" Ref="C19"  Part="1" 
 F 0 "C19" H 9025 3450 50  0000 L CNN
 F 1 "22u" H 9025 3250 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0805" H 9038 3200 50  0001 C CNN
@@ -255,7 +185,7 @@ F 3 "" H 9000 3350 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR52
+L power:GND #PWR52
 U 1 1 57CA271B
 P 9000 3700
 F 0 "#PWR52" H 9000 3450 50  0001 C CNN
@@ -269,9 +199,11 @@ Wire Wire Line
 	9000 3700 9000 3500
 Connection ~ 9000 2800
 $Comp
-L R R5
+L KERISEv1-rescue:R R5
 U 1 1 57CC0B58
 P 8150 3200
+AR Path="/57CC0B58" Ref="R5"  Part="1" 
+AR Path="/57CA15C1/57CC0B58" Ref="R5"  Part="1" 
 F 0 "R5" V 8230 3200 50  0000 C CNN
 F 1 "68" V 8150 3200 50  0000 C CNN
 F 2 "Resistors_SMD:R_0603" V 8080 3200 50  0001 C CNN
@@ -284,7 +216,7 @@ Wire Wire Line
 Wire Wire Line
 	8400 3200 8400 3300
 $Comp
-L +BATT #PWR33
+L power:+BATT #PWR33
 U 1 1 57CC111A
 P 4800 2700
 F 0 "#PWR33" H 4800 2550 50  0001 C CNN
@@ -295,7 +227,7 @@ F 3 "" H 4800 2700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR28
+L power:GND #PWR28
 U 1 1 57CC113A
 P 3800 3700
 F 0 "#PWR28" H 3800 3450 50  0001 C CNN
@@ -306,7 +238,7 @@ F 3 "" H 3800 3700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L +5V #PWR31
+L power:+5V #PWR31
 U 1 1 57CC1940
 P 4600 4400
 F 0 "#PWR31" H 4600 4250 50  0001 C CNN
@@ -317,9 +249,9 @@ F 3 "" H 4600 4400 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	4600 4400 4600 4800
+	4600 4400 4600 4500
 Wire Wire Line
-	4600 4500 4900 4500
+	4600 4500 4800 4500
 Wire Wire Line
 	4800 4500 4800 4600
 Wire Wire Line
@@ -327,7 +259,7 @@ Wire Wire Line
 Connection ~ 4800 4500
 Connection ~ 4600 4500
 $Comp
-L GND #PWR37
+L power:GND #PWR37
 U 1 1 57CC1AB4
 P 5400 5300
 F 0 "#PWR37" H 5400 5050 50  0001 C CNN
@@ -340,7 +272,7 @@ $EndComp
 Wire Wire Line
 	5400 5300 5400 5100
 $Comp
-L GND #PWR32
+L power:GND #PWR32
 U 1 1 57CC1B19
 P 4600 5300
 F 0 "#PWR32" H 4600 5050 50  0001 C CNN
@@ -353,7 +285,7 @@ $EndComp
 Wire Wire Line
 	4600 5300 4600 5100
 $Comp
-L +3.3VA-RESCUE-KERISEv1 #PWR39
+L KERISEv1-rescue:+3.3VA-RESCUE-KERISEv1 #PWR39
 U 1 1 57CC1D9F
 P 6100 4400
 F 0 "#PWR39" H 6250 4350 50  0001 C CNN
@@ -364,11 +296,11 @@ F 3 "" H 6100 4400 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	6100 4400 6100 4800
+	6100 4400 6100 4500
 Wire Wire Line
 	6100 4500 5900 4500
 $Comp
-L +1.65VA #PWR43
+L KERISEv1:+1.65VA #PWR43
 U 1 1 57CC1DFF
 P 6500 4400
 F 0 "#PWR43" H 6650 4350 50  0001 C CNN
@@ -379,11 +311,11 @@ F 3 "" H 6500 4400 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	6500 4400 6500 4800
+	6500 4400 6500 4600
 Wire Wire Line
 	6500 4600 5900 4600
 $Comp
-L LT1963ES8 U6
+L KERISEv1:LT1963ES8 U6
 U 1 1 57CC1FE4
 P 8100 4650
 F 0 "U6" H 7750 4950 60  0000 C CNN
@@ -394,7 +326,7 @@ F 3 "" H 8000 4900 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L +5V #PWR46
+L power:+5V #PWR46
 U 1 1 57CC204D
 P 7100 4400
 F 0 "#PWR46" H 7100 4250 50  0001 C CNN
@@ -405,9 +337,11 @@ F 3 "" H 7100 4400 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C C12
+L KERISEv1-rescue:C C12
 U 1 1 57CC207F
 P 4600 4950
+AR Path="/57CC207F" Ref="C12"  Part="1" 
+AR Path="/57CA15C1/57CC207F" Ref="C12"  Part="1" 
 F 0 "C12" H 4625 5050 50  0000 L CNN
 F 1 "0.1u" H 4625 4850 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0603" H 4638 4800 50  0001 C CNN
@@ -416,9 +350,11 @@ F 3 "" H 4600 4950 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C C17
+L KERISEv1-rescue:C C17
 U 1 1 57CC20C3
 P 7100 4950
+AR Path="/57CC20C3" Ref="C17"  Part="1" 
+AR Path="/57CA15C1/57CC20C3" Ref="C17"  Part="1" 
 F 0 "C17" H 7125 5050 50  0000 L CNN
 F 1 "0.1u" H 7125 4850 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0603" H 7138 4800 50  0001 C CNN
@@ -427,7 +363,7 @@ F 3 "" H 7100 4950 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR47
+L power:GND #PWR47
 U 1 1 57CC212C
 P 7100 5300
 F 0 "#PWR47" H 7100 5050 50  0001 C CNN
@@ -440,9 +376,9 @@ $EndComp
 Wire Wire Line
 	7100 5300 7100 5100
 Wire Wire Line
-	7100 4400 7100 4800
+	7100 4400 7100 4500
 Wire Wire Line
-	7100 4500 7500 4500
+	7100 4500 7400 4500
 Connection ~ 7100 4500
 Wire Wire Line
 	7500 4600 7400 4600
@@ -450,7 +386,7 @@ Wire Wire Line
 	7400 4600 7400 4500
 Connection ~ 7400 4500
 $Comp
-L GND #PWR48
+L power:GND #PWR48
 U 1 1 57CC2261
 P 8100 5300
 F 0 "#PWR48" H 8100 5050 50  0001 C CNN
@@ -461,16 +397,16 @@ F 3 "" H 8100 5300 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	8100 5100 8100 5300
+	8100 5100 8100 5200
 Wire Wire Line
 	8000 5100 8000 5200
 Wire Wire Line
-	8000 5200 8200 5200
+	8000 5200 8100 5200
 Connection ~ 8100 5200
 Wire Wire Line
 	8200 5200 8200 5100
 $Comp
-L +3.3V #PWR53
+L power:+3.3V #PWR53
 U 1 1 57CC235F
 P 9000 4400
 F 0 "#PWR53" H 9000 4250 50  0001 C CNN
@@ -481,18 +417,20 @@ F 3 "" H 9000 4400 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	9000 4400 9000 4800
+	9000 4400 9000 4500
 Wire Wire Line
-	8700 4500 9000 4500
+	8700 4500 8800 4500
 Wire Wire Line
 	8700 4600 8800 4600
 Wire Wire Line
 	8800 4600 8800 4500
 Connection ~ 8800 4500
 $Comp
-L C C20
+L KERISEv1-rescue:C C20
 U 1 1 57CC2665
 P 9000 4950
+AR Path="/57CC2665" Ref="C20"  Part="1" 
+AR Path="/57CA15C1/57CC2665" Ref="C20"  Part="1" 
 F 0 "C20" H 9025 5050 50  0000 L CNN
 F 1 "0.1u" H 9025 4850 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0603" H 9038 4800 50  0001 C CNN
@@ -501,7 +439,7 @@ F 3 "" H 9000 4950 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR54
+L power:GND #PWR54
 U 1 1 57CC26B1
 P 9000 5300
 F 0 "#PWR54" H 9000 5050 50  0001 C CNN
@@ -515,9 +453,11 @@ Wire Wire Line
 	9000 5300 9000 5100
 Connection ~ 9000 4500
 $Comp
-L C C14
+L KERISEv1-rescue:C C14
 U 1 1 57CC2786
 P 6100 4950
+AR Path="/57CC2786" Ref="C14"  Part="1" 
+AR Path="/57CA15C1/57CC2786" Ref="C14"  Part="1" 
 F 0 "C14" H 6125 5050 50  0000 L CNN
 F 1 "10u" H 6125 4850 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0603" H 6138 4800 50  0001 C CNN
@@ -526,9 +466,11 @@ F 3 "" H 6100 4950 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C C16
+L KERISEv1-rescue:C C16
 U 1 1 57CC27DF
 P 6500 4950
+AR Path="/57CC27DF" Ref="C16"  Part="1" 
+AR Path="/57CA15C1/57CC27DF" Ref="C16"  Part="1" 
 F 0 "C16" H 6525 5050 50  0000 L CNN
 F 1 "10u" H 6525 4850 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0603" H 6538 4800 50  0001 C CNN
@@ -539,7 +481,7 @@ $EndComp
 Connection ~ 6100 4500
 Connection ~ 6500 4600
 $Comp
-L GND #PWR40
+L power:GND #PWR40
 U 1 1 57CC28D4
 P 6100 5300
 F 0 "#PWR40" H 6100 5050 50  0001 C CNN
@@ -552,7 +494,7 @@ $EndComp
 Wire Wire Line
 	6100 5300 6100 5100
 $Comp
-L GND #PWR44
+L power:GND #PWR44
 U 1 1 57CC2961
 P 6500 5300
 F 0 "#PWR44" H 6500 5050 50  0001 C CNN
@@ -567,9 +509,11 @@ Wire Wire Line
 Text Notes 3400 2500 0    100  ~ 0
 Power\nKERI's Lab 2017.11.3
 $Comp
-L R R3
+L KERISEv1-rescue:R R3
 U 1 1 57CD3B50
 P 5200 2950
+AR Path="/57CD3B50" Ref="R3"  Part="1" 
+AR Path="/57CA15C1/57CD3B50" Ref="R3"  Part="1" 
 F 0 "R3" V 5280 2950 50  0000 C CNN
 F 1 "20k" V 5200 2950 50  0000 C CNN
 F 2 "Resistors_SMD:R_0603" V 5130 2950 50  0001 C CNN
@@ -578,9 +522,11 @@ F 3 "" H 5200 2950 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R4
+L KERISEv1-rescue:R R4
 U 1 1 57CD3B95
 P 5200 3450
+AR Path="/57CD3B95" Ref="R4"  Part="1" 
+AR Path="/57CA15C1/57CD3B95" Ref="R4"  Part="1" 
 F 0 "R4" V 5280 3450 50  0000 C CNN
 F 1 "10k" V 5200 3450 50  0000 C CNN
 F 2 "Resistors_SMD:R_0603" V 5130 3450 50  0001 C CNN
@@ -589,7 +535,7 @@ F 3 "" H 5200 3450 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR36
+L power:GND #PWR36
 U 1 1 57CD3C05
 P 5200 3700
 F 0 "#PWR36" H 5200 3450 50  0001 C CNN
@@ -602,7 +548,7 @@ $EndComp
 Wire Wire Line
 	5200 3600 5200 3700
 $Comp
-L +BATT #PWR35
+L power:+BATT #PWR35
 U 1 1 57CD3CA2
 P 5200 2700
 F 0 "#PWR35" H 5200 2550 50  0001 C CNN
@@ -617,13 +563,13 @@ Wire Wire Line
 Text HLabel 5600 3200 2    60   Input ~ 0
 BAT_VOL
 Wire Wire Line
-	5200 3200 5600 3200
+	5200 3200 5500 3200
 Wire Wire Line
-	5200 3100 5200 3300
+	5200 3100 5200 3200
 Connection ~ 5200 3200
 NoConn ~ 4700 3200
 $Comp
-L GND #PWR27
+L power:GND #PWR27
 U 1 1 57D18DB8
 P 3600 5300
 F 0 "#PWR27" H 3600 5050 50  0001 C CNN
@@ -634,7 +580,7 @@ F 3 "" H 3600 5300 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L PWR_FLAG #FLG4
+L power:PWR_FLAG #FLG4
 U 1 1 57D18DE7
 P 3600 5200
 F 0 "#FLG4" H 3600 5295 50  0001 C CNN
@@ -647,7 +593,7 @@ $EndComp
 Wire Wire Line
 	3600 5200 3600 5300
 $Comp
-L PWR_FLAG #FLG3
+L power:PWR_FLAG #FLG3
 U 1 1 57D1915C
 P 3600 4500
 F 0 "#FLG3" H 3600 4595 50  0001 C CNN
@@ -658,7 +604,7 @@ F 3 "" H 3600 4500 50  0000 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L +BATT #PWR26
+L power:+BATT #PWR26
 U 1 1 57D1923B
 P 3600 4400
 F 0 "#PWR26" H 3600 4250 50  0001 C CNN
@@ -671,7 +617,7 @@ $EndComp
 Wire Wire Line
 	3600 4400 3600 4500
 $Comp
-L REF1933 U4
+L KERISEv1:REF1933 U4
 U 1 1 57DD6DFA
 P 5400 4600
 F 0 "U4" H 5150 4850 60  0000 C CNN
@@ -682,7 +628,7 @@ F 3 "" H 5400 4850 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L LED-RESCUE-KERISEv1 D1
+L KERISEv1-rescue:LED-RESCUE-KERISEv1 D1
 U 1 1 57D008F5
 P 4100 5000
 F 0 "D1" H 4100 5100 50  0000 C CNN
@@ -693,9 +639,11 @@ F 3 "" H 4100 5000 50  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L R R2
+L KERISEv1-rescue:R R2
 U 1 1 57D00960
 P 4100 4650
+AR Path="/57D00960" Ref="R2"  Part="1" 
+AR Path="/57CA15C1/57D00960" Ref="R2"  Part="1" 
 F 0 "R2" V 4180 4650 50  0000 C CNN
 F 1 "1k" V 4100 4650 50  0000 C CNN
 F 2 "Resistors_SMD:R_0603" V 4030 4650 50  0001 C CNN
@@ -704,7 +652,7 @@ F 3 "" H 4100 4650 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L +5V #PWR29
+L power:+5V #PWR29
 U 1 1 57D009FE
 P 4100 4400
 F 0 "#PWR29" H 4100 4250 50  0001 C CNN
@@ -715,7 +663,7 @@ F 3 "" H 4100 4400 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR30
+L power:GND #PWR30
 U 1 1 57D00A42
 P 4100 5300
 F 0 "#PWR30" H 4100 5050 50  0001 C CNN
@@ -730,9 +678,11 @@ Wire Wire Line
 Wire Wire Line
 	4100 4500 4100 4400
 $Comp
-L CONN_01X02 P3
+L KERISEv1-rescue:CONN_01X02 P3
 U 1 1 57D07AC8
 P 3500 2950
+AR Path="/57D07AC8" Ref="P3"  Part="1" 
+AR Path="/57CA15C1/57D07AC8" Ref="P3"  Part="1" 
 F 0 "P3" H 3500 3100 50  0000 C CNN
 F 1 "Battery_A" V 3600 2950 50  0000 C CNN
 F 2 "Connectors_JST:JST_PH_B2B-PH-K_02x2.00mm_Straight" H 3500 2950 50  0001 C CNN
@@ -741,9 +691,11 @@ F 3 "" H 3500 2950 50  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L CONN_01X02 P4
+L KERISEv1-rescue:CONN_01X02 P4
 U 1 1 57D07B6B
 P 3500 3450
+AR Path="/57D07B6B" Ref="P4"  Part="1" 
+AR Path="/57CA15C1/57D07B6B" Ref="P4"  Part="1" 
 F 0 "P4" H 3500 3600 50  0000 C CNN
 F 1 "Battery_B" V 3600 3450 50  0000 C CNN
 F 2 "Connectors_JST:JST_PH_B2B-PH-K_02x2.00mm_Straight" H 3500 3450 50  0001 C CNN
@@ -762,9 +714,11 @@ Wire Wire Line
 Wire Wire Line
 	3800 3400 3700 3400
 $Comp
-L LXDC55FAAA-203 U5
+L KERISEv1-rescue:LXDC55FAAA-203 U5
 U 1 1 58627F28
 P 7250 3000
+AR Path="/58627F28" Ref="U5"  Part="1" 
+AR Path="/57CA15C1/58627F28" Ref="U5"  Part="1" 
 F 0 "U5" H 7250 3450 60  0000 C CNN
 F 1 "LXDC55FAAA-203" H 7250 3350 60  0000 C CNN
 F 2 "" H 7250 3300 60  0000 C CNN
@@ -773,9 +727,11 @@ F 3 "" H 7250 3300 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Q_PMOS_DGS Q1
+L KERISEv1-rescue:Q_PMOS_DGS Q1
 U 1 1 59FC1E48
 P 4200 3000
+AR Path="/59FC1E48" Ref="Q1"  Part="1" 
+AR Path="/57CA15C1/59FC1E48" Ref="Q1"  Part="1" 
 F 0 "Q1" V 4550 3000 50  0000 L CNN
 F 1 "IRLML6402" V 4450 3000 50  0000 L CNN
 F 2 "" H 4400 3100 50  0001 C CNN
@@ -784,9 +740,11 @@ F 3 "" H 4200 3000 50  0001 C CNN
 	0    1    -1   0   
 $EndComp
 $Comp
-L R R1
+L KERISEv1-rescue:R R1
 U 1 1 59FC22E4
 P 4050 3300
+AR Path="/59FC22E4" Ref="R1"  Part="1" 
+AR Path="/57CA15C1/59FC22E4" Ref="R1"  Part="1" 
 F 0 "R1" V 4130 3300 50  0000 C CNN
 F 1 "10k" V 4050 3300 50  0000 C CNN
 F 2 "" V 3980 3300 50  0001 C CNN
@@ -800,9 +758,11 @@ Connection ~ 3900 2900
 Wire Wire Line
 	4200 3200 4200 3300
 $Comp
-L SW_SPDT SW2
+L KERISEv1-rescue:SW_SPDT SW2
 U 1 1 59FC250C
 P 4500 3300
+AR Path="/59FC250C" Ref="SW2"  Part="1" 
+AR Path="/57CA15C1/59FC250C" Ref="SW2"  Part="1" 
 F 0 "SW2" H 4500 3470 50  0000 C CNN
 F 1 "SW_SPDT" H 4500 3100 50  0000 C CNN
 F 2 "" H 4500 3300 50  0001 C CNN
@@ -811,11 +771,11 @@ F 3 "" H 4500 3300 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3700 2900 4000 2900
+	3700 2900 3900 2900
 Wire Wire Line
 	4200 3300 4300 3300
 $Comp
-L GND #PWR34
+L power:GND #PWR34
 U 1 1 59FC26D9
 P 4800 3700
 F 0 "#PWR34" H 4800 3450 50  0001 C CNN
@@ -834,9 +794,11 @@ Wire Wire Line
 Wire Wire Line
 	4800 2900 4400 2900
 $Comp
-L C C13
+L KERISEv1-rescue:C C13
 U 1 1 59FC2EF3
 P 5500 3450
+AR Path="/59FC2EF3" Ref="C13"  Part="1" 
+AR Path="/57CA15C1/59FC2EF3" Ref="C13"  Part="1" 
 F 0 "C13" H 5525 3550 50  0000 L CNN
 F 1 "0.1u" H 5525 3350 50  0000 L CNN
 F 2 "" H 5538 3300 50  0001 C CNN
@@ -845,7 +807,7 @@ F 3 "" H 5500 3450 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR38
+L power:GND #PWR38
 U 1 1 59FC2F63
 P 5500 3700
 F 0 "#PWR38" H 5500 3450 50  0001 C CNN
@@ -860,4 +822,52 @@ Wire Wire Line
 Wire Wire Line
 	5500 3200 5500 3300
 Connection ~ 5500 3200
+Wire Wire Line
+	6500 2800 6600 2800
+Wire Wire Line
+	6500 2900 6500 3000
+Wire Wire Line
+	6500 3000 6500 3100
+Wire Wire Line
+	6300 2800 6300 3200
+Wire Wire Line
+	7100 3600 7100 3700
+Wire Wire Line
+	7200 3600 7300 3600
+Wire Wire Line
+	7300 3600 7400 3600
+Wire Wire Line
+	8000 2800 8700 2800
+Wire Wire Line
+	8000 2900 8000 3000
+Wire Wire Line
+	8700 2800 9000 2800
+Wire Wire Line
+	9000 2800 9000 3200
+Wire Wire Line
+	4800 4500 4900 4500
+Wire Wire Line
+	4600 4500 4600 4800
+Wire Wire Line
+	7100 4500 7100 4800
+Wire Wire Line
+	7400 4500 7500 4500
+Wire Wire Line
+	8100 5200 8100 5300
+Wire Wire Line
+	8100 5200 8200 5200
+Wire Wire Line
+	8800 4500 9000 4500
+Wire Wire Line
+	9000 4500 9000 4800
+Wire Wire Line
+	6100 4500 6100 4800
+Wire Wire Line
+	6500 4600 6500 4800
+Wire Wire Line
+	5200 3200 5200 3300
+Wire Wire Line
+	3900 2900 4000 2900
+Wire Wire Line
+	5500 3200 5600 3200
 $EndSCHEMATC
