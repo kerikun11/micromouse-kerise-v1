@@ -2,7 +2,7 @@
 
 クラッシクサイズマイクロマウス
 
-![KERISE v1](images/kerise-v1.jpg)
+<img src="images/kerise-v1.jpg" alt="KERISE v1" width="240px"/>
 
 ## 戦績
 
